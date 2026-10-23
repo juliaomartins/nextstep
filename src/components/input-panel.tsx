@@ -71,7 +71,7 @@ export const InputPanel = forwardRef<HTMLTextAreaElement, Props>(function InputP
           e.preventDefault();
           onFile(file);
         }}
-        placeholder="For example, a job posting, an application notice, course requirements, or a form's instructions. You can also drop a PDF or Word file here."
+        placeholder="For example, a job posting, an application notice, course requirements, or a form's instructions. You can also drop a PDF, Word file, or photo here."
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? "input-error" : "input-hint"}
         spellCheck={false}

@@ -17,7 +17,7 @@ AI summaries sound confident even when they are wrong. NextStep doesn't ask you 
 
 ## Features
 
-- Paste a document, try the built-in fictional sample job posting, or **upload a PDF or Word (.docx) file**. Files are read in your browser and become editable text before anything is analyzed.
+- Paste a document, try the built-in fictional sample job posting, or **upload a PDF, a Word (.docx) file, or a photo or screenshot of the document**. Files are read in your browser (pictures with Tesseract OCR, no AI tokens) and become editable text before anything is analyzed.
 - Summary, deadline banner, and a grouped checklist with progress counts.
 - Open any step to see its source quote, highlighted.
 - Ticks are saved in your browser and survive a reload. *Clear saved data* removes them.
@@ -48,7 +48,8 @@ Open **http://localhost:3000**. Use `localhost` rather than your network address
 ## Tests and checks
 
 ```bash
-npm test         # Vitest: evidence check, input limits, text cleanup, storage, and page behavior
+npm test         # Vitest: evidence check, input limits, text cleanup, storage, file reading, OCR, and page behavior
+                 # (the first run downloads Tesseract's English model into node_modules/.cache)
 npm run lint
 npm run build && npm start   # production build on http://localhost:3000
 ```
@@ -74,7 +75,7 @@ OpenAI is used for exactly one thing: turning text into the checklist. With `gpt
 
 ## Privacy
 
-- Uploaded files are read in your browser and never uploaded. Only the text you choose to analyze is sent to OpenAI. NextStep does not store your document.
+- Uploaded files are read in your browser and never uploaded. For pictures, Tesseract downloads its English language model from a public CDN (jsDelivr) the first time; the picture itself stays on your device. Only the text you choose to analyze is sent to OpenAI. NextStep does not store your document.
 - Checklist progress is saved only in your browser, as the result, your ticks, and a SHA-256 hash of the text (never the text itself).
 - The server logs errors and token counts, never document text.
 

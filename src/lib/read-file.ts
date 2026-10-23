@@ -99,7 +99,10 @@ export function fileErrorMessage(error: unknown, kind?: FileKind): string {
 }
 
 /** Browser entry point: checks the file, loads only the library it needs, and returns cleaned text. */
-export async function readFile(file: File): Promise<{ text: string; kind: FileKind }> {
+export async function readFile(
+  file: File,
+  onProgress?: (fraction: number) => void,
+): Promise<{ text: string; kind: FileKind }> {
   const check = checkFile(file);
   if (!check.ok) throw new ReadFileError(check.code);
   const data = await file.arrayBuffer();
@@ -116,9 +119,11 @@ export async function readFile(file: File): Promise<{ text: string; kind: FileKi
       const mammoth = (await import("mammoth")).default;
       return { kind: "docx", text: await extractDocxText(data, mammoth) };
     }
-    case "image":
-      // Pictures (OCR) arrive in slice 6.
-      throw new ReadFileError("unsupported");
+    case "image": {
+      // Tesseract downloads its English model from a CDN on first use; the picture itself stays here.
+      const tesseract = (await import("tesseract.js")).default;
+      return { kind: "image", text: await extractImageText(file, tesseract, onProgress) };
+    }
   }
 }
 
@@ -131,4 +136,46 @@ export async function extractDocxText(data: ArrayBuffer, mammoth: Mammoth): Prom
     throw new ReadFileError("read_failed");
   }
   return requireText(raw);
+}
+
+type OcrWorker = {
+  recognize(image: Blob | Buffer): Promise<{ data: { text: string } }>;
+  terminate(): Promise<unknown>;
+};
+export type Tesseract = {
+  createWorker(
+    langs: string,
+    oem?: number,
+    options?: { logger?: (message: { status: string; progress: number }) => void; cachePath?: string },
+  ): Promise<OcrWorker>;
+};
+
+/** OCR in the browser (or Node in tests) with Tesseract: the picture never leaves the device. */
+export async function extractImageText(
+  image: Blob | Buffer,
+  tesseract: Tesseract,
+  onProgress?: (fraction: number) => void,
+  options: { cachePath?: string } = {},
+): Promise<string> {
+  let reported = 0;
+  const worker = await tesseract.createWorker("eng", undefined, {
+    ...options,
+    // Only the recognition phase counts; model loading has its own 0..1 progress.
+    logger: ({ status, progress }) => {
+      if (status === "recognizing text" && progress > reported && progress < 1) {
+        reported = progress;
+        onProgress?.(progress);
+      }
+    },
+  });
+  try {
+    const { data } = await worker.recognize(image);
+    onProgress?.(1);
+    return requireText(data.text);
+  } catch (error) {
+    if (error instanceof ReadFileError) throw error;
+    throw new ReadFileError("read_failed");
+  } finally {
+    await worker.terminate();
+  }
 }

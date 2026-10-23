@@ -9,7 +9,7 @@ type Props = {
   onFile: (file: File) => void;
 };
 
-export const ACCEPTED_FILES = ".pdf,.docx";
+export const ACCEPTED_FILES = ".pdf,.docx,.png,.jpg,.jpeg,.webp";
 
 export function UploadControl({ disabled, reading, onFile }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -43,7 +43,7 @@ export function UploadControl({ disabled, reading, onFile }: Props) {
           {reading}
         </span>
       ) : (
-        <span className="text-sm text-muted-ink">PDF or Word, up to 5 MB. You can also drop it on the box.</span>
+        <span className="text-sm text-muted-ink">PDF, Word, or a photo of the document, up to 5 MB. You can also drop it on the box.</span>
       )}
     </div>
   );

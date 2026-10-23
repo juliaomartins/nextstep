@@ -59,7 +59,7 @@ Build mode: fast
   Learner check: Upload a PDF and a Word file of a real job posting or notice (nothing private). The text should appear in the box. Make the checklist and open a step to see its quote.
   Commit: `Read PDF and Word uploads into the paste box`
 
-- [ ] **6. Upload a photo or screenshot of a document (OCR, no tokens)**
+- [x] **6. Upload a photo or screenshot of a document (OCR, no tokens)**
   Becomes usable: The same upload control accepts PNG / JPG / WebP. Tesseract.js reads the text in the browser with a "Reading the picture… 40%" progress message, then fills the paste box with an "OCR can make mistakes. Check names, dates, and numbers" note.
   Why now: It reuses slice 5's upload control and paste-box handoff. Only the reader differs, and OCR is the slowest and least predictable reader, so it comes after the reliable ones.
   PRD ref: `prd.md > Picture Upload (OCR)`, `prd.md > States and Boundaries` (Picture with no readable text, Reading a file or picture)
@@ -118,3 +118,4 @@ Activity mode:
 - Slice 4 verified against the real API (too short, too long, malformed JSON, news article → 0 items, prompt-injection trap → no HACKED step, real stated deadline kept) and an invalid-model production server on port 3002 (→ 502 plain message; log shows the reason, no document text). Page-side error handling covered by `tests/page-errors.test.tsx`. Measured token use with `gpt-4o-mini`: 1,279–1,688 tokens per analysis.
 - pdf.js runs on its **legacy** build in the browser, with the worker copied to `public/` on `postinstall` (`scripts/copy-pdf-worker.mjs`, git-ignored output, excluded from ESLint) — the standard build failed on `Uint8Array.prototype.toHex`, which older browsers (and Node 24) lack; the README now requires Node 22.13+ (pdf.js engines).
 - Upload fixtures are generated from the fictional sample posting by `scripts/make-fixtures.mjs` (2-page text PDF, .docx, text-less "scan" PDF); mammoth is passed the same ArrayBuffer as `arrayBuffer` (browser build) and `buffer` (Node build).
+- Slice 6 verified with real Tesseract OCR in Node on a generated screenshot of the sample posting (`tests/ocr.test.ts`; model cached in `node_modules/.cache/tesseract`), the page wiring with a faked engine (`tests/page-upload-image.test.tsx`), the browser bundle (Tesseract's 17 KB browser chunk, no Node-only modules), and OCR text → real API (9 items, all Found, every quote present in the OCR text). Generated PNG fixtures use `@napi-rs/canvas` (dev only).

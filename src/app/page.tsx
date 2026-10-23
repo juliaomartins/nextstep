@@ -126,11 +126,17 @@ export default function Home() {
     setError(null);
     const check = checkFile(file);
     const kind = check.ok ? check.kind : undefined;
-    setReading(`Reading ${file.name}…`);
+    setReading(kind === "image" ? "Reading the picture…" : `Reading ${file.name}…`);
     try {
-      const { text: extracted } = await readFile(file);
+      const { text: extracted } = await readFile(file, (fraction) =>
+        setReading(`Reading the picture… ${Math.round(fraction * 100)}%`),
+      );
       setText(extracted);
-      setSourceNote(`Text from ${file.name}. Check it before making your checklist.`);
+      setSourceNote(
+        kind === "image"
+          ? "Text read from your picture. OCR can make mistakes, so check names, dates, and numbers before making your checklist."
+          : `Text from ${file.name}. Check it before making your checklist.`,
+      );
     } catch (err) {
       setError(fileErrorMessage(err, kind));
     } finally {
