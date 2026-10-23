@@ -145,7 +145,7 @@ Source: `scope.md > Added during the build (learner decision)`.
 - **Empty input:** **Analyze** can't be clicked.
 - **Too short:** under roughly a sentence or two of text, the message is *"This looks too short to analyze. Paste the full document."*
 - **Too long:** above the input limit (about 5–6 pages of text; exact number set in `4-spec`), the message says the document is too long and suggests pasting the relevant section.
-- **Nothing actionable found:** e.g. a recipe or a news article. The message is *"We couldn't find any requirements or steps in this text."* No empty checklist is shown.
+- **Nothing actionable found:** e.g. a news article or a story. The message is *"We couldn't find any requirements or steps in this text."* No empty checklist is shown.
 - **AI or network failure, or an unusable response:** a plain message such as *"We couldn't analyze this document right now. Please try again."* The pasted text is kept so the user can retry.
 - **New analysis while a result is saved:** the new result **replaces** the old one (only one checklist at a time).
 - **Return visit:** the saved result and ticks reappear. The paste area is empty because the document isn't stored.

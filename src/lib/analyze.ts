@@ -1,5 +1,6 @@
 import "server-only";
 
+import type { AIMessage } from "@langchain/core/messages";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { ChatOpenAI } from "@langchain/openai";
 import { AnalysisSchema, type AnalysisOutput } from "./schemas";
@@ -14,15 +15,22 @@ const prompt = ChatPromptTemplate.fromMessages([
 
 /** One LangChain chain: prompt → OpenAI with a strict structured-output schema. */
 export async function analyzeDocument(text: string): Promise<AnalysisOutput> {
-  const model = new ChatOpenAI({
-    model: process.env.OPENAI_MODEL || DEFAULT_MODEL,
-    timeout: 45_000,
-    maxRetries: 1,
-  });
+  const modelName = process.env.OPENAI_MODEL || DEFAULT_MODEL;
+  const model = new ChatOpenAI({ model: modelName, timeout: 45_000, maxRetries: 1 });
 
-  const chain = prompt.pipe(model.withStructuredOutput(AnalysisSchema, { name: "document_analysis", strict: true }));
-  const output = await chain.invoke({ document: text });
+  const chain = prompt.pipe(
+    model.withStructuredOutput(AnalysisSchema, { name: "document_analysis", strict: true, includeRaw: true }),
+  );
+  const { raw, parsed } = await chain.invoke({ document: text });
+
+  // Token visibility for the learner: counts only, never the document.
+  const usage = (raw as AIMessage).usage_metadata;
+  if (usage) {
+    console.info(
+      `[analyze] ${modelName} tokens: ${usage.input_tokens} in + ${usage.output_tokens} out = ${usage.total_tokens}`,
+    );
+  }
 
   // Belt and braces: the structured-output parser already validates, but the UI must never see a malformed shape.
-  return AnalysisSchema.parse(output);
+  return AnalysisSchema.parse(parsed);
 }

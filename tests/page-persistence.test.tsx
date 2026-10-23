@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import Home from "@/app/page";
 import type { AnalysisResult } from "@/lib/schemas";
 import { STORAGE_KEY } from "@/lib/storage";
+import { setUpBrowser } from "./helpers/browser";
 
 const DOCUMENT = `Junior Operations Coordinator. You must have at least 1 year of experience in an administrative role. ${"Details about the role. ".repeat(10)}`;
 
@@ -37,21 +38,9 @@ const RESULT: AnalysisResult = {
 const fetchMock = vi.fn(async () => new Response(JSON.stringify(RESULT), { status: 200 }));
 
 beforeEach(() => {
-  window.localStorage.clear();
+  setUpBrowser();
   fetchMock.mockClear();
   vi.stubGlobal("fetch", fetchMock);
-  // jsdom has no layout or media queries; report "reduce motion" so animations are skipped.
-  window.matchMedia = ((query: string) => ({
-    matches: query === "(prefers-reduced-motion: reduce)",
-    media: query,
-    addEventListener() {},
-    removeEventListener() {},
-    addListener() {},
-    removeListener() {},
-    onchange: null,
-    dispatchEvent: () => false,
-  })) as unknown as typeof window.matchMedia;
-  Element.prototype.scrollIntoView = () => {};
 });
 
 afterEach(() => {
