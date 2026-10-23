@@ -52,6 +52,11 @@ Versions are the latest on npm as of 2026-10-23 (checked with `npm view`). Insta
 | **shadcn/ui** | CLI 4.22 | Learner's choice. Only the components the page needs: `button`, `card`, `checkbox`, `textarea`, `badge`, `alert`. | https://ui.shadcn.com/docs |
 | **lucide-react** | 1.61 | Learner's choice. Icons for found / warning / deadline / clear. | https://lucide.dev |
 | **Vitest** | latest | Agent-added, small: unit tests for the evidence check and input limits, the two pieces of logic the kernel depends on. | https://vitest.dev |
+| **pdfjs-dist** | 6.4 (Apache-2.0) | *Added in the build (learner decision).* Extracts text from text-based PDFs in the browser. | https://mozilla.github.io/pdf.js/ |
+| **mammoth** | 1.13 (BSD-2) | *Added in the build.* Extracts raw text from `.docx` in the browser (`extractRawText`). | https://github.com/mwilliamson/mammoth.js |
+| **tesseract.js** | 7.0 (Apache-2.0) | *Added in the build; chosen over Hugging Face with the learner's agreement.* OCR in the browser: no tokens, no key, the image stays on the device. | https://github.com/naptha/tesseract.js |
+| **docx** | 9.14 (MIT) | *Added in the build.* Builds the Word download in the browser. | https://docx.js.org |
+| **jspdf** | 4.2 (MIT) | *Added in the build.* Builds the PDF download in the browser. | https://github.com/parallax/jsPDF |
 
 Node 24.13 / npm 11.8 are installed locally, which is enough for Next 16.
 
@@ -81,7 +86,11 @@ Implements `prd.md > Look and Feel`.
 - **Status labels always pair color with an icon and text:** `CheckCircle2` "Found in document", `AlertTriangle` "Not found in document. Check the original" / "Needs your check", `CalendarX` "No deadline stated".
 - **Excerpt style:** a `<blockquote>` with the yellow highlight behind the text (`box-decoration-break: clone`, so the highlight wraps line by line), quotation marks, and slightly larger serif text.
 - **Layout:** a single column, `max-w-2xl` centered, with generous vertical rhythm. Cards have `rounded-lg`, 1px `--rule` borders, and no heavy shadows. Checkbox rows have tap targets of at least 44px.
-- **Motion (GSAP, requested by the learner):** restrained and purposeful, in line with the PRD's "no unnecessary animation". *Agent default, to be confirmed with the learner at the first UI step of `5-build`:* results fade and rise in after Analyze (≤300ms), checklist items arrive with a short stagger, and the excerpt expands and collapses (≤200ms). No looping, scroll-driven, or decorative motion. Every animation is skipped when `prefers-reduced-motion` is set, and content stays fully usable without it.
+- **Motion (GSAP, revised at the learner's request for an "unforgettable" first visit):**
+  - *Signature:* `components/hero-demo.tsx` is a one-shot GSAP timeline in which a marker sweeps over four sentences of a fictional notice, each becoming a checklist step with its group, ending on "No deadline stated". It has a *Replay example* button.
+  - *Answering the user:* the results sheet reveals once per new result; the overall progress bar glides on each tick; a ticked box pops and a strike is drawn through the title; opening evidence sweeps the highlighter across the quote; "Every required step is ticked off" gets a marker sweep; the analyzing panel scans placeholder lines while waiting.
+  - Everything runs inside `gsap.matchMedia()` with `(prefers-reduced-motion: no-preference)`. Reduced-motion visitors see the finished states. Only transforms, opacity, and background-size are animated.
+- **Layout (revised):** the landing page is `max-w-6xl` with a two-column hero on desktop (copy + live example), a three-step "how it works", then the app column (`max-w-3xl`) with the paste box (ruled notepad lines), the analyzing state, and the results sheet, then the footer.
 - **Copy tone:** plain, calm, second person ("Paste the full document."). No exclamation marks, and no chat persona.
 - **Light mode only** (dark mode is a PRD *Possible Later Enhancement*).
 
@@ -152,6 +161,32 @@ PRD ref: `prd.md > Saved Progress`.
 A fictional, clearly labelled sample job posting (a made-up company). It contains 4–6 clearly required items, 2–3 preferred items, at least one vague line ("References may be requested at a later stage"), and **no application deadline**.
 PRD ref: `prd.md > Document Input`.
 
+### Upload Control (`components/upload-control.tsx`)
+*Added in the build.* An **Upload a file** button (hidden `<input type="file" accept=".pdf,.docx,.png,.jpg,.jpeg,.webp">`) next to the paste box, plus drag-and-drop onto the paste box. It checks the type and the **5 MB** limit before reading, calls the File Reader, shows progress (OCR reports a percentage), then puts the text in the paste box with a source note ("Text from *posting.pdf*. Check it before making your checklist."). It is disabled while reading or analyzing.
+PRD ref: `prd.md > File Upload (PDF and Word)`, `prd.md > Picture Upload (OCR)`, `prd.md > States and Boundaries`.
+
+### File Reader (`lib/read-file.ts`)
+*Added in the build.* Browser-only. `readFile(file, onProgress) → { text, kind: "pdf" | "docx" | "image" }`, or a typed error (`unsupported`, `too_large`, `no_text`). Each library is loaded with a dynamic `import()` only when needed, so the page stays light:
+- **PDF:** `pdfjs-dist`, joining each page's text items with spaces and pages with blank lines. If the extracted text is under ~20 characters, it throws `no_text` (a scan).
+- **Word:** `mammoth.extractRawText({ arrayBuffer })`.
+- **Picture:** `tesseract.js` with the English model (`createWorker("eng")`), with progress passed to `onProgress`. If the result is empty or whitespace, it throws `no_text`.
+
+All results go through `cleanText()` (see *Token Savers*) before reaching the paste box, so the text the user sees is exactly the text that gets sent and checked.
+PRD ref: `prd.md > File Upload (PDF and Word)`, `prd.md > Picture Upload (OCR)`.
+
+### Download Actions (`components/download-actions.tsx`, `lib/export-docx.ts`, `lib/export-pdf.ts`)
+*Added in the build.* Two buttons in the results sheet: **Download as Word** and **Download as PDF**. Both exporters take `(result, completedIds, madeAt)` and build the file in the browser, loaded with dynamic `import()` on click:
+- **Word (`docx`):** a heading, the date, the summary, the deadline and status, and each group as a heading with its steps as paragraphs: ☑ / ☐, the title, then an indented italic quote with *Found* / *Not found*. It ends with the "check the original" reminder. Saved with a `Blob` and a temporary link as `nextstep-checklist.docx`.
+- **PDF (`jspdf`):** the same content, laid out with `splitTextToSize` and manual page breaks. Tick boxes are drawn as small squares (with a check line when done), because the built-in PDF fonts don't include ☑ / ☐. Saved as `nextstep-checklist.pdf`.
+PRD ref: `prd.md > Download Checklist`.
+
+### Token Savers (`lib/clean-text.ts`, `lib/storage.ts`, `app/api/analyze/route.ts`)
+*Added in the build (learner priority: efficient OpenAI token use).*
+- **`cleanText(text)`**, shared by the browser and the server: normalize line endings, turn tabs and runs of spaces into one space, collapse three or more newlines into two, and trim. The server applies it before the length checks and before calling OpenAI. Tested first.
+- **Reuse identical results:** after each successful analysis the page stores `textHash` (SHA-256 of the cleaned text, via `crypto.subtle`) with the saved result. Before calling the API, the page hashes the current cleaned text. If it matches, it reuses the saved result and its ticks and shows *"Same document as before, so your saved checklist was reused."* Only a hash is stored, never the document.
+- **Log real usage:** the route requests the raw model message (`withStructuredOutput(..., { includeRaw: true })`) and logs `usage_metadata` input/output/total tokens to the server console. It never logs the text.
+PRD ref: `prd.md > Token Efficiency`.
+
 ## Data Model
 All shapes live in `lib/schemas.ts` (Zod). The TypeScript types are inferred from them.
 
@@ -182,7 +217,7 @@ AnalysisResult = AnalysisSchema, with each item extended by
   { id: string, evidence: "found" | "not_found" }   // group may be forced to "needs_check"
 
 // localStorage key "nextstep:v1"
-SavedState = { version: 1, savedAt: string /* ISO */, result: AnalysisResult, completedIds: string[] }
+SavedState = { version: 1, savedAt: string /* ISO */, textHash: string /* SHA-256 of cleaned text */, result: AnalysisResult, completedIds: string[] }
 
 // Error response
 ApiError = { error: { code: "too_short" | "too_long" | "invalid_request" | "analysis_failed", message: string } }
@@ -196,6 +231,8 @@ ApiError = { error: { code: "too_short" | "too_long" | "invalid_request" | "anal
 | Expanded item | React state only | Click | Collapsed |
 | Error / loading status | React state only | During analysis | Reset |
 | API key / model | `.env.local` → server only | Never at runtime | n/a |
+| Uploaded file | Browser memory only, while being read | Each upload | Gone (never saved or sent; only its extracted text goes into the paste box) |
+| `textHash` | localStorage, with the saved result | Each successful analysis | Restored; used to skip a repeat AI call |
 
 ### Input Limits
 - **Minimum 200 characters** (about two sentences): *"This looks too short to analyze. Paste the full document."*
@@ -223,6 +260,12 @@ nextstep/
 │   │   ├── deadline-banner.tsx
 │   │   ├── checklist.tsx           # groups + progress counts
 │   │   ├── checklist-item.tsx      # checkbox, expand, excerpt, evidence label
+│   │   ├── hero.tsx, hero-demo.tsx # landing headline + GSAP living-document example (added in build)
+│   │   ├── how-it-works.tsx        # three steps (added in build)
+│   │   ├── analyzing-state.tsx     # "Reading your document" scan (added in build)
+│   │   ├── site-footer.tsx         # privacy note + trust reminder (added in build)
+│   │   ├── upload-control.tsx      # file button + drag-and-drop + progress (added in build)
+│   │   ├── download-actions.tsx    # Download as Word / PDF (added in build)
 │   │   └── ui/                     # shadcn components (button, card, checkbox, textarea, badge, alert)
 │   └── lib/
 │       ├── schemas.ts              # all Zod schemas + inferred types
@@ -231,10 +274,18 @@ nextstep/
 │       ├── verify-evidence.ts      # the kernel: excerpt search + deadline downgrade + ids
 │       ├── storage.ts              # localStorage load/save/clear with validation
 │       ├── sample-posting.ts       # fictional sample job posting (no deadline)
+│       ├── motion.ts               # GSAP + useGSAP registration, reduced-motion query (added in build)
+│       ├── clean-text.ts           # shared whitespace cleanup before display, sending, and hashing (added in build)
+│       ├── read-file.ts            # PDF / Word / picture → text, browser only (added in build)
+│       ├── export-docx.ts          # Word download (added in build)
+│       ├── export-pdf.ts           # PDF download (added in build)
 │       └── utils.ts                # shadcn cn() helper
 ├── tests/
 │   ├── verify-evidence.test.ts     # found / not found / normalization / deadline downgrade
-│   └── schemas.test.ts             # input limits
+│   ├── schemas.test.ts             # input limits
+│   ├── clean-text.test.ts          # whitespace cleanup (added in build)
+│   ├── storage.test.ts             # saved-state validation + textHash reuse (slice 3)
+│   └── fixtures/                   # sample.pdf, sample.docx, sample.png made from the fictional posting (added in build)
 ├── .env.example                    # OPENAI_API_KEY=, OPENAI_MODEL=
 ├── .env.local                      # (exists, git-ignored) real key + model
 ├── components.json                 # shadcn config
@@ -260,7 +311,10 @@ nextstep/
 - **Docs:** https://platform.openai.com/docs/guides/structured-outputs , https://js.langchain.com/docs/integrations/chat/openai/
 - **Strict-schema rule:** every field must be required, so "optional" fields are `.nullable()`, not `.optional()`.
 
-No other external services.
+No other AI services. Hugging Face was considered as a second provider to save OpenAI tokens and rejected with the learner's agreement (see `scope.md > Explicitly Cut`).
+
+### Tesseract language data (CDN download)
+`tesseract.js` downloads its worker, WASM core, and the English model (`eng.traineddata`, a few MB) from a public CDN (jsDelivr) the first time a picture is read, then the browser caches them. **The image itself is never uploaded.** If offline use or no third-party downloads becomes a requirement, these files can be self-hosted in `public/` and passed as `workerPath` / `corePath` / `langPath`. This isn't needed for the proof of concept. Docs: https://github.com/naptha/tesseract.js/blob/master/docs/local-installation.md
 
 ## Important Failure Modes
 - **The model paraphrases or invents a quote** → the Evidence Check labels it *Not found*, moves it to *Needs your check*, and the user is told to check the original. This is the kernel's safety net and is covered by unit tests.
@@ -268,9 +322,15 @@ No other external services.
 - **OpenAI is slow, down, out of credit, or returns something that doesn't fit the schema** → after 45s or one retry, the user sees *"We couldn't analyze this document right now. Please try again."* The text stays in the box. The server logs the real reason, never the document.
 - **The document contains instructions ("ignore previous instructions…")** → the system prompt treats document content as data, and the structured output limits what can come back. Anything that slips through still has to quote the document to appear as *Found*.
 - **Saved data is corrupt or from an older version** → it's discarded on load and the empty state is shown.
+- **A PDF is a scan (no text layer)** → *"This PDF has no readable text…"*, suggesting a photo or screenshot instead.
+- **OCR misreads words** → the recognized text appears in the paste box with a "check names, dates, and numbers" note before analysis. Quotes are verified against that visible text, so *Found* still means "found in what you see".
+- **The pdf.js worker fails to load under Turbopack** → verified first in slice 5. Fallback: use the legacy build or set `GlobalWorkerOptions.workerSrc` to the worker file shipped in `pdfjs-dist`, copied to `public/`.
+- **A big picture makes OCR slow** → a percentage progress message. Images over 5 MB are refused before reading.
 
 ## What Was Simplified and Why
-- **Pasted text only** instead of PDF upload. Agreed in scope; file parsing would add its own failure cases. Upload would mean a parser (e.g. `pdf-parse`) on the server plus scanned-PDF handling.
+- **Uploads are read in the browser and become editable text** instead of a server-side file pipeline. *(Revised in the build: upload was originally out of scope.)* There's no file storage, no upload size issues on the server, no tokens for reading, and the evidence check still runs against visible text.
+- **Scanned PDFs are not OCR'd**: the user uploads a photo or screenshot of the page instead. OCR on PDFs would need each page rendered to an image first.
+- **Tesseract.js in the browser** instead of a hosted OCR model (e.g. Hugging Face): free, private, and no extra key. It's less accurate on messy photos, which the "check the text" note covers.
 - **One saved checklist** instead of a history. Agreed in the PRD. A history would need a list view and an id per document.
 - **One LangChain chain with one model call** instead of multi-step or agent pipelines. Root `prd.md` §6 says to use a simple chain. A second "verifier" model pass is unnecessary because evidence is checked with deterministic code.
 - **Exact-match excerpt search (after normalization)** instead of fuzzy matching. A strict check fits the promise that a quote must really be in the text. It may occasionally flag a near-quote as *Not found*, which errs on the side of honesty. Fuzzy matching could come later if that's too strict in practice.

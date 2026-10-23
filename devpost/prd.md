@@ -38,7 +38,8 @@ There are no other screens.
 ## Look and Feel
 *The learner asked the agent to propose the visual direction, building on `prd.md` (root) §11. This is the agent's proposal and becomes the direction when this PRD is approved.*
 
-- **Overall feel:** calm, document-like, and trustworthy, like a well-organized notebook rather than a chatbot or a dashboard. No chat bubbles, no decorative charts, and no unnecessary animation.
+- **Overall feel:** document-like and trustworthy, like a well-organized notebook rather than a chatbot or a dashboard. No chat bubbles and no decorative charts. *Revised during the build at the learner's request ("make it unforgettable"):* the first visit should be memorable. The bold energy goes into one signature moment, a hero example where a highlighter turns a fictional notice into a checklist. Motion otherwise answers what the user does (ticking, opening evidence, progress) and is skipped when reduced motion is set.
+- **Landing content (added in the build):** a hero with a headline, the product description, *Paste a document* and *Try a sample job posting* actions, and the live example; a three-step "how it works" (paste, get a checklist, check the source); and a footer with the privacy note and the "check the original" reminder.
 - **Typography:** a confident **serif for headings** (it echoes "documents") paired with a clean, highly readable **sans-serif for body and UI**. Clear hierarchy, generous line height.
 - **Color:** warm off-white "paper" background, near-black ink text, and **one deep ink-blue accent** for primary actions and focus. Status colors are used sparingly and always with text or an icon, never color alone: green for *found in document*, amber for *unclear / missing / needs your check*, and red only for errors.
 - **Signature detail:** source excerpts look like **highlighted passages in a document**: a soft highlighter-yellow background behind the quoted text, set in quotation style. This makes the evidence kernel visible at a glance.
@@ -102,7 +103,43 @@ Source: `scope.md > The Unique Kernel`.
 - A short note near the paste area: the text is sent to an AI service to be analyzed, NextStep does not store the document, checklist progress stays in this browser, and no account is needed.
 - [ ] The note is visible on first load without scrolling on desktop.
 
+### File Upload (PDF and Word)
+Source: `scope.md > Added during the build (learner decision)`.
+- Next to the paste box, an **Upload a file** control accepts `.pdf`, `.docx`, and pictures (see *Picture Upload*). Dragging a file onto the paste box does the same.
+- The text is extracted **in the browser** and placed in the paste box, replacing what was there. A note says where it came from ("Text from *posting.pdf*. Check it before making your checklist."). Nothing is analyzed until the user presses the analyze button.
+- Old `.doc` files, spreadsheets, and other formats aren't supported.
+- [ ] Uploading a text-based PDF fills the paste box with its text, and the analysis works as with pasted text.
+- [ ] Uploading a `.docx` fills the paste box with its text.
+- [ ] Every *Found* excerpt from an uploaded file can be located word-for-word in the text shown in the paste box.
+
+### Picture Upload (OCR)
+Source: `scope.md > Added during the build (learner decision)`.
+- The same upload control accepts `.png`, `.jpg`/`.jpeg`, and `.webp` photos or screenshots of a document.
+- The text is read **in the browser** with OCR (no AI tokens, and the image is not sent anywhere). A progress message shows while it reads ("Reading the picture… 40%").
+- The recognized text goes into the paste box with a note: "Text read from your picture. OCR can make mistakes, so check names, dates, and numbers before making your checklist."
+- [ ] Uploading a clear screenshot of the sample posting fills the paste box with recognizably the same text.
+- [ ] A progress message is visible while the picture is being read.
+
+### Download Checklist
+- Once a checklist exists, **Download as Word** and **Download as PDF** buttons appear with the results.
+- The file is created **in the browser** and contains: the title "NextStep checklist", the date it was made, the summary, the deadline and its status, the three groups with each step's tick state (☑ / ☐), each step's quote and *Found* / *Not found* label, and the reminder to check the original document.
+- [ ] *Download as Word* saves a `.docx` that opens in Word or Google Docs with all of the content above.
+- [ ] *Download as PDF* saves a `.pdf` with the same content, readable and correctly paginated.
+- [ ] Ticked steps show as ticked in both files.
+
+### Token Efficiency
+Source: `scope.md > Added during the build (learner decision)`.
+- OpenAI is used for exactly one thing: turning text into the checklist. Reading files, OCR, the evidence check, and downloads use no AI.
+- If the user analyzes text identical to the saved result's text, the saved result is reused without calling the AI, and its ticks are kept. A short note says "Same document as before, so your saved checklist was reused."
+- Extra blank lines and spaces are trimmed before the text is sent.
+- [ ] Analyzing the sample twice in a row makes only one AI call (visible in the server log), and the second result appears instantly.
+
 ## States and Boundaries
+- **Unsupported file type:** *"NextStep can read PDF, Word (.docx), and pictures (PNG, JPG, WebP). Try one of those, or paste the text."*
+- **File too large (over 5 MB):** *"This file is too large (over 5 MB). Try a smaller file, or paste the relevant section."*
+- **PDF with no text inside (a scan):** *"This PDF has no readable text. It's probably a scan. Upload a photo or screenshot of the pages instead, or paste the text."*
+- **Picture with no readable text:** *"We couldn't read any text in this picture. Try a sharper, well-lit photo, or paste the text."*
+- **Reading a file or picture:** the upload control and analyze button are disabled, and a progress message shows.
 - **First use:** empty paste area, **Try a sample** visible, no results section.
 - **Analyzing:** the button is disabled and a progress message is shown. The paste area keeps its text.
 - **Empty input:** **Analyze** can't be clicked.
@@ -115,6 +152,9 @@ Source: `scope.md > The Unique Kernel`.
 - **Trust boundary:** results are a reading aid, not legal, financial, or official advice. The footer reminds users to check important details against the original.
 
 ## Product Decisions
+- **Upload, OCR, and download added during the build** (learner decision, after the core loop worked). Every upload becomes visible, editable text first, so evidence is always checked against what the user can see.
+- **OCR in the browser (Tesseract.js), not Hugging Face** (learner followed the agent's recommendation). It costs no tokens, needs no extra account or key, and the image never leaves the device.
+- **OpenAI used only for the checklist itself** (learner priority: efficient token use).
 - **Job posting for the proof of concept, document-neutral design.** The learner chose a job posting as the example, while keeping the product useful for students and administrative documents. All labels avoid job-specific wording.
 - **One checklist, not separate requirement and task lists.** The learner approved the agent's recommendation: it avoids duplication and keeps the evidence attached to the action.
 - **Groups based on the document's own wording (Required / Recommended / Needs your check).** The learner approved this. It works across document types and demonstrates the kernel: the app sorts by what the text says, not by its own guess.
@@ -132,11 +172,11 @@ Source: `scope.md > The Unique Kernel`.
 - Saved result and ticks in this browser, plus **Clear saved data**.
 - A privacy note, a trust reminder, and the error and empty states listed above.
 - A layout that works on desktop and mobile.
+- *Added during the build:* uploading PDF, Word, and pictures (OCR in the browser); downloading the checklist as Word or PDF; reusing the saved result for identical text.
 
 ## Deferred From the POC
 - **Editing item titles:** in the original PRD (FR-08); deferred in scope to keep the first loop small.
 - **Several saved checklists:** would need a list of saved results and switching between them. One at a time is enough to prove the idea.
-- **PDF / file upload:** pasting text proves the kernel; file parsing adds its own failure cases.
 - **Public deployment:** optional for this hackathon. Do it if time remains after the core loop works.
 
 ## Possible Later Enhancements
@@ -148,7 +188,8 @@ Source: `scope.md > The Unique Kernel`.
 ## Non-Goals
 - **Accounts, cloud sync, databases:** not needed to prove the kernel (scope cut).
 - **Multi-agent orchestration, RAG / vector search:** a single document needs only a single analysis (scope cut).
-- **OCR for scanned documents:** a separate hard problem (scope cut).
+- **OCR of scanned (image-only) PDFs:** uploading a photo or screenshot of the page covers it (scope cut). Pictures themselves are supported.
+- **Hugging Face or a second AI provider:** rejected to keep one reliable structured-output model; browser OCR already avoids token costs (scope cut).
 - **Calendar, reminders, payments, team features, dashboards:** product features, not proof of the idea (scope cut).
 - **Authoritative advice:** NextStep helps people read a document; it doesn't replace it.
 

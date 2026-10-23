@@ -45,9 +45,16 @@ This needs to be demonstrable in about a minute in the demo video, running local
 - Clear messages for empty or oversized input and for AI/API failures.
 - A layout that works on desktop and mobile, and a short note on how the data is processed.
 
+### Added during the build (learner decision)
+The learner approved these after the core loop was working. They come **after** the original boundary is complete (slices 1–4), so a demo-ready app exists even if time runs short.
+- **Upload a PDF or Word (.docx) file**: text extracted in the browser.
+- **Upload a picture of a document**: OCR in the browser with Tesseract.js.
+- **Every upload becomes text in the paste box first**, so the user can check or fix what was read before analyzing. Quotes are always verified against exactly that text, which protects the kernel.
+- **Download the checklist as Word or PDF**: generated in the browser.
+- **Efficient OpenAI token use**: OpenAI is used only for the one call that turns text into the checklist. Reading files, OCR, the evidence check, and downloads cost no tokens. Re-analyzing identical text reuses the saved result, and text is trimmed before sending.
+
 ## Later
 - Editing task titles *(FR-08 in `prd.md`; deferred to keep the first loop small. Bring it back if you want it in now)*.
-- PDF upload.
 - Export as Markdown and copy to clipboard.
 - Public deployment on Vercel (optional for this hackathon; worth doing if time remains).
 - Example walkthroughs for academic, application, and administrative documents.
@@ -55,5 +62,6 @@ This needs to be demonstrable in about a minute in the demo video, running local
 ## Explicitly Cut
 - **Accounts, cloud sync, Supabase**: not needed to prove the kernel, and they cost hours.
 - **Multi-agent orchestration, RAG/vector databases**: one well-instructed extraction call is enough for a single posting.
-- **OCR for scanned documents**: a separate hard problem.
+- **OCR of scanned (image-only) PDFs**: would mean rendering each PDF page to an image before OCR. Uploading a photo or screenshot of the page covers the need. *(Pictures are now in; see "Added during the build".)*
+- **Hugging Face as an AI provider**: considered to save OpenAI tokens and rejected with the learner's agreement. One analysis costs a fraction of a cent, open models are less reliable at the strict structured output the kernel depends on, and browser OCR already avoids paying for image reading.
 - **Calendar integrations, payments, team collaboration, dashboards**: product features, not proof of the idea.
