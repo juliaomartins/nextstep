@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Stamp as StampIcon, UserRoundX } from "lucide-react";
 import { AnalyzingState } from "@/components/analyzing-state";
 import { Hero } from "@/components/hero";
 import { HowItWorks } from "@/components/how-it-works";
@@ -167,19 +168,27 @@ export default function Home() {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-      <nav aria-label="NextStep" className="flex items-center justify-between py-6">
-        <span className="display text-2xl font-semibold text-ink">NextStep</span>
-        <span className="text-sm text-muted-ink">No account needed</span>
+      <nav aria-label="NextStep" className="flex items-center justify-between border-b-2 border-ink py-4">
+        <span className="flex items-center gap-2">
+          <span className="flex size-9 items-center justify-center bg-ink text-sheet">
+            <StampIcon className="size-5" aria-hidden />
+          </span>
+          <span className="condensed text-2xl font-black text-ink uppercase">NextStep</span>
+        </span>
+        <span className="flex items-center gap-1.5 text-sm font-medium text-ink-soft">
+          <UserRoundX className="size-4" aria-hidden />
+          No account needed
+        </span>
       </nav>
 
       <main>
-        <div className="pt-8 pb-16 sm:pt-14 sm:pb-20">
+        <div className="pt-12 pb-20 sm:pt-16 sm:pb-24">
           <Hero onStart={startPasting} onSample={loadSample} />
         </div>
 
         <HowItWorks />
 
-        <div ref={inputSectionRef} className="mx-auto mt-16 max-w-3xl space-y-8 sm:mt-20">
+        <div ref={inputSectionRef} className="mx-auto mt-16 max-w-3xl space-y-10 sm:mt-20">
           <InputPanel
             ref={textareaRef}
             text={text}

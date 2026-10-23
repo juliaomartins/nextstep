@@ -36,14 +36,16 @@ Success: an unfamiliar document becomes a checklist the user can check against t
 There are no other screens.
 
 ## Look and Feel
-*The learner asked the agent to propose the visual direction, building on `prd.md` (root) §11. This is the agent's proposal and becomes the direction when this PRD is approved.*
+*Redesigned during the build at the learner's request: the first version (cream paper, big serif, rounded cards) read as generic "AI slop". The learner asked for something unique and unforgettable, with icons on every interaction, and approved the "stamp office" direction proposed by the agent.*
 
-- **Overall feel:** document-like and trustworthy, like a well-organized notebook rather than a chatbot or a dashboard. No chat bubbles and no decorative charts. *Revised during the build at the learner's request ("make it unforgettable"):* the first visit should be memorable. The bold energy goes into one signature moment, a hero example where a highlighter turns a fictional notice into a checklist. Motion otherwise answers what the user does (ticking, opening evidence, progress) and is skipped when reduced motion is set.
-- **Landing content (added in the build):** a hero with a headline, the product description, *Paste a document* and *Try a sample job posting* actions, and the live example; a three-step "how it works" (paste, get a checklist, check the source); and a footer with the privacy note and the "check the original" reminder.
-- **Typography:** a confident **serif for headings** (it echoes "documents") paired with a clean, highly readable **sans-serif for body and UI**. Clear hierarchy, generous line height.
-- **Color:** warm off-white "paper" background, near-black ink text, and **one deep ink-blue accent** for primary actions and focus. Status colors are used sparingly and always with text or an icon, never color alone: green for *found in document*, amber for *unclear / missing / needs your check*, and red only for errors.
-- **Signature detail:** source excerpts look like **highlighted passages in a document**: a soft highlighter-yellow background behind the quoted text, set in quotation style. This makes the evidence kernel visible at a glance.
-- **Components:** simple rounded cards, clear checkboxes with large tap targets, consistent icons, and visible keyboard focus.
+- **Concept, "the stamp office":** NextStep is the clerk who reads the small print for you and stamps every line it can prove. The look borrows from official forms, rubber stamps, and ballpoint pens, never from chat apps or dashboards.
+- **Colour:** the cool grey-green of official form paper on a faint squared grid, black form ink, **ballpoint blue** for every action, **approval-stamp green** for *Found*, **rubber-stamp red** for *Needs your check / Not found*, and highlighter yellow only for quotes.
+- **Typography:** one family (Archivo) in two voices. Condensed and heavy for form headers and the headline, normal width for reading.
+- **Signature moment:** rubber stamps (REQUIRED, FOUND, CHECK THIS, NOT STATED, READY) **thump** onto the paper, slightly rotated, with a tiny shake. The hero shows a fictional form being highlighted and stamped line by line.
+- **Form structure:** hard black borders with offset shadows like stacked paper, numbered form sections (1 Your document, 2 Your checklist), a ruled paste box with a red margin line, and a perforated tear-off edge on the results slip.
+- **Icons on every interaction:** upload choices (PDF, Word, Photo), every button, each checklist group, deadline types, the promises under the hero, and the footer notes.
+- **Motion answers the user:** a drawn ballpoint tick and strike-through when ticking, a highlighter sweep plus a verdict stamp when opening a source, a READY stamp when every required step is done, and a scanning highlighter while analyzing. Everything is skipped when reduced motion is set.
+- **Landing content:** a hero with a headline, the product description, *Paste a document* and *Try a sample job posting* actions, and the live example; a three-step "how it works"; and a footer with the privacy notes and the "check the original" reminder.
 
 ## Features and Behavior
 

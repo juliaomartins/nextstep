@@ -76,23 +76,15 @@ Node 24.13 / npm 11.8 are installed locally, which is enough for Next 16.
 - **Submission:** demo video + public GitHub repository. **Deployment is deferred** (`prd.md > Deferred From the POC`). If time remains, Vercel is the natural target: import the repo, add the two environment variables in the project settings, and deploy. Nothing in this design blocks that.
 
 ## Look and Feel
-Implements `prd.md > Look and Feel`.
-- **Fonts (via `next/font/google`):** **Source Serif 4** for headings (`font-serif`) and **Source Sans 3** for body and UI (`font-sans`). They're designed as a pair, which gives a calm, editorial, document-like feel.
-- **Color tokens** (CSS variables in `globals.css`, mapped onto shadcn's theme variables):
-  - `--paper` `#FAF8F3` (page background), `--card` `#FFFFFF`, `--ink` `#1C1B19` (text), `--muted` `#6B6760`, `--rule` `#E7E2D8` (borders)
-  - `--accent` `#1F3A5F` deep ink blue (primary button, focus ring, links)
-  - `--highlight` `#FFF1A8` (excerpt background, like a highlighter marker)
-  - `--found` `#2F6B3A` · `--warn` `#8A5A00` on `--warn-bg` `#FDF3D7` · `--error` `#B42318`
-- **Status labels always pair color with an icon and text:** `CheckCircle2` "Found in document", `AlertTriangle` "Not found in document. Check the original" / "Needs your check", `CalendarX` "No deadline stated".
-- **Excerpt style:** a `<blockquote>` with the yellow highlight behind the text (`box-decoration-break: clone`, so the highlight wraps line by line), quotation marks, and slightly larger serif text.
-- **Layout:** a single column, `max-w-2xl` centered, with generous vertical rhythm. Cards have `rounded-lg`, 1px `--rule` borders, and no heavy shadows. Checkbox rows have tap targets of at least 44px.
-- **Motion (GSAP, revised at the learner's request for an "unforgettable" first visit):**
-  - *Signature:* `components/hero-demo.tsx` is a one-shot GSAP timeline in which a marker sweeps over four sentences of a fictional notice, each becoming a checklist step with its group, ending on "No deadline stated". It has a *Replay example* button.
-  - *Answering the user:* the results sheet reveals once per new result; the overall progress bar glides on each tick; a ticked box pops and a strike is drawn through the title; opening evidence sweeps the highlighter across the quote; "Every required step is ticked off" gets a marker sweep; the analyzing panel scans placeholder lines while waiting.
-  - Everything runs inside `gsap.matchMedia()` with `(prefers-reduced-motion: no-preference)`. Reduced-motion visitors see the finished states. Only transforms, opacity, and background-size are animated.
-- **Layout (revised):** the landing page is `max-w-6xl` with a two-column hero on desktop (copy + live example), a three-step "how it works", then the app column (`max-w-3xl`) with the paste box (ruled notepad lines), the analyzing state, and the results sheet, then the footer.
-- **Copy tone:** plain, calm, second person ("Paste the full document."). No exclamation marks, and no chat persona.
-- **Light mode only** (dark mode is a PRD *Possible Later Enhancement*).
+Implements `prd.md > Look and Feel` ("stamp office" redesign, approved by the learner during the build).
+- **Font (`next/font/google`):** **Archivo** with its `wdth` axis. `.condensed` sets `font-variation-settings: "wdth" 70` for headers; body text uses the normal width.
+- **Tokens (`globals.css`, mapped onto shadcn's variables):** `--form` `#EEF1EC` (page, with a 28px grid at 4.5% ink), `--sheet` `#FBFCFA`, `--ink` `#15171C`, `--ink-soft` `#3B4049`, `--muted-ink` `#5F666E`, `--rule` `#CBD3CA`, `--ballpoint` `#2338C4` (actions, focus), `--stamp-green` `#1C7A4B` (found / ready), `--stamp-red` `#C2352D` (check / not found), `--highlight` `#FFE45C` (quotes only).
+- **Stamp (`components/stamp.tsx` + `.stamp`):** a bordered, uppercase, condensed label with an inset second border, `mix-blend-mode: multiply`, an SVG-noise mask for ink grain, and a per-instance rotation. Rotation is deterministic per item id.
+- **GSAP (`lib/motion.ts`):** `thump(targets, paper?, stagger?)` drops stamps from `scale 1.9 → 1` (`power4.in`) and shakes the paper ±1.5px. It's used by the hero demo timeline, the results reveal (every verdict stamp in sequence), opened evidence, and READY. Other motion: highlighter `backgroundSize` sweeps, a `strokeDashoffset` ballpoint tick, a `scaleX` progress bar, and the analyzing scanner. Everything is inside `gsap.matchMedia()` with `(prefers-reduced-motion: no-preference)`; hidden-until-animated elements are only hidden under that media query.
+- **Surfaces:** 2px ink borders, offset shadows (`6px 6px 0 var(--ink)`), square corners. `SectionHeading` renders numbered black form bars, with the number outside the `<h2>` so accessible names stay plain. `.perforated` cuts a dotted tear-off edge into the results slip. `.paper-lines` rules the paste box with a red margin line.
+- **Controls:** a `.press` class gives CSS hover lift and press feedback (disabled under reduced motion). Every action has a Lucide icon.
+- **Responsive:** the hero headline uses `clamp(2.25rem, 10.5vw, 3.4rem)` and the grid children use `min-w-0`. Verified with no horizontal overflow at 320px and 375px.
+- **Light mode only.**
 
 ## Components
 
@@ -246,9 +238,9 @@ Resolves `prd.md > Open Questions` (exact input size limit).
 nextstep/
 ├── src/
 │   ├── app/
-│   │   ├── layout.tsx              # fonts (Source Serif 4 / Source Sans 3), metadata, <body> paper background
+│   │   ├── layout.tsx              # Archivo (wdth axis), metadata
 │   │   ├── page.tsx                # Page Shell: client state, load/save, wires components
-│   │   ├── globals.css             # Tailwind v4 + color tokens + excerpt highlight style
+│   │   ├── globals.css             # Tailwind v4 + stamp-office tokens, form grid, stamp, perforation, ruled paste box
 │   │   └── api/
 │   │       └── analyze/
 │   │           └── route.ts        # Analyze Route: validate → analyze → verify → respond
@@ -264,6 +256,8 @@ nextstep/
 │   │   ├── how-it-works.tsx        # three steps (added in build)
 │   │   ├── analyzing-state.tsx     # "Reading your document" scan (added in build)
 │   │   ├── site-footer.tsx         # privacy note + trust reminder (added in build)
+│   │   ├── stamp.tsx               # rubber-stamp label used everywhere (stamp-office redesign)
+│   │   ├── section-heading.tsx     # numbered black form-section bar (stamp-office redesign)
 │   │   ├── upload-control.tsx      # file button + drag-and-drop + progress (added in build)
 │   │   ├── download-actions.tsx    # Download as Word / PDF (added in build)
 │   │   └── ui/                     # shadcn components (button, card, checkbox, textarea, badge, alert)

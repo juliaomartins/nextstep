@@ -1,15 +1,34 @@
 "use client";
 
 import { useRef } from "react";
-import { PartyPopper, TriangleAlert } from "lucide-react";
-import { gsap, MOTION_OK, useGSAP } from "@/lib/motion";
+import { FileCheck2, SearchCheck, Sparkles, type LucideIcon } from "lucide-react";
+import { gsap, MOTION_OK, thump, useGSAP } from "@/lib/motion";
 import type { Group, ResultItem } from "@/lib/schemas";
 import { ChecklistItem } from "./checklist-item";
+import { Stamp } from "./stamp";
 
-const GROUPS: { group: Group; label: string; hint: string }[] = [
-  { group: "required", label: "Required", hint: "The document says these are a must." },
-  { group: "recommended", label: "Recommended", hint: "Preferred or optional, according to the document." },
-  { group: "needs_check", label: "Needs your check", hint: "Vague, conditional, or not found word for word." },
+const GROUPS: { group: Group; label: string; hint: string; Icon: LucideIcon; iconClass: string }[] = [
+  {
+    group: "required",
+    label: "Required",
+    hint: "The document says these are a must.",
+    Icon: FileCheck2,
+    iconClass: "bg-ballpoint text-white",
+  },
+  {
+    group: "recommended",
+    label: "Recommended",
+    hint: "Preferred or optional, according to the document.",
+    Icon: Sparkles,
+    iconClass: "bg-sheet text-ink",
+  },
+  {
+    group: "needs_check",
+    label: "Needs your check",
+    hint: "Vague, conditional, or not found word for word.",
+    Icon: SearchCheck,
+    iconClass: "bg-stamp-red text-white",
+  },
 ];
 
 type Props = {
@@ -18,35 +37,33 @@ type Props = {
   onToggle: (id: string) => void;
 };
 
+/** When every required step is ticked, the slip gets a READY stamp. */
 function RequiredDone() {
-  const ref = useRef<HTMLParagraphElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
   useGSAP(
     () => {
       const mm = gsap.matchMedia();
       mm.add(MOTION_OK, () => {
-        gsap.from(ref.current, { autoAlpha: 0, y: 6, duration: 0.3, ease: "power2.out" });
-        gsap.fromTo(
-          ref.current!.querySelector(".evidence-mark"),
-          { backgroundSize: "0% 100%" },
-          { backgroundSize: "100% 100%", duration: 0.6, delay: 0.1, ease: "power2.out" },
-        );
+        thump(ref.current!.querySelector("[data-stamp]"), ref.current);
       });
       return () => mm.revert();
     },
     { scope: ref },
   );
   return (
-    <p ref={ref} role="status" className="mt-3 flex items-center gap-2 text-found">
-      <PartyPopper className="size-4 shrink-0" aria-hidden />
-      <span className="evidence-mark font-medium">Every required step is ticked off.</span>
-    </p>
+    <div ref={ref} role="status" className="mt-4 flex flex-wrap items-center gap-4">
+      <Stamp tone="ready" rotate={-7} className="text-2xl">
+        Ready
+      </Stamp>
+      <span className="font-semibold text-stamp-green">Every required step is ticked off.</span>
+    </div>
   );
 }
 
 export function Checklist({ items, completedIds, onToggle }: Props) {
   return (
     <div className="space-y-10">
-      {GROUPS.map(({ group, label, hint }) => {
+      {GROUPS.map(({ group, label, hint, Icon, iconClass }) => {
         const groupItems = items.filter((item) => item.group === group);
         if (groupItems.length === 0) return null;
         const done = groupItems.filter((item) => completedIds.has(item.id)).length;
@@ -54,19 +71,23 @@ export function Checklist({ items, completedIds, onToggle }: Props) {
 
         return (
           <section key={group} aria-labelledby={headingId}>
-            <div data-reveal className="flex items-baseline justify-between gap-4 border-b border-ink/15 pb-2">
-              <div>
-                <h3 id={headingId} className="flex items-center gap-2 font-serif text-xl font-semibold text-ink">
-                  {group === "needs_check" && <TriangleAlert className="size-4 text-warn" aria-hidden />}
-                  {label}
-                </h3>
-                <p className="text-sm text-muted-ink">{hint}</p>
+            <div data-reveal className="flex items-end justify-between gap-4 border-b-2 border-ink pb-2">
+              <div className="flex items-center gap-3">
+                <span className={`flex size-9 shrink-0 items-center justify-center border-2 border-ink ${iconClass}`}>
+                  <Icon className="size-5" aria-hidden />
+                </span>
+                <div>
+                  <h3 id={headingId} className="condensed text-2xl leading-none font-extrabold text-ink">
+                    {label}
+                  </h3>
+                  <p className="mt-1 text-sm text-muted-ink">{hint}</p>
+                </div>
               </div>
-              <p className="shrink-0 text-sm text-muted-ink tabular-nums">
+              <p className="shrink-0 text-sm font-semibold text-ink-soft tabular-nums">
                 {done} of {groupItems.length} done
               </p>
             </div>
-            <ul className="divide-y divide-rule">
+            <ul className="divide-y divide-dashed divide-rule">
               {groupItems.map((item) => (
                 <ChecklistItem key={item.id} item={item} done={completedIds.has(item.id)} onToggle={onToggle} />
               ))}
