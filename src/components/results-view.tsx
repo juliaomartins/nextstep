@@ -6,6 +6,7 @@ import { gsap, MOTION_OK, thump, useGSAP } from "@/lib/motion";
 import type { AnalysisResult } from "@/lib/schemas";
 import { Checklist } from "./checklist";
 import { DeadlineBanner } from "./deadline-banner";
+import { DownloadActions } from "./download-actions";
 import { SectionHeading } from "./section-heading";
 import { SummaryCard } from "./summary-card";
 
@@ -111,6 +112,8 @@ export const ResultsView = forwardRef<HTMLElement, Props>(function ResultsView(
           </p>
         )}
       </div>
+
+      {total > 0 && <DownloadActions result={result} completedIds={completedIds} />}
 
       <footer className="flex flex-wrap items-center justify-between gap-4 border-t-2 border-dashed border-ink px-5 py-4 text-sm sm:px-9">
         <p className="flex items-center gap-1.5 text-ink-soft">

@@ -22,6 +22,7 @@ AI summaries sound confident even when they are wrong. NextStep doesn't ask you 
 - Open any step to see its source quote, highlighted.
 - Ticks are saved in your browser and survive a reload. *Clear saved data* removes them.
 - Analyzing the same text again reuses the saved result, with **no second AI call**.
+- **Download your checklist as Word or PDF**, made on your device: summary, deadline, every step with its tick state, quote, and Found / Not found stamp. The Word file stays editable; the PDF uses the same stamp style as the app.
 - Clear messages for text that is too short, too long, has nothing actionable, or when the AI service fails. Your text is always kept.
 
 ## Run it locally
@@ -71,7 +72,7 @@ save result + ticks + a hash of the text in localStorage
 
 ## Token use
 
-OpenAI is used for exactly one thing: turning text into the checklist. With `gpt-4o-mini`, one analysis of a typical job posting uses roughly **1,300–1,700 tokens**. The server logs the real count of each call (`[analyze] … tokens: … in + … out`). Whitespace is trimmed before sending, and identical text reuses the saved result instead of calling the AI again.
+OpenAI is used for exactly one thing: turning text into the checklist. Reading files and pictures, checking quotes, and making downloads use no tokens. With `gpt-4o-mini`, one analysis of a typical job posting uses roughly **1,300–1,700 tokens**. The server logs the real count of each call (`[analyze] … tokens: … in + … out`). Whitespace is trimmed before sending, and identical text reuses the saved result instead of calling the AI again.
 
 ## Privacy
 
