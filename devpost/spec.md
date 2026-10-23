@@ -256,6 +256,7 @@ nextstep/
 │   │   ├── analyzing-state.tsx     # "Reading your document" scan (added in build)
 │   │   ├── site-footer.tsx         # privacy note + trust reminder (added in build)
 │   │   ├── stamp.tsx               # rubber-stamp label used everywhere (stamp-office redesign)
+│   │   ├── logo-mark.tsx           # the NextStep mark (same artwork as app/icon.svg), header + footer
 │   │   ├── section-heading.tsx     # numbered black form-section bar (stamp-office redesign)
 │   │   ├── upload-control.tsx      # file button + drag-and-drop + progress (added in build)
 │   │   ├── download-actions.tsx    # Download as Word / PDF (added in build)

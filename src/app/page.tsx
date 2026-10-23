@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Stamp as StampIcon, UserRoundX } from "lucide-react";
+import { UserRoundX } from "lucide-react";
 import { AnalyzingState } from "@/components/analyzing-state";
+import { LogoMark } from "@/components/logo-mark";
 import { Hero } from "@/components/hero";
 import { HowItWorks } from "@/components/how-it-works";
 import { InputPanel } from "@/components/input-panel";
@@ -169,10 +170,8 @@ export default function Home() {
   return (
     <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
       <nav aria-label="NextStep" className="flex items-center justify-between border-b-2 border-ink py-4">
-        <span className="flex items-center gap-2">
-          <span className="flex size-9 items-center justify-center bg-ink text-sheet">
-            <StampIcon className="size-5" aria-hidden />
-          </span>
+        <span className="flex items-center gap-2.5">
+          <LogoMark className="size-10" />
           <span className="condensed text-2xl font-black text-ink uppercase">NextStep</span>
         </span>
         <span className="flex items-center gap-1.5 text-sm font-medium text-ink-soft">

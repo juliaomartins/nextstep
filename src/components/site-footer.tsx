@@ -1,12 +1,16 @@
 import { FileLock2, LockKeyhole, Scale } from "lucide-react";
+import { LogoMark } from "./logo-mark";
 
 export function SiteFooter() {
   return (
     <footer className="mt-24 border-t-2 border-ink pt-10 pb-12">
       <div className="grid gap-8 sm:grid-cols-[1fr_1.5fr]">
         <div>
-          <p className="condensed text-3xl font-black text-ink uppercase">NextStep</p>
-          <p className="mt-1 text-ink-soft">From confusing documents to clear next steps.</p>
+          <p className="flex items-center gap-3">
+            <LogoMark className="size-11" />
+            <span className="condensed text-3xl font-black text-ink uppercase">NextStep</span>
+          </p>
+          <p className="mt-2 text-ink-soft">From confusing documents to clear next steps.</p>
         </div>
         <ul className="space-y-3 text-sm leading-relaxed text-ink-soft">
           <li className="flex gap-2.5">
