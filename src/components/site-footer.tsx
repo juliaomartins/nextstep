@@ -12,8 +12,9 @@ export function SiteFooter() {
           <p className="flex gap-2">
             <LockKeyhole className="mt-0.5 size-4 shrink-0 text-accent-ink" aria-hidden />
             <span>
-              Your text is sent to an AI service (OpenAI) to be analyzed. NextStep does not store your document,
-              checklist progress stays in this browser, and no account is needed.
+              Files you upload are read in your browser and never uploaded. When you make a checklist, the text is
+              sent to an AI service (OpenAI) to be analyzed. NextStep does not store your document, checklist progress
+              stays in this browser, and no account is needed.
             </span>
           </p>
           <p>

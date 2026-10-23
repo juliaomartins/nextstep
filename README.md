@@ -17,7 +17,7 @@ AI summaries sound confident even when they are wrong. NextStep doesn't ask you 
 
 ## Features
 
-- Paste a document, or try the built-in fictional sample job posting.
+- Paste a document, try the built-in fictional sample job posting, or **upload a PDF or Word (.docx) file**. Files are read in your browser and become editable text before anything is analyzed.
 - Summary, deadline banner, and a grouped checklist with progress counts.
 - Open any step to see its source quote, highlighted.
 - Ticks are saved in your browser and survive a reload. *Clear saved data* removes them.
@@ -26,12 +26,12 @@ AI summaries sound confident even when they are wrong. NextStep doesn't ask you 
 
 ## Run it locally
 
-You need **Node.js 20.9 or newer** (developed on Node 24) and an **OpenAI API key**.
+You need **Node.js 22.13 or newer** (required by pdf.js; developed on Node 24) and an **OpenAI API key**.
 
 ```bash
 git clone <this repository>
 cd nextstep
-npm install
+npm install                  # also copies the pdf.js worker into public/
 cp .env.example .env.local   # then fill in the values
 npm run dev
 ```
@@ -74,7 +74,7 @@ OpenAI is used for exactly one thing: turning text into the checklist. With `gpt
 
 ## Privacy
 
-- Your text is sent to OpenAI to be analyzed. NextStep does not store your document.
+- Uploaded files are read in your browser and never uploaded. Only the text you choose to analyze is sent to OpenAI. NextStep does not store your document.
 - Checklist progress is saved only in your browser, as the result, your ticks, and a SHA-256 hash of the text (never the text itself).
 - The server logs errors and token counts, never document text.
 

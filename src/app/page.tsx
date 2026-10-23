@@ -8,6 +8,7 @@ import { InputPanel } from "@/components/input-panel";
 import { ResultsView } from "@/components/results-view";
 import { SiteFooter } from "@/components/site-footer";
 import { cleanText } from "@/lib/clean-text";
+import { checkFile, fileErrorMessage, readFile } from "@/lib/read-file";
 import type { AnalysisResult, ApiError } from "@/lib/schemas";
 import { SAMPLE_POSTING } from "@/lib/sample-posting";
 import { clearSaved, hashText, loadSaved, save } from "@/lib/storage";
@@ -31,6 +32,8 @@ export default function Home() {
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
   const [textHash, setTextHash] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [reading, setReading] = useState<string | null>(null);
+  const [sourceNote, setSourceNote] = useState<string | null>(null);
 
   const inputSectionRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -72,6 +75,7 @@ export default function Home() {
 
   function loadSample() {
     setText(SAMPLE_POSTING);
+    setSourceNote(null);
     setError(null);
     bringIntoView(inputSectionRef.current);
   }
@@ -117,6 +121,23 @@ export default function Home() {
     }
   }
 
+  // Uploads become visible, editable text first: no AI, no tokens, nothing analyzed yet.
+  async function handleFile(file: File) {
+    setError(null);
+    const check = checkFile(file);
+    const kind = check.ok ? check.kind : undefined;
+    setReading(`Reading ${file.name}…`);
+    try {
+      const { text: extracted } = await readFile(file);
+      setText(extracted);
+      setSourceNote(`Text from ${file.name}. Check it before making your checklist.`);
+    } catch (err) {
+      setError(fileErrorMessage(err, kind));
+    } finally {
+      setReading(null);
+    }
+  }
+
   function toggle(id: string) {
     setCompletedIds((prev) => {
       const next = new Set(prev);
@@ -133,6 +154,7 @@ export default function Home() {
     setTextHash(null);
     setNotice(null);
     setText("");
+    setSourceNote(null);
     setError(null);
     startPasting();
   }
@@ -156,10 +178,13 @@ export default function Home() {
             ref={textareaRef}
             text={text}
             loading={loading}
+            reading={reading}
+            sourceNote={sourceNote}
             error={error}
             onTextChange={setText}
             onSample={loadSample}
             onAnalyze={analyze}
+            onFile={handleFile}
           />
           {loading && <AnalyzingState />}
           {result && !loading && (

@@ -167,7 +167,7 @@ PRD ref: `prd.md > File Upload (PDF and Word)`, `prd.md > Picture Upload (OCR)`,
 
 ### File Reader (`lib/read-file.ts`)
 *Added in the build.* Browser-only. `readFile(file, onProgress) → { text, kind: "pdf" | "docx" | "image" }`, or a typed error (`unsupported`, `too_large`, `no_text`). Each library is loaded with a dynamic `import()` only when needed, so the page stays light:
-- **PDF:** `pdfjs-dist`, joining each page's text items with spaces and pages with blank lines. If the extracted text is under ~20 characters, it throws `no_text` (a scan).
+- **PDF:** `pdfjs-dist` **legacy build** (`pdfjs-dist/legacy/build/pdf.mjs`; the standard build needs very recent JS such as `Uint8Array.prototype.toHex`), with its worker copied to `public/pdf.worker.min.mjs` by `scripts/copy-pdf-worker.mjs` on `postinstall`, joining each page's text items with spaces and pages with blank lines. If the extracted text is under ~20 characters, it throws `no_text` (a scan).
 - **Word:** `mammoth.extractRawText({ arrayBuffer })`.
 - **Picture:** `tesseract.js` with the English model (`createWorker("eng")`), with progress passed to `onProgress`. If the result is empty or whitespace, it throws `no_text`.
 

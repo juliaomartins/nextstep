@@ -13,7 +13,10 @@ function Harness({ onAnalyze = () => {} }: { onAnalyze?: () => void }) {
     <InputPanel
       text={text}
       loading={false}
+      reading={null}
+      sourceNote={null}
       error={null}
+      onFile={() => {}}
       onTextChange={setText}
       onSample={() => setText("Sample posting text")}
       onAnalyze={onAnalyze}

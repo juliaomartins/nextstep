@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "postinstall": "node scripts/copy-pdf-worker.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
@@ -16,9 +17,13 @@
     "@langchain/openai": "^1.7.0",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.5.0",
+    "docx": "^9.14.0",
     "gsap": "^3.15.0",
+    "jspdf": "^4.2.1",
     "lucide-react": "^1.61.0",
+    "mammoth": "^1.13.0",
     "next": "16.4.2",
+    "pdfjs-dist": "^6.4.299",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "server-only": "^0.0.1",

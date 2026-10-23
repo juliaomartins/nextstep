@@ -49,7 +49,7 @@ Build mode: fast
   Learner check: Try to break it: paste one short sentence, paste a news article, and paste something huge. Each should get a clear message and your text should stay put. Read the privacy note and say whether it's what you'd want a user to see.
   Commit: `Handle edge cases and add README, license, and env example`
 
-- [ ] **5. Upload a PDF or Word file instead of pasting**
+- [x] **5. Upload a PDF or Word file instead of pasting**
   Becomes usable: An *Upload a file* button (and drag-and-drop onto the paste box) reads a text-based `.pdf` or a `.docx` in the browser and puts its text in the paste box with a "Text from *file*. Check it" note. Then the usual analysis runs. Wrong types, files over 5 MB, and scanned PDFs get the agreed messages.
   Why now: The core app is complete and demo-ready after slice 4, so new input routes can't break the essentials. PDF goes first because the pdf.js worker under Turbopack is the riskiest new dependency, and slice 6 reuses the same upload control.
   PRD ref: `prd.md > File Upload (PDF and Word)`, `prd.md > States and Boundaries` (Unsupported file type, File too large, PDF with no text inside, Reading a file or picture)
@@ -116,3 +116,5 @@ Activity mode:
 - Slice 3's browser checks were run as jsdom integration tests of the real page (`tests/page-persistence.test.tsx`: reload keeps ticks, storage holds no document text, identical text makes no second API call, clear empties storage and page), mutation-checked — browser automation was declined by the learner; their own hands-on check follows at the next checkpoint.
 - Changed the "nothing actionable" example from a recipe to a news article (`prd.md > States and Boundaries`, slice 4) — the real run showed a recipe *is* a list of instructions, so the model correctly turned it into steps; a news article returns no steps.
 - Slice 4 verified against the real API (too short, too long, malformed JSON, news article → 0 items, prompt-injection trap → no HACKED step, real stated deadline kept) and an invalid-model production server on port 3002 (→ 502 plain message; log shows the reason, no document text). Page-side error handling covered by `tests/page-errors.test.tsx`. Measured token use with `gpt-4o-mini`: 1,279–1,688 tokens per analysis.
+- pdf.js runs on its **legacy** build in the browser, with the worker copied to `public/` on `postinstall` (`scripts/copy-pdf-worker.mjs`, git-ignored output, excluded from ESLint) — the standard build failed on `Uint8Array.prototype.toHex`, which older browsers (and Node 24) lack; the README now requires Node 22.13+ (pdf.js engines).
+- Upload fixtures are generated from the fictional sample posting by `scripts/make-fixtures.mjs` (2-page text PDF, .docx, text-less "scan" PDF); mammoth is passed the same ArrayBuffer as `arrayBuffer` (browser build) and `buffer` (Node build).
