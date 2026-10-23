@@ -111,3 +111,13 @@ describe("saved progress", () => {
     expect(screen.queryByRole("heading", { name: "Your checklist" })).toBeNull();
   });
 });
+
+describe("on a non-secure page (http:// on a network address)", () => {
+  test("Make my checklist still works and saves, even without crypto.subtle", async () => {
+    vi.stubGlobal("crypto", {});
+    render(<Home />);
+    await analyzeDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(JSON.parse(window.localStorage.getItem(STORAGE_KEY)!).textHash).toMatch(/^[0-9a-f]{64}$/);
+  });
+});

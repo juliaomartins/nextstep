@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import type { AnalysisResult } from "@/lib/schemas";
 import { clearSaved, hashText, loadSaved, save, STORAGE_KEY, type SavedState } from "@/lib/storage";
 
@@ -123,5 +123,21 @@ describe("hashText", () => {
 
   test("differs for different text", async () => {
     expect(await hashText("CV in PDF")).not.toBe(await hashText("CV in Word"));
+  });
+
+  describe("on a non-secure page (http:// on a network address), where crypto.subtle is missing", () => {
+    afterEach(() => vi.unstubAllGlobals());
+
+    test("still returns the same SHA-256 digest", async () => {
+      vi.stubGlobal("crypto", {});
+      expect(await hashText("abc")).toBe("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
+    });
+
+    test("matches the built-in digest for longer, non-ASCII text", async () => {
+      const text = `Applications close on 15 November 2026 — CV “in PDF” ✓\n${"x".repeat(1000)}`;
+      const native = await hashText(text);
+      vi.stubGlobal("crypto", {});
+      expect(await hashText(text)).toBe(native);
+    });
   });
 });

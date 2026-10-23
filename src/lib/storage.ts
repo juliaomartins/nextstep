@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { AnalysisResultSchema } from "./schemas";
+import { sha256Hex } from "./sha256";
 
 export const STORAGE_KEY = "nextstep:v1";
 
@@ -53,6 +54,8 @@ export function clearSaved(storage: Storage | undefined = browserStorage()): voi
 
 /** SHA-256 of the cleaned text, so an identical document can reuse its result without an AI call. */
 export async function hashText(text: string): Promise<string> {
+  // crypto.subtle only exists on secure pages (https:// or localhost); fall back to plain JS elsewhere.
+  if (!globalThis.crypto?.subtle) return sha256Hex(text);
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
   return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
