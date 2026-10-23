@@ -1,6 +1,4 @@
 @import "tailwindcss";
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
 
 /* Light mode only: `dark:` styles apply only under a `.dark` class (never set),
    not when the operating system is in dark mode. */
@@ -25,7 +23,7 @@
   --stamp-red-bg: #fbe9e6;
   --highlight: #ffe45c;
 
-  /* shadcn theme variables mapped onto the tokens above */
+  /* Theme variables (used by utilities such as border-border and ring-ring), mapped onto the tokens above */
   --background: var(--form);
   --foreground: var(--ink);
   --card: var(--sheet);

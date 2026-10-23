@@ -30,7 +30,7 @@ AI summaries sound confident even when they are wrong. NextStep doesn't ask you 
 You need **Node.js 22.13 or newer** (required by pdf.js; developed on Node 24) and an **OpenAI API key**.
 
 ```bash
-git clone <this repository>
+git clone https://github.com/<your-account>/nextstep.git   # replace with this repository's URL
 cd nextstep
 npm install                  # also copies the pdf.js worker into public/
 cp .env.example .env.local   # then fill in the values
@@ -67,7 +67,7 @@ paste or sample → Make my checklist ─ text ─▶  clean whitespace, check 2
 save result + ticks + a hash of the text in localStorage
 ```
 
-- **Stack:** Next.js 16 (App Router, TypeScript), LangChain JS with `@langchain/openai`, Zod 4, Tailwind CSS 4, shadcn/ui, Lucide icons, and GSAP for motion (skipped when your system asks for reduced motion).
+- **Stack:** Next.js 16 (App Router, TypeScript), LangChain JS with `@langchain/openai`, Zod 4, Tailwind CSS 4, Lucide icons, GSAP for motion (skipped when your system asks for reduced motion).
 - **The kernel:** [`src/lib/verify-evidence.ts`](src/lib/verify-evidence.ts), with tests in [`tests/verify-evidence.test.ts`](tests/verify-evidence.test.ts).
 
 ## Token use
@@ -81,6 +81,27 @@ OpenAI is used for exactly one thing: turning text into the checklist. Reading f
 - The server logs errors and token counts, never document text.
 
 NextStep is a reading aid, not legal, financial, or official advice. Always check important details against the original document.
+
+## How it was built
+
+NextStep was planned and built during the *Build With AI: Basics* submission period with the [Devpost Learn Skill Pack](https://github.com/challengepost/learn-ai-basics) in Claude Code. The plan came first, through an AI interview, and the code followed it in small, tested steps:
+
+- [`devpost/scope.md`](devpost/scope.md): the idea, the unique kernel, and the proof-of-concept boundary
+- [`devpost/prd.md`](devpost/prd.md): what the product does, screen by screen, with checkable criteria
+- [`devpost/spec.md`](devpost/spec.md): the technical blueprint
+- [`devpost/checklist.md`](devpost/checklist.md): the build steps, and a *Revisions* log of every change of plan and why
+
+## Credits and third-party code
+
+All application code in this repository was written for this project. It builds on these open libraries and assets, used under their licenses:
+
+- [Next.js](https://nextjs.org), [React](https://react.dev), [Tailwind CSS](https://tailwindcss.com), [Zod](https://zod.dev), [LangChain JS](https://js.langchain.com) (MIT); [Lucide](https://lucide.dev) icons (ISC)
+- [GSAP](https://gsap.com) and `@gsap/react` for animation, under GSAP's [standard no-charge license](https://gsap.com/standard-license)
+- [pdf.js](https://mozilla.github.io/pdf.js/) and [Tesseract.js](https://tesseract.projectnaptha.com) (Apache-2.0); [mammoth](https://github.com/mwilliamson/mammoth.js) (BSD-2-Clause); [docx](https://docx.js.org) and [jsPDF](https://github.com/parallax/jsPDF) (MIT)
+- The [Archivo](https://fonts.google.com/specimen/Archivo) typeface (SIL Open Font License), served through `next/font`
+- The OpenAI API, used with the developer's own key under OpenAI's terms
+
+The sample job posting and every example in the app are fictional.
 
 ## License
 

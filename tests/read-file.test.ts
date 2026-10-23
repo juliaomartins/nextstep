@@ -2,7 +2,16 @@ import { readFileSync } from "node:fs";
 import mammoth from "mammoth";
 import * as pdfjs from "pdfjs-dist/legacy/build/pdf.mjs";
 import { describe, expect, test } from "vitest";
-import { checkFile, extractDocxText, extractPdfText, MAX_FILE_BYTES, ReadFileError } from "@/lib/read-file";
+import {
+  checkFile,
+  extractDocxText,
+  extractImageText,
+  extractPdfText,
+  fileErrorMessage,
+  MAX_FILE_BYTES,
+  ReadFileError,
+  type Tesseract,
+} from "@/lib/read-file";
 
 function fixture(name: string): ArrayBuffer {
   const buf = readFileSync(new URL(`./fixtures/${name}`, import.meta.url));
@@ -72,5 +81,27 @@ describe("extractDocxText", () => {
 
   test("throws read_failed for a file that is not really a .docx", async () => {
     await expect(extractDocxText(fixture("sample.pdf"), mammoth)).rejects.toMatchObject({ code: "read_failed" });
+  });
+});
+
+describe("fileErrorMessage", () => {
+  test("an empty Word file gets a Word-specific message, not the scanned-PDF one", () => {
+    expect(fileErrorMessage(new ReadFileError("no_text"), "docx")).toBe(
+      "We couldn't find any text in this Word file. Check it isn't empty, or paste the text.",
+    );
+    expect(fileErrorMessage(new ReadFileError("no_text"), "pdf")).toMatch(/probably a scan/);
+  });
+
+  test("an OCR engine that can't load says so instead of blaming the file", async () => {
+    const offline: Tesseract = {
+      createWorker: async () => {
+        throw new TypeError("Failed to fetch");
+      },
+    };
+    const error = await extractImageText(new Blob(["x"]), offline).catch((e) => e);
+    expect(error).toMatchObject({ code: "ocr_unavailable" });
+    expect(fileErrorMessage(error, "image")).toBe(
+      "We couldn't load the picture reader. Check your internet connection, or paste the text.",
+    );
   });
 });

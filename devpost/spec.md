@@ -45,11 +45,11 @@ Versions are the latest on npm as of 2026-10-23 (checked with `npm view`). Insta
 
 | Piece | Version | Why | Docs |
 |---|---|---|---|
-| **Next.js** (App Router) + **TypeScript** | 16.4 | Learner's choice (root `prd.md` §6). A page and a server route in one app. | https://nextjs.org/docs |
+| **Next.js** (App Router) + **TypeScript** | 16.4 | Learner's choice (from the learner's original idea notes (kept outside this repo)). A page and a server route in one app. | https://nextjs.org/docs |
 | **@langchain/core** + **@langchain/openai** | 1.3 / 1.7 | Learner's choice. A simple chain: `ChatPromptTemplate` piped into `ChatOpenAI.withStructuredOutput(zodSchema)`. No LangGraph, no agents. The `langchain` meta-package isn't needed. | https://js.langchain.com/docs/how_to/structured_output/ , https://js.langchain.com/docs/integrations/chat/openai/ |
 | **Zod** | 4.6 | Learner's choice. One schema file defines the request, the AI output, the API response, and the saved data. | https://zod.dev |
 | **Tailwind CSS** | 4.3 | Learner's choice. | https://tailwindcss.com/docs |
-| **shadcn/ui** | CLI 4.22 | Learner's choice. Only the components the page needs: `button`, `card`, `checkbox`, `textarea`, `badge`, `alert`. | https://ui.shadcn.com/docs |
+| ~~shadcn/ui~~ | removed | Learner's choice at first. Used for the first prototype, then replaced by the custom stamp-office components; the unused components and packages were removed in the final review (see `checklist.md > Revisions`). | https://ui.shadcn.com/docs |
 | **lucide-react** | 1.61 | Learner's choice. Icons for found / warning / deadline / clear. | https://lucide.dev |
 | **Vitest** | latest | Agent-added, small: unit tests for the evidence check and input limits, the two pieces of logic the kernel depends on. | https://vitest.dev |
 | **pdfjs-dist** | 6.4 (Apache-2.0) | *Added in the build (learner decision).* Extracts text from text-based PDFs in the browser. | https://mozilla.github.io/pdf.js/ |
@@ -78,7 +78,7 @@ Node 24.13 / npm 11.8 are installed locally, which is enough for Next 16.
 ## Look and Feel
 Implements `prd.md > Look and Feel` ("stamp office" redesign, approved by the learner during the build).
 - **Font (`next/font/google`):** **Archivo** with its `wdth` axis. `.condensed` sets `font-variation-settings: "wdth" 70` for headers; body text uses the normal width.
-- **Tokens (`globals.css`, mapped onto shadcn's variables):** `--form` `#EEF1EC` (page, with a 28px grid at 4.5% ink), `--sheet` `#FBFCFA`, `--ink` `#15171C`, `--ink-soft` `#3B4049`, `--muted-ink` `#5F666E`, `--rule` `#CBD3CA`, `--ballpoint` `#2338C4` (actions, focus), `--stamp-green` `#1C7A4B` (found / ready), `--stamp-red` `#C2352D` (check / not found), `--highlight` `#FFE45C` (quotes only).
+- **Tokens (`globals.css`, mapped onto Tailwind theme variables):** `--form` `#EEF1EC` (page, with a 28px grid at 4.5% ink), `--sheet` `#FBFCFA`, `--ink` `#15171C`, `--ink-soft` `#3B4049`, `--muted-ink` `#5F666E`, `--rule` `#CBD3CA`, `--ballpoint` `#2338C4` (actions, focus), `--stamp-green` `#1C7A4B` (found / ready), `--stamp-red` `#C2352D` (check / not found), `--highlight` `#FFE45C` (quotes only).
 - **Stamp (`components/stamp.tsx` + `.stamp`):** a bordered, uppercase, condensed label with an inset second border, `mix-blend-mode: multiply`, an SVG-noise mask for ink grain, and a per-instance rotation. Rotation is deterministic per item id.
 - **GSAP (`lib/motion.ts`):** `thump(targets, paper?, stagger?)` drops stamps from `scale 1.9 → 1` (`power4.in`) and shakes the paper ±1.5px. It's used by the hero demo timeline, the results reveal (every verdict stamp in sequence), opened evidence, and READY. Other motion: highlighter `backgroundSize` sweeps, a `strokeDashoffset` ballpoint tick, a `scaleX` progress bar, and the analyzing scanner. Everything is inside `gsap.matchMedia()` with `(prefers-reduced-motion: no-preference)`; hidden-until-animated elements are only hidden under that media query.
 - **Surfaces:** 2px ink borders, offset shadows (`6px 6px 0 var(--ink)`), square corners. `SectionHeading` renders numbered black form bars, with the number outside the `<h2>` so accessible names stay plain. `.perforated` cuts a dotted tear-off edge into the results slip. `.paper-lines` rules the paste box with a red margin line.
@@ -96,8 +96,8 @@ PRD ref: `prd.md > Screens and Layout`, `prd.md > The Core Journey`.
 The textarea, the *Try a sample* link, the *Analyze* button, and the Privacy Note. *Analyze* is disabled when the text is empty or an analysis is running. Shows the too-short / too-long / failure messages returned by the server under the textarea, and keeps the text so the user can retry. It also shows a live character count once the text is near the limit.
 PRD ref: `prd.md > Document Input`, `prd.md > States and Boundaries`.
 
-### Privacy Note (`components/privacy-note.tsx`)
-Static copy: the text is sent to an AI service (OpenAI) for analysis, NextStep doesn't store the document, progress stays in this browser, and no account is needed.
+### Privacy Note (`components/input-panel.tsx`, `components/site-footer.tsx`)
+Under the analyze button: "When you press the button, the text in the box is sent to OpenAI to make your checklist. NextStep doesn't store it." The footer adds the full note: uploads are read in the browser, progress stays in this browser, no account is needed, and it's a reading aid, not advice.
 PRD ref: `prd.md > Privacy Note`.
 
 ### Analyze Route (`app/api/analyze/route.ts`)
@@ -168,8 +168,8 @@ PRD ref: `prd.md > File Upload (PDF and Word)`, `prd.md > Picture Upload (OCR)`.
 
 ### Download Actions (`components/download-actions.tsx`, `lib/export-docx.ts`, `lib/export-pdf.ts`)
 *Added in the build.* Two buttons in the results sheet: **Download as Word** and **Download as PDF**. Both exporters take `(result, completedIds, madeAt)` and build the file in the browser, loaded with dynamic `import()` on click:
-- **Word (`docx`):** a heading, the date, the summary, the deadline and status, and each group as a heading with its steps as paragraphs: ☑ / ☐, the title, then an indented italic quote with *Found* / *Not found*. It ends with the "check the original" reminder. Saved with a `Blob` and a temporary link as `nextstep-checklist.docx`.
-- **PDF (`jspdf`):** the same content, laid out with `splitTextToSize` and manual page breaks. Tick boxes are drawn as small squares (with a check line when done), because the built-in PDF fonts don't include ☑ / ☐. Saved as `nextstep-checklist.pdf`.
+- **Word (`docx`):** a heading, the date, the summary, the deadline and status, and each group as a heading with its steps as paragraphs: ☑ / ☐, the title, then an indented italic quote with *Found* / *Not found*. It ends with the "check the original" reminder. Saved with a `Blob` and a temporary link as `nextstep-checklist-YYYY-MM-DD.docx`.
+- **PDF (`jspdf`):** the same content, laid out with `splitTextToSize` and manual page breaks. Tick boxes are drawn as small squares (with a check line when done), because the built-in PDF fonts don't include ☑ / ☐. Saved as `nextstep-checklist-YYYY-MM-DD.pdf`.
 PRD ref: `prd.md > Download Checklist`.
 
 ### Token Savers (`lib/clean-text.ts`, `lib/storage.ts`, `app/api/analyze/route.ts`)
@@ -246,7 +246,6 @@ nextstep/
 │   │           └── route.ts        # Analyze Route: validate → analyze → verify → respond
 │   ├── components/
 │   │   ├── input-panel.tsx         # textarea, Try a sample, Analyze, input errors
-│   │   ├── privacy-note.tsx
 │   │   ├── results-view.tsx        # summary + deadline + checklist + footer actions
 │   │   ├── summary-card.tsx
 │   │   ├── deadline-banner.tsx
@@ -260,7 +259,6 @@ nextstep/
 │   │   ├── section-heading.tsx     # numbered black form-section bar (stamp-office redesign)
 │   │   ├── upload-control.tsx      # file button + drag-and-drop + progress (added in build)
 │   │   ├── download-actions.tsx    # Download as Word / PDF (added in build)
-│   │   └── ui/                     # shadcn components (button, card, checkbox, textarea, badge, alert)
 │   └── lib/
 │       ├── schemas.ts              # all Zod schemas + inferred types
 │       ├── prompt.ts               # system prompt text
@@ -273,7 +271,6 @@ nextstep/
 │       ├── read-file.ts            # PDF / Word / picture → text, browser only (added in build)
 │       ├── export-docx.ts          # Word download (added in build)
 │       ├── export-pdf.ts           # PDF download (added in build)
-│       └── utils.ts                # shadcn cn() helper
 ├── tests/
 │   ├── verify-evidence.test.ts     # found / not found / normalization / deadline downgrade
 │   ├── schemas.test.ts             # input limits
@@ -282,14 +279,12 @@ nextstep/
 │   └── fixtures/                   # sample.pdf, sample.docx, sample.png made from the fictional posting (added in build)
 ├── .env.example                    # OPENAI_API_KEY=, OPENAI_MODEL=
 ├── .env.local                      # (exists, git-ignored) real key + model
-├── components.json                 # shadcn config
 ├── next.config.ts
 ├── package.json
 ├── tsconfig.json
 ├── vitest.config.ts
 ├── README.md                       # what it is, setup, run, test, how it works, license
-├── LICENSE                         # MIT (open-source license required by root prd.md §14)
-├── prd.md                          # learner's original PRD (kept as is)
+├── LICENSE                         # MIT (the hackathon requires an open-source license)
 └── devpost/                        # Devpost learning workspace (scope, prd, spec, checklist)
 ```
 
@@ -326,7 +321,7 @@ No other AI services. Hugging Face was considered as a second provider to save O
 - **Scanned PDFs are not OCR'd**: the user uploads a photo or screenshot of the page instead. OCR on PDFs would need each page rendered to an image first.
 - **Tesseract.js in the browser** instead of a hosted OCR model (e.g. Hugging Face): free, private, and no extra key. It's less accurate on messy photos, which the "check the text" note covers.
 - **One saved checklist** instead of a history. Agreed in the PRD. A history would need a list view and an id per document.
-- **One LangChain chain with one model call** instead of multi-step or agent pipelines. Root `prd.md` §6 says to use a simple chain. A second "verifier" model pass is unnecessary because evidence is checked with deterministic code.
+- **One LangChain chain with one model call** instead of multi-step or agent pipelines. The learner's original idea notes (kept outside this repo) asked for a simple chain. A second "verifier" model pass is unnecessary because evidence is checked with deterministic code.
 - **Exact-match excerpt search (after normalization)** instead of fuzzy matching. A strict check fits the promise that a quote must really be in the text. It may occasionally flag a near-quote as *Not found*, which errs on the side of honesty. Fuzzy matching could come later if that's too strict in practice.
 - **Run locally and record** instead of deploying. Deployment is deferred in the PRD and optional for the hackathon; Vercel is a one-step add later.
 
@@ -345,7 +340,7 @@ Requested by the learner for `5-build`. Nothing is installed or run until the le
 ## Decisions and Open Issues
 
 **Learner decisions carried forward**
-- Stack: Next.js + TypeScript, LangChain JS + OpenAI, Zod, Tailwind + shadcn/ui + Lucide, and localStorage (root `prd.md` §6). The learner reports already having worked with these tools.
+- Stack: Next.js + TypeScript, LangChain JS + OpenAI, Zod, Tailwind + Lucide (shadcn/ui at first, later removed), and localStorage (from the learner's original idea notes (kept outside this repo)). The learner reports already having worked with these tools.
 - OpenAI key and model are already in `.env.local`.
 - Deployment deferred (PRD). The required deliverables are the demo video and the public repo.
 
@@ -354,8 +349,8 @@ Requested by the learner for `5-build`. Nothing is installed or run until the le
 - Strict normalized substring match for evidence. A failed quote forces *Needs your check*; a failed deadline quote forces *Unclear*.
 - Item ids assigned on the server, not by the model.
 - Vitest unit tests for the evidence check and input limits.
-- Fonts Source Serif 4 + Source Sans 3, and the color tokens above (from the PRD's agent-proposed Look and Feel).
-- MIT license (root `prd.md` §14 requires an open-source license; MIT is the common default).
+- Archivo font and the stamp-office color tokens above (the learner approved this redesign during the build; see *Look and Feel*).
+- MIT license (the hackathon rules require an open-source license; MIT is the common default).
 
 **Learner uncertainty discussed:** none was raised in this stage. The learner reported already knowing the stack. If a question comes up during the build, record it here or in the learner profile.
 

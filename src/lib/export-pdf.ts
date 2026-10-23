@@ -69,18 +69,26 @@ export function createPdf(model: ExportModel, PdfClass: typeof JsPdf): JsPdf {
   paragraph(model.summary, MARGIN, contentWidth, 16);
   y += 10;
 
-  // Deadline box.
-  ensureSpace(52);
+  // Deadline box, sized to its (possibly long, quoted) label.
+  font("bold", 13);
+  const deadlineLines = lines(model.deadline.label, contentWidth - 170);
+  const boxHeight = 30 + deadlineLines.length * 16;
+  ensureSpace(boxHeight + 8);
   pdf.setDrawColor(...INK);
   pdf.setLineWidth(1.5);
-  pdf.rect(MARGIN, y, contentWidth, 44);
+  pdf.rect(MARGIN, y, contentWidth, boxHeight);
   font("bold", 8, MUTED);
   pdf.text("DEADLINE", MARGIN + 12, y + 16);
   font("bold", 13);
-  pdf.text(toPdfSafe(model.deadline.label), MARGIN + 12, y + 33, { maxWidth: contentWidth - 150 });
-  const deadlineColor = model.deadline.status === "Stated in document" ? GREEN : model.deadline.status === "Not stated" || model.deadline.status === "Check the original" ? RED : BALLPOINT;
+  deadlineLines.forEach((line, i) => pdf.text(line, MARGIN + 12, y + 33 + i * 16));
+  const deadlineColor =
+    model.deadline.status === "Stated in document"
+      ? GREEN
+      : model.deadline.status === "Not stated" || model.deadline.status === "Check the original"
+        ? RED
+        : BALLPOINT;
   stamp(model.deadline.status, MARGIN + contentWidth - 12, y + 26, deadlineColor, true);
-  y += 70;
+  y += boxHeight + 26;
 
   model.groups.forEach((group, groupIndex) => {
     // Space between groups (not after the last one).

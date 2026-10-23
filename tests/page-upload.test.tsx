@@ -31,7 +31,10 @@ describe("uploading a file", () => {
     render(<Home />);
     await userEvent.upload(screen.getByLabelText("Upload a file"), fixtureFile("sample.docx", DOCX_TYPE));
 
-    expect(await screen.findByText(/Text from sample\.docx\. Check it before making your checklist\./)).toBeTruthy();
+    // The first dynamic import("mammoth") can be slow in a busy parallel test run.
+    expect(
+      await screen.findByText(/Text from sample\.docx\. Check it before making your checklist\./, {}, { timeout: 5000 }),
+    ).toBeTruthy();
     expect(box().value).toContain("A valid right to work in the country is required");
     expect(fetchMock).not.toHaveBeenCalled();
   });

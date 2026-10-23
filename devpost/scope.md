@@ -24,7 +24,7 @@ The wider vision stays open: application notices, academic requirements, and adm
 They come back to tick things off as they work through the application, or to paste the next posting.
 
 ## Inspiration & Identity
-It should feel like a polished productivity app, not a chatbot. That means strong typography and hierarchy, a restrained color palette, consistent components, readable and accessible text, and no decorative dashboards or unnecessary animation. *(From `prd.md` §11.)*
+It should feel like a polished productivity app, not a chatbot. That means strong typography and hierarchy, a restrained color palette, consistent components, readable and accessible text, and no decorative dashboards or unnecessary animation. *(From the learner's original idea notes (kept outside this repo).)*
 
 ## Why This Matters to the Learner
 Not shared beyond the product goal: *"Turn information overload into actionable progress."*
@@ -54,7 +54,7 @@ The learner approved these after the core loop was working. They come **after** 
 - **Efficient OpenAI token use**: OpenAI is used only for the one call that turns text into the checklist. Reading files, OCR, the evidence check, and downloads cost no tokens. Re-analyzing identical text reuses the saved result, and text is trimmed before sending.
 
 ## Later
-- Editing task titles *(FR-08 in `prd.md`; deferred to keep the first loop small. Bring it back if you want it in now)*.
+- Editing task titles *(from the learner's original idea notes (kept outside this repo); deferred to keep the first loop small. Bring it back if you want it in now)*.
 - Export as Markdown and copy to clipboard.
 - Public deployment on Vercel (optional for this hackathon; worth doing if time remains).
 - Example walkthroughs for academic, application, and administrative documents.

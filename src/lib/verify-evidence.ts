@@ -6,10 +6,12 @@ const GROUP_ORDER: Group[] = ["required", "recommended", "needs_check"];
 /** Makes quoting differences that don't change meaning irrelevant to the match. */
 export function normalize(s: string): string {
   return s
+    .normalize("NFKC") // full-width letters, "…" → "...", ligatures
     .toLowerCase()
+    .replace(/­/g, "") // soft hyphens hidden in PDF text
     .replace(/[‘’‚′]/g, "'")
     .replace(/[“”„″]/g, '"')
-    .replace(/[‒–—―−]/g, "-")
+    .replace(/[‐‑‒–—―−]/g, "-")
     .replace(/[•·▪‣◦●]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
@@ -27,16 +29,22 @@ function isRealIsoDate(date: string | null): boolean {
   return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === date;
 }
 
+/** Every piece of deadline text that reaches the screen must be found in the document. */
 function verifyDeadline(normalizedText: string, deadline: Deadline): Deadline {
   const { status } = deadline;
+  if (status === "not_stated") return { status, date: null, wording: null, sourceExcerpt: null };
+
+  const excerptFound = isFoundIn(normalizedText, deadline.sourceExcerpt);
+  const sourceExcerpt = excerptFound ? deadline.sourceExcerpt : null;
+  // The model's own phrasing is kept only if the document contains it; otherwise show the verified quote.
+  const wording = isFoundIn(normalizedText, deadline.wording) ? deadline.wording : sourceExcerpt;
 
   if (status === "stated" || status === "relative") {
-    const supported =
-      isFoundIn(normalizedText, deadline.sourceExcerpt) && (status === "relative" || isRealIsoDate(deadline.date));
-    if (!supported) return { ...deadline, status: "unclear", date: null };
+    const supported = excerptFound && (status === "relative" || isRealIsoDate(deadline.date));
+    if (!supported) return { status: "unclear", date: null, wording, sourceExcerpt };
   }
 
-  return { ...deadline, date: status === "stated" ? deadline.date : null };
+  return { status, date: status === "stated" ? deadline.date : null, wording, sourceExcerpt };
 }
 
 /**
@@ -53,6 +61,8 @@ export function verifyEvidence(text: string, output: AnalysisOutput): AnalysisRe
       ...item,
       evidence: found ? ("found" as const) : ("not_found" as const),
       group: found ? item.group : ("needs_check" as const),
+      // A step's own deadline is shown only if the document contains it; dates are never made up.
+      deadline: isFoundIn(normalizedText, item.deadline) ? item.deadline : null,
     };
   });
 

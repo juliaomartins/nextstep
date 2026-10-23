@@ -39,6 +39,12 @@ describe("normalize", () => {
   });
 });
 
+describe("normalize: characters common in PDF and OCR text", () => {
+  test("drops soft hyphens and unifies other hyphens, ellipses, and full-width characters", () => {
+    expect(normalize("cus­tomer‐service ‑ role… ＣＶ")).toBe("customer-service - role... cv");
+  });
+});
+
 describe("verifyEvidence: items", () => {
   test("marks an excerpt that appears verbatim as found and keeps its group", () => {
     const result = verifyEvidence(DOC, output({ items: [item("Applicants must submit a CV in PDF format.")] }));
@@ -81,6 +87,13 @@ describe("verifyEvidence: items", () => {
       ["item-2", "recommended"],
       ["item-3", "needs_check"],
     ]);
+  });
+
+  test("keeps a step's own deadline only if the document contains it", () => {
+    const supported = { ...item("Applicants must submit a CV in PDF format."), deadline: "15 November 2026" };
+    const invented = { ...item("A cover letter addressed to the hiring manager is required."), deadline: "by 1 December" };
+    const result = verifyEvidence(DOC, output({ items: [supported, invented] }));
+    expect(result.items.map((i) => i.deadline)).toEqual(["15 November 2026", null]);
   });
 
   test("returns an empty list when the model found nothing", () => {
@@ -150,6 +163,44 @@ describe("verifyEvidence: deadline", () => {
       }),
     );
     expect(result.deadline.status).toBe("unclear");
+  });
+
+  test("a downgraded deadline keeps none of the model's unsupported wording or quote", () => {
+    const result = verifyEvidence(
+      DOC,
+      output({
+        deadline: {
+          status: "stated",
+          date: "2026-12-01",
+          wording: "Apply by 1 December 2026",
+          sourceExcerpt: "Apply by 1 December 2026.",
+        },
+      }),
+    );
+    expect(result.deadline).toEqual({ status: "unclear", date: null, wording: null, sourceExcerpt: null });
+  });
+
+  test("deadline wording the document doesn't contain is replaced by the verified quote", () => {
+    const result = verifyEvidence(
+      DOC,
+      output({
+        deadline: {
+          status: "stated",
+          date: "2026-11-15",
+          wording: "Apply before mid-November",
+          sourceExcerpt: "Applications close on 15 November 2026.",
+        },
+      }),
+    );
+    expect(result.deadline.wording).toBe("Applications close on 15 November 2026.");
+  });
+
+  test("an unclear deadline's wording is dropped when it isn't in the document", () => {
+    const result = verifyEvidence(
+      DOC,
+      output({ deadline: { status: "unclear", date: null, wording: "apply by Friday", sourceExcerpt: null } }),
+    );
+    expect(result.deadline.wording).toBeNull();
   });
 
   test("never keeps a date unless the status is stated", () => {

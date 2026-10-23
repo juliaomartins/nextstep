@@ -10,7 +10,7 @@ export const MAX_FILE_BYTES = 5 * 1024 * 1024;
 const MIN_TEXT_CHARS = 20;
 
 export type FileKind = "pdf" | "docx" | "image";
-export type ReadFileErrorCode = "unsupported" | "too_large" | "no_text" | "read_failed";
+export type ReadFileErrorCode = "unsupported" | "too_large" | "no_text" | "read_failed" | "ocr_unavailable";
 
 export class ReadFileError extends Error {
   constructor(public code: ReadFileErrorCode) {
@@ -88,12 +88,16 @@ const MESSAGES: Record<ReadFileErrorCode, string> = {
     "This PDF has no readable text. It's probably a scan. Upload a photo or screenshot of the pages instead, or paste the text.",
   read_failed:
     "We couldn't open this file. It may be damaged or password-protected. Try another file, or paste the text.",
+  ocr_unavailable: "We couldn't load the picture reader. Check your internet connection, or paste the text.",
 };
 
 export function fileErrorMessage(error: unknown, kind?: FileKind): string {
   const code = error instanceof ReadFileError ? error.code : "read_failed";
   if (code === "no_text" && kind === "image") {
     return "We couldn't read any text in this picture. Try a sharper, well-lit photo, or paste the text.";
+  }
+  if (code === "no_text" && kind === "docx") {
+    return "We couldn't find any text in this Word file. Check it isn't empty, or paste the text.";
   }
   return MESSAGES[code];
 }
@@ -158,16 +162,22 @@ export async function extractImageText(
   options: { cachePath?: string } = {},
 ): Promise<string> {
   let reported = 0;
-  const worker = await tesseract.createWorker("eng", undefined, {
-    ...options,
-    // Only the recognition phase counts; model loading has its own 0..1 progress.
-    logger: ({ status, progress }) => {
-      if (status === "recognizing text" && progress > reported && progress < 1) {
-        reported = progress;
-        onProgress?.(progress);
-      }
-    },
-  });
+  let worker: OcrWorker;
+  try {
+    // Downloads the OCR engine and English model on first use; fails when offline or the CDN is blocked.
+    worker = await tesseract.createWorker("eng", undefined, {
+      ...options,
+      // Only the recognition phase counts; model loading has its own 0..1 progress.
+      logger: ({ status, progress }) => {
+        if (status === "recognizing text" && progress > reported && progress < 1) {
+          reported = progress;
+          onProgress?.(progress);
+        }
+      },
+    });
+  } catch {
+    throw new ReadFileError("ocr_unavailable");
+  }
   try {
     const { data } = await worker.recognize(image);
     onProgress?.(1);

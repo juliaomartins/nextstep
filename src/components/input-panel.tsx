@@ -1,7 +1,7 @@
 "use client";
 
 import { forwardRef, useState } from "react";
-import { FileCheck2, FileSearch, ListChecks, LoaderCircle, TextCursorInput } from "lucide-react";
+import { FileCheck2, FileSearch, ListChecks, LoaderCircle, LockKeyhole, TextCursorInput } from "lucide-react";
 import { MAX_CHARS } from "@/lib/schemas";
 import { SectionHeading } from "./section-heading";
 import { UploadControl } from "./upload-control";
@@ -115,6 +115,12 @@ export const InputPanel = forwardRef<HTMLTextAreaElement, Props>(function InputP
             {loading ? "Reading…" : "Make my checklist"}
           </button>
         </div>
+
+        <p className="flex items-start gap-1.5 text-sm text-muted-ink">
+          <LockKeyhole className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+          When you press the button, the text in the box is sent to OpenAI to make your checklist. NextStep doesn&apos;t
+          store it.
+        </p>
 
         {error && (
           <p

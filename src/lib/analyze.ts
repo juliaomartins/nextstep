@@ -16,7 +16,9 @@ const prompt = ChatPromptTemplate.fromMessages([
 /** One LangChain chain: prompt → OpenAI with a strict structured-output schema. */
 export async function analyzeDocument(text: string): Promise<AnalysisOutput> {
   const modelName = process.env.OPENAI_MODEL || DEFAULT_MODEL;
-  const model = new ChatOpenAI({ model: modelName, timeout: 45_000, maxRetries: 1 });
+  // temperature 0: the most literal, repeatable output, which keeps quotes verbatim (spec.md > Analysis Chain).
+  // Note: reasoning models that reject a temperature setting are not supported by this configuration.
+  const model = new ChatOpenAI({ model: modelName, temperature: 0, timeout: 45_000, maxRetries: 1 });
 
   const chain = prompt.pipe(
     model.withStructuredOutput(AnalysisSchema, { name: "document_analysis", strict: true, includeRaw: true }),

@@ -25,6 +25,12 @@ function Harness({ onAnalyze = () => {} }: { onAnalyze?: () => void }) {
 }
 
 describe("InputPanel", () => {
+  test("says, next to the button, that the text is sent to OpenAI and not stored", () => {
+    render(<Harness />);
+    expect(screen.getByText(/sent to OpenAI to make your checklist/)).toBeTruthy();
+    expect(screen.getByText(/NextStep doesn't store it/)).toBeTruthy();
+  });
+
   test("the analyze button is disabled while the box is empty", () => {
     render(<Harness />);
     expect(screen.getByRole("button", { name: "Make my checklist" })).toHaveProperty("disabled", true);
