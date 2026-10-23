@@ -23,6 +23,15 @@ describe("validateAnalyzeInput", () => {
     expect(validateAnalyzeInput(null)).toEqual({ ok: false, code: "invalid_request" });
   });
 
+  test("cleans whitespace before checking the length and returns the cleaned text", () => {
+    const padded = `Apply   now.\n\n\n\n${"a".repeat(MIN_CHARS)}`;
+    expect(validateAnalyzeInput({ text: padded })).toEqual({ ok: true, text: `Apply now.\n\n${"a".repeat(MIN_CHARS)}` });
+  });
+
+  test("text that is mostly whitespace counts as too short", () => {
+    expect(validateAnalyzeInput({ text: `word ${" ".repeat(400)} word` })).toEqual({ ok: false, code: "too_short" });
+  });
+
   test("uses the agreed limits of 200 and 20,000 characters", () => {
     expect([MIN_CHARS, MAX_CHARS]).toEqual([200, 20_000]);
   });

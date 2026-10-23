@@ -1,6 +1,7 @@
 "use client";
 
 import { forwardRef, useRef } from "react";
+import { HardDriveDownload, Info, Trash2 } from "lucide-react";
 import { gsap, MOTION_OK, useGSAP } from "@/lib/motion";
 import type { AnalysisResult } from "@/lib/schemas";
 import { Checklist } from "./checklist";
@@ -10,11 +11,14 @@ import { SummaryCard } from "./summary-card";
 type Props = {
   result: AnalysisResult;
   completedIds: Set<string>;
+  saved: boolean;
+  notice: string | null;
   onToggle: (id: string) => void;
+  onClear: () => void;
 };
 
 export const ResultsView = forwardRef<HTMLElement, Props>(function ResultsView(
-  { result, completedIds, onToggle },
+  { result, completedIds, saved, notice, onToggle, onClear },
   forwardedRef,
 ) {
   const sheetRef = useRef<HTMLElement | null>(null);
@@ -83,6 +87,13 @@ export const ResultsView = forwardRef<HTMLElement, Props>(function ResultsView(
         </div>
       )}
 
+      {notice && (
+        <p data-reveal role="status" className="mt-6 flex items-center gap-2 rounded-lg bg-paper px-4 py-2.5 text-sm text-accent-ink">
+          <Info className="size-4 shrink-0" aria-hidden />
+          {notice}
+        </p>
+      )}
+
       <div className="mt-8 space-y-8">
         <SummaryCard summary={result.summary} />
         <DeadlineBanner deadline={result.deadline} />
@@ -94,6 +105,27 @@ export const ResultsView = forwardRef<HTMLElement, Props>(function ResultsView(
           </p>
         )}
       </div>
+
+      <footer className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-rule pt-5 text-sm">
+        <p className="flex items-center gap-1.5 text-muted-ink">
+          {saved ? (
+            <>
+              <HardDriveDownload className="size-4" aria-hidden />
+              Saved in this browser. Your ticks will be here when you come back.
+            </>
+          ) : (
+            "Not saved, because there was nothing to tick off."
+          )}
+        </p>
+        <button
+          type="button"
+          onClick={onClear}
+          className="inline-flex items-center gap-1.5 rounded-md px-1 font-medium text-ink-soft hover:text-error focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+        >
+          <Trash2 className="size-4" aria-hidden />
+          Clear saved data
+        </button>
+      </footer>
     </section>
   );
 });

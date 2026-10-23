@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { cleanText } from "./clean-text";
 
 export const MIN_CHARS = 200;
 export const MAX_CHARS = 20_000;
@@ -69,7 +70,7 @@ export function validateAnalyzeInput(body: unknown): InputCheck {
   const parsed = AnalyzeRequestSchema.safeParse(body);
   if (!parsed.success) return { ok: false, code: "invalid_request" };
 
-  const text = parsed.data.text.trim();
+  const text = cleanText(parsed.data.text);
   if (text.length < MIN_CHARS) return { ok: false, code: "too_short" };
   if (text.length > MAX_CHARS) return { ok: false, code: "too_long" };
   return { ok: true, text };
