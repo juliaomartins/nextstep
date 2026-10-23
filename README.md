@@ -24,6 +24,7 @@ AI summaries sound confident even when they are wrong. NextStep doesn't ask you 
 - Analyzing the same text again reuses the saved result, with **no second AI call**.
 - **Download your checklist as Word or PDF**, made on your device: summary, deadline, every step with its tick state, quote, and Found / Not found stamp. The Word file stays editable; the PDF uses the same stamp style as the app.
 - Clear messages for text that is too short, too long, has nothing actionable, or when the AI service fails. Your text is always kept.
+- **Chrome extension:** on any job posting or notice, click *Analyze this page*, review the extracted text, and get the checklist on the site's `/results` page. Same API, same evidence check. See [`extension/README.md`](extension/README.md).
 
 ## Run it locally
 
@@ -53,6 +54,8 @@ npm test         # Vitest: evidence check, input limits, text cleanup, storage, 
                  # (the first run downloads Tesseract's English model into node_modules/.cache)
 npm run lint
 npm run build && npm start   # production build on http://localhost:3000
+npm run build:extension      # Chrome extension → extension/dist (load it unpacked; see extension/README.md)
+npm run typecheck:extension
 ```
 
 ## How it works

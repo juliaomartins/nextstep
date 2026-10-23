@@ -1,0 +1,240 @@
+/* NextStep "stamp office" tokens, the same values as src/app/globals.css. */
+:root {
+  --form: #eef1ec;
+  --sheet: #fbfcfa;
+  --ink: #15171c;
+  --ink-soft: #3b4049;
+  --muted-ink: #5f666e;
+  --rule: #cbd3ca;
+  --ballpoint: #2338c4;
+  --ballpoint-deep: #18289a;
+  --stamp-green: #1c7a4b;
+  --stamp-red: #c2352d;
+  --stamp-red-bg: #fbe9e6;
+  --highlight: #ffe45c;
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  width: 380px;
+  font: 14px/1.45 "Archivo", "Segoe UI", system-ui, Arial, sans-serif;
+  color: var(--ink);
+  background-color: var(--form);
+  background-image:
+    linear-gradient(rgba(21, 23, 28, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(21, 23, 28, 0.045) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--ink);
+  color: var(--sheet);
+}
+.mark {
+  width: 30px;
+  height: 30px;
+  outline: 2px solid var(--sheet);
+  border-radius: 8px;
+}
+.brand {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-stretch: condensed;
+}
+
+main {
+  padding: 14px;
+}
+
+h1 {
+  margin: 0 0 4px;
+  font-size: 20px;
+  line-height: 1.15;
+  font-weight: 800;
+  font-stretch: condensed;
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  margin: 0 0 12px;
+  padding: 8px 10px;
+  border-left: 4px solid var(--ballpoint);
+  background: var(--sheet);
+}
+.page-title {
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.page-host {
+  color: var(--muted-ink);
+  font-size: 12px;
+}
+
+.muted {
+  margin: 0 0 12px;
+  color: var(--ink-soft);
+}
+.small {
+  display: flex;
+  gap: 6px;
+  font-size: 12px;
+}
+
+svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.small svg {
+  width: 14px;
+  height: 14px;
+  margin-top: 2px;
+}
+
+button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 16px;
+  border: 2px solid var(--ink);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 120ms ease, background-color 120ms ease;
+}
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+button:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid color-mix(in oklab, var(--ballpoint) 45%, transparent);
+  outline-offset: 2px;
+}
+button:disabled {
+  cursor: not-allowed;
+  border-color: var(--rule);
+  background: #e1e6df;
+  color: var(--muted-ink);
+  box-shadow: none;
+}
+.primary {
+  width: 100%;
+  background: var(--ballpoint);
+  color: #fff;
+  box-shadow: 3px 3px 0 0 var(--ink);
+}
+.primary:hover:not(:disabled) {
+  background: var(--ballpoint-deep);
+}
+.secondary {
+  background: var(--sheet);
+  color: var(--ink);
+}
+.actions {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+}
+
+textarea {
+  display: block;
+  width: 100%;
+  height: 220px;
+  resize: vertical;
+  padding: 8px 10px;
+  border: 2px solid var(--ink);
+  background-color: var(--sheet);
+  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 21px, var(--rule) 21px, var(--rule) 22px);
+  background-attachment: local;
+  line-height: 22px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.count {
+  margin: 6px 0 10px;
+  font-size: 12px;
+  color: var(--muted-ink);
+  font-variant-numeric: tabular-nums;
+}
+.count.over {
+  color: var(--stamp-red);
+  font-weight: 700;
+}
+
+.status {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border-left: 4px solid var(--highlight);
+  background: var(--sheet);
+  font-weight: 600;
+}
+.error {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border: 2px solid var(--stamp-red);
+  background: var(--stamp-red-bg);
+  color: var(--stamp-red);
+  font-weight: 600;
+}
+
+.stamp {
+  display: inline-block;
+  margin: 4px 0 12px;
+  padding: 4px 10px 3px;
+  border: 2px solid var(--stamp-green);
+  border-radius: 4px;
+  color: var(--stamp-green);
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transform: rotate(-5deg);
+}
+
+[hidden] {
+  display: none !important;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button {
+    transition: none;
+  }
+  button:hover:not(:disabled),
+  button:active:not(:disabled) {
+    transform: none;
+  }
+}

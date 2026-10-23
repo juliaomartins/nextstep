@@ -33,7 +33,7 @@ Success: an unfamiliar document becomes a checklist the user can check against t
   - **Checklist:** three groups, *Required*, *Recommended*, and *Needs your check*, each with a progress count. Empty groups are hidden.
   - **Footer actions:** **Clear saved data** and a one-line reminder to check important details against the original document.
 
-There are no other screens.
+**`/results`** *(added with the browser extension)*: the same results section, under a **Read from** *page title · site* line. The extension opens it with the analysis. Without one, it shows the checklist saved in this browser, or an empty state with a **Make a checklist** link back home. It is kept out of search engines because every checklist is personal.
 
 ## Look and Feel
 *Redesigned during the build at the learner's request: the first version (cream paper, big serif, rounded cards) read as generic "AI slop". The learner asked for something unique and unforgettable, with icons on every interaction, and approved the "stamp office" direction proposed by the agent.*
@@ -136,12 +136,35 @@ Source: `scope.md > Added during the build (learner decision)`.
 - Extra blank lines and spaces are trimmed before the text is sent.
 - [ ] Analyzing the sample twice in a row makes only one AI call (visible in the server log), and the second result appears instantly.
 
+### Browser Extension
+Source: `scope.md > Added during the build (learner decision)`.
+- A Chrome extension (toolbar button) for the page the user is reading. The popup shows the page's title and site, and one button: **Analyze this page**.
+- Nothing is read until that click. Then the extension extracts the page's **main** text, skipping navigation, sidebars, footers, cookie banners, ads, share bars, and hidden elements.
+- **Review before sending:** the text appears in an editable box with a character count against the 20,000 limit and a note that it will be sent to the NextStep server (which uses OpenAI) and not stored. **Make my checklist** sends it; **Start over** discards it.
+- The checklist is made by the **same** analysis and evidence check as the website. Nothing is invented: requirements, preferred qualifications, documents to submit, deadlines, and next steps come only from the page's own words.
+- When it's ready, the website's **/results** page opens in a new tab with the checklist.
+- [ ] On a job posting, *Analyze this page* fills the review box with the posting and none of the site's navigation, cookie banner, ads, sidebar, or footer.
+- [ ] *Make my checklist* opens `/results` with the checklist, a "Read from" line naming the page, and every *Found* quote present in the reviewed text.
+- [ ] On `chrome://` pages, the Chrome Web Store, or a new tab, the popup explains it can't read the page and the button is disabled.
+- [ ] With the NextStep server stopped, the popup says it couldn't reach NextStep at its address, and the text stays in the box.
+
+### Results Page
+- Opened by the extension with the analysis in the URL fragment, which never reaches any server. It validates the data, saves it like any checklist (ticks, downloads, and "same document" reuse all work), and removes it from the address bar.
+- [ ] After opening from the extension, the address bar shows plain `/results`, and a reload still shows the checklist (restored from this browser).
+- [ ] The same page analyzed again keeps the ticks already saved for it.
+- [ ] A broken or tampered link shows *"This link doesn't contain a valid checklist."* and leaves the saved checklist alone.
+
 ## States and Boundaries
 - **Unsupported file type:** *"NextStep can read PDF, Word (.docx), and pictures (PNG, JPG, WebP). Try one of those, or paste the text."*
 - **File too large (over 5 MB):** *"This file is too large (over 5 MB). Try a smaller file, or paste the relevant section."*
 - **PDF with no text inside (a scan):** *"This PDF has no readable text. It's probably a scan. Upload a photo or screenshot of the pages instead, or paste the text."*
 - **Picture with no readable text:** *"We couldn't read any text in this picture. Try a sharper, well-lit photo, or paste the text."*
 - **Reading a file or picture:** the upload control and analyze button are disabled, and a progress message shows.
+- **Extension on an unsupported page** (Chrome's own pages, the Web Store, a new tab): *"NextStep can't read this kind of page…"*, with the button disabled.
+- **Extension on a page with no readable text:** *"This page has no readable text to analyze…"*
+- **Extension can't reach the server:** *"We couldn't reach NextStep at <address>. Check that it's running and that you're online…"* The text stays in the review box.
+- **Extension text over the limit:** the counter turns red and *Make my checklist* is disabled until the text is trimmed.
+- **Extension waiting for the analysis:** *"Making your checklist… this usually takes 10 to 20 seconds."* The box is read-only.
 - **First use:** empty paste area, **Try a sample** visible, no results section.
 - **Analyzing:** the button is disabled and a progress message is shown. The paste area keeps its text.
 - **Empty input:** **Analyze** can't be clicked.
@@ -157,6 +180,8 @@ Source: `scope.md > Added during the build (learner decision)`.
 - **Upload, OCR, and download added during the build** (learner decision, after the core loop worked). Every upload becomes visible, editable text first, so evidence is always checked against what the user can see.
 - **OCR in the browser (Tesseract.js), not Hugging Face** (learner followed the agent's recommendation). It costs no tokens, needs no extra account or key, and the image never leaves the device.
 - **OpenAI used only for the checklist itself** (learner priority: efficient token use).
+- **A Chrome extension, reusing the existing API and AI workflow** (learner decision). The extension never holds the OpenAI key. It reads a page only after the user's click (`activeTab`), and the user reviews the text before anything is sent.
+- **Results hand-off through the URL fragment** (agent's call, accepted with the build): no new server endpoint or storage is needed, and the fragment never reaches a server.
 - **Job posting for the proof of concept, document-neutral design.** The learner chose a job posting as the example, while keeping the product useful for students and administrative documents. All labels avoid job-specific wording.
 - **One checklist, not separate requirement and task lists.** The learner approved the agent's recommendation: it avoids duplication and keeps the evidence attached to the action.
 - **Groups based on the document's own wording (Required / Recommended / Needs your check).** The learner approved this. It works across document types and demonstrates the kernel: the app sorts by what the text says, not by its own guess.
@@ -175,6 +200,7 @@ Source: `scope.md > Added during the build (learner decision)`.
 - A privacy note, a trust reminder, and the error and empty states listed above.
 - A layout that works on desktop and mobile.
 - *Added during the build:* uploading PDF, Word, and pictures (OCR in the browser); downloading the checklist as Word or PDF; reusing the saved result for identical text.
+- *Added during the build:* a Chrome extension (*Analyze this page* → review → checklist) and the website's `/results` page.
 
 ## Deferred From the POC
 - **Editing item titles:** in the learner's original idea notes (kept outside this repo); deferred in scope to keep the first loop small.
@@ -193,6 +219,7 @@ Source: `scope.md > Added during the build (learner decision)`.
 - **OCR of scanned (image-only) PDFs:** uploading a photo or screenshot of the page covers it (scope cut). Pictures themselves are supported.
 - **Hugging Face or a second AI provider:** rejected to keep one reliable structured-output model; browser OCR already avoids token costs (scope cut).
 - **Calendar, reminders, payments, team features, dashboards:** product features, not proof of the idea (scope cut).
+- **Background reading or automatic analysis by the extension:** it acts only on the current tab, only after a click, so it never reads pages the user didn't choose.
 - **Authoritative advice:** NextStep helps people read a document; it doesn't replace it.
 
 ## Open Questions

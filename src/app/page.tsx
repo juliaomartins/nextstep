@@ -1,19 +1,19 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { UserRoundX } from "lucide-react";
+import { useRef, useState } from "react";
 import { AnalyzingState } from "@/components/analyzing-state";
-import { LogoMark } from "@/components/logo-mark";
 import { Hero } from "@/components/hero";
 import { HowItWorks } from "@/components/how-it-works";
 import { InputPanel } from "@/components/input-panel";
 import { ResultsView } from "@/components/results-view";
 import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
 import { cleanText } from "@/lib/clean-text";
 import { checkFile, fileErrorMessage, readFile } from "@/lib/read-file";
 import type { AnalysisResult, ApiError } from "@/lib/schemas";
 import { SAMPLE_POSTING } from "@/lib/sample-posting";
-import { clearSaved, hashText, loadSaved, save } from "@/lib/storage";
+import { hashText, loadSaved } from "@/lib/storage";
+import { useSavedChecklist } from "@/lib/use-saved-checklist";
 
 const NETWORK_ERROR = "We couldn't analyze this document right now. Please try again.";
 const REUSED_NOTICE = "Same document as before, so your saved checklist was reused.";
@@ -30,9 +30,7 @@ export default function Home() {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<AnalysisResult | null>(null);
-  const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
-  const [textHash, setTextHash] = useState<string | null>(null);
+  const { result, completedIds, textHash, show, toggle, clear } = useSavedChecklist();
   const [notice, setNotice] = useState<string | null>(null);
   const [reading, setReading] = useState<string | null>(null);
   const [sourceNote, setSourceNote] = useState<string | null>(null);
@@ -40,28 +38,6 @@ export default function Home() {
   const inputSectionRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const resultsRef = useRef<HTMLElement>(null);
-
-  // Restore the saved checklist after mount, so the server-rendered HTML matches the first browser render.
-  useEffect(() => {
-    const saved = loadSaved();
-    if (!saved) return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time sync from browser storage
-    setResult(saved.result);
-    setCompletedIds(new Set(saved.completedIds));
-    setTextHash(saved.textHash);
-  }, []);
-
-  // Persist on every change of result or ticks. Only the result, ticks, and a hash are stored.
-  useEffect(() => {
-    if (!result || !textHash) return;
-    save({
-      version: 1,
-      savedAt: new Date().toISOString(),
-      textHash,
-      result,
-      completedIds: [...completedIds],
-    });
-  }, [result, completedIds, textHash]);
 
   function showResults() {
     requestAnimationFrame(() => {
@@ -91,9 +67,7 @@ export default function Home() {
     // Token saver: identical text reuses the saved result and its ticks, with no AI call.
     const saved = loadSaved();
     if (saved && saved.textHash === hash) {
-      setResult(saved.result);
-      setCompletedIds(new Set(saved.completedIds));
-      setTextHash(hash);
+      show(saved.result, hash, saved.completedIds);
       setNotice(REUSED_NOTICE);
       showResults();
       return;
@@ -111,10 +85,8 @@ export default function Home() {
         setError(data.error.message);
         return;
       }
-      setResult(data);
-      setCompletedIds(new Set());
       // Nothing actionable: show the message, but don't replace the saved checklist with an empty one.
-      setTextHash(data.items.length > 0 ? hash : null);
+      show(data, data.items.length > 0 ? hash : null);
       showResults();
     } catch {
       setError(NETWORK_ERROR);
@@ -146,20 +118,8 @@ export default function Home() {
     }
   }
 
-  function toggle(id: string) {
-    setCompletedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }
-
   function clearAll() {
-    clearSaved();
-    setResult(null);
-    setCompletedIds(new Set());
-    setTextHash(null);
+    clear();
     setNotice(null);
     setText("");
     setSourceNote(null);
@@ -169,16 +129,7 @@ export default function Home() {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-      <nav aria-label="NextStep" className="flex items-center justify-between border-b-2 border-ink py-4">
-        <span className="flex items-center gap-2.5">
-          <LogoMark className="size-10" />
-          <span className="condensed text-2xl font-black text-ink uppercase">NextStep</span>
-        </span>
-        <span className="flex items-center gap-1.5 text-sm font-medium text-ink-soft">
-          <UserRoundX className="size-4" aria-hidden />
-          No account needed
-        </span>
-      </nav>
+      <SiteHeader />
 
       <main>
         <div className="pt-12 pb-20 sm:pt-16 sm:pb-24">

@@ -40,6 +40,25 @@ PRD ref: `prd.md > The Core Journey`.
  ticks ─▶ localStorage
 ```
 
+### The Same Journey From the Browser Extension
+PRD ref: `prd.md > Browser Extension`, `prd.md > Results Page`.
+
+1. **Click the toolbar button.** The popup (`extension/src/popup.ts`) asks Chrome for the active tab. `activeTab` grants access to that tab only, because the user invoked the extension. Unsupported URLs (non-http(s), the Web Store) are refused up front.
+2. **Analyze this page.** `chrome.scripting.executeScript` injects `extractMainText` (`extension/src/extract.ts`) once. It returns the main text; the popup runs the shared `cleanText`.
+3. **Review.** The text is shown, editable, with the 20,000-character limit enforced in the popup.
+4. **Make my checklist.** `analyzeText` (`extension/src/api.ts`) `POST`s `{ text }` to the **same** `/api/analyze`. Steps 4–6 above run unchanged on the server: input checks, the LangChain chain, and the evidence check. The response is validated with `AnalysisResultSchema`.
+5. **Hand-off.** The popup builds `{ version, textHash, result, source }` (the same SHA-256 text hash as the website) and opens `<NEXTSTEP_URL>/results#data=<base64url JSON>` in a new tab.
+6. **/results** (`app/results/page.tsx`) decodes and validates the fragment (`lib/handoff.ts`), clears it from the address bar, and shows the checklist through the shared `useSavedChecklist` hook, which saves it like any other checklist.
+
+```
+ Web page            Extension popup                        NextStep server              Website /results
+ ────────            ───────────────                        ───────────────              ────────────────
+ (click) ◀─ inject ─ extractMainText (activeTab+scripting)
+         ── text ──▶ cleanText → review/edit → POST {text} ─▶ /api/analyze (unchanged)
+                     ◀──────────── AnalysisResult ────────── LangChain → OpenAI → evidence check
+                     open new tab: /results#data=… ─────────────────────────────────▶ validate (Zod), save, show
+```
+
 ## Stack
 Versions are the latest on npm as of 2026-10-23 (checked with `npm view`). Install the current versions; these numbers are for reference.
 
@@ -57,6 +76,8 @@ Versions are the latest on npm as of 2026-10-23 (checked with `npm view`). Insta
 | **tesseract.js** | 7.0 (Apache-2.0) | *Added in the build; chosen over Hugging Face with the learner's agreement.* OCR in the browser: no tokens, no key, the image stays on the device. | https://github.com/naptha/tesseract.js |
 | **docx** | 9.14 (MIT) | *Added in the build.* Builds the Word download in the browser. | https://docx.js.org |
 | **jspdf** | 4.2 (MIT) | *Added in the build.* Builds the PDF download in the browser. | https://github.com/parallax/jsPDF |
+| **esbuild** | 0.28 (MIT) | *Added with the extension.* Bundles the extension's TypeScript, including the shared `src/lib` code, into `extension/dist/popup.js`. | https://esbuild.github.io |
+| **@types/chrome** | 0.3 (MIT) | *Added with the extension.* Types for `chrome.tabs` and `chrome.scripting` (strict type checking of the extension). | https://developer.chrome.com/docs/extensions/reference |
 
 Node 24.13 / npm 11.8 are installed locally, which is enough for Next 16.
 
@@ -73,6 +94,7 @@ Node 24.13 / npm 11.8 are installed locally, which is enough for Next 16.
 - **Start:** `npm install`, then `npm run dev`, then open **http://localhost:3000**.
 - **Check before recording:** `npm run test`, `npm run lint`, and `npm run build && npm run start`. Record against the production build.
 - **What to show in the demo video (about 1 minute):** Try a sample → Analyze → Summary + "No deadline stated in this document" → open a *Required* item and its highlighted ✓ excerpt → point out an item in *Needs your check* → tick two items → reload, and the ticks are still there.
+- **Chrome extension:** `npm run build:extension` writes `extension/dist` for `http://localhost:3000` (or `NEXTSTEP_URL=https://… npm run build:extension`). Load it via `chrome://extensions` → Developer mode → *Load unpacked*. Full steps are in `extension/README.md`.
 - **Submission:** demo video + public GitHub repository. **Deployment is deferred** (`prd.md > Deferred From the POC`). If time remains, Vercel is the natural target: import the repo, add the two environment variables in the project settings, and deploy. Nothing in this design blocks that.
 
 ## Look and Feel
@@ -89,7 +111,7 @@ Implements `prd.md > Look and Feel` ("stamp office" redesign, approved by the le
 ## Components
 
 ### Page Shell (`app/page.tsx`)
-A client component that owns the page state (status, current result, completedIds, error message) and wires the parts below together. On mount, it loads saved data with `storage.ts`. Loading happens after mount so the server-rendered HTML matches the first browser render.
+A client component that owns the input state (text, loading, file reading, errors, notices) and wires the parts below together. The checklist on screen (result, ticks, text hash) comes from the shared `useSavedChecklist` hook, which restores it after mount so the server-rendered HTML matches the first browser render. The header is the shared `SiteHeader`.
 PRD ref: `prd.md > Screens and Layout`, `prd.md > The Core Journey`.
 
 ### Input Panel (`components/input-panel.tsx`)
@@ -179,6 +201,29 @@ PRD ref: `prd.md > Download Checklist`.
 - **Log real usage:** the route requests the raw model message (`withStructuredOutput(..., { includeRaw: true })`) and logs `usage_metadata` input/output/total tokens to the server console. It never logs the text.
 PRD ref: `prd.md > Token Efficiency`.
 
+### Saved Checklist Hook (`lib/use-saved-checklist.ts`)
+*Extracted when `/results` was added.* Holds the result, the ticks, and the text hash on screen. It restores them from `storage.ts` after mount, saves them on every change, and exposes `show` / `toggle` / `clear`. Both the home page and `/results` use it, so they behave identically.
+PRD ref: `prd.md > Saved Progress`.
+
+### Site Header (`components/site-header.tsx`)
+The NextStep mark and name (linking home) and "No account needed". Shared by both pages.
+
+### Results Page (`app/results/page.tsx`, `app/results/layout.tsx`)
+Reads `window.location.hash` once after mount. A valid hand-off is shown and saved; if its `textHash` matches the saved checklist, the saved ticks are kept. The fragment is then removed with `history.replaceState`. Without a hand-off it shows the saved checklist or an empty state. An invalid hand-off shows an error and leaves storage alone. The layout sets `robots: noindex, nofollow`.
+PRD ref: `prd.md > Results Page`.
+
+### Results Hand-off (`lib/handoff.ts`)
+`encodeHandoff` / `decodeHandoff` / `resultsUrl`: UTF-8 JSON → base64url in `#data=`. Decoding is strict: base64url characters only, fatal UTF-8 decoding, and Zod validation of the whole payload (`AnalysisResultSchema` plus a 64-hex `textHash`). Anything else returns `null`.
+
+### Browser Extension (`extension/`)
+*Added with the learner's extension request.* Manifest V3 and strict TypeScript (`extension/tsconfig.json`, `types: ["chrome"]`). It is excluded from the web app's `tsconfig` and built separately.
+- **Popup** (`src/popup.html`, `src/popup.css`, `src/popup.ts`): the stamp-office tokens copied as CSS variables, and the views *start → review → done* with status and error lines. `popup.ts` is the only file that touches Chrome APIs.
+- **Extractor** (`src/extract.ts`): picks the largest of `main` / `article` / `[role=main]` (or `body` if under 200 characters). It walks the DOM, skipping noise tags (nav, aside, form, script, …), noise roles, page-level header/footer, `hidden` / `aria-hidden` / `display:none` / `checkVisibility()` false, and class/id words such as cookie, consent, ad(s), share, newsletter, sidebar, footer. Blocks become lines and list items get "- ". It is self-contained because Chrome injects it by source text; `doc` defaults to the page's `document`.
+- **API client** (`src/api.ts`): `isSupportedUrl`, `analyzeText` (shared `cleanText`, `POST /api/analyze`, the API's own error messages, a named-server network message, schema validation), and `buildHandoff` (shared `sha256Hex`).
+- **Build** (`scripts/build-extension.mjs`): esbuild IIFE bundle (`chrome120`, not minified so reviewers can read it, no `keepNames` so the injected function stays self-contained). `NEXTSTEP_URL` is injected via `define` (https required, except localhost). The manifest's single host permission is derived from it, and icons are rendered from `src/app/icon.svg`.
+- **Permissions:** `activeTab`, `scripting`, and the NextStep origin only. No background worker, no `tabs`, no `<all_urls>`.
+PRD ref: `prd.md > Browser Extension`.
+
 ## Data Model
 All shapes live in `lib/schemas.ts` (Zod). The TypeScript types are inferred from them.
 
@@ -226,6 +271,13 @@ ApiError = { error: { code: "too_short" | "too_long" | "invalid_request" | "anal
 | Uploaded file | Browser memory only, while being read | Each upload | Gone (never saved or sent; only its extracted text goes into the paste box) |
 | `textHash` | localStorage, with the saved result | Each successful analysis | Restored; used to skip a repeat AI call |
 
+```ts
+// Extension → /results hand-off, in the URL fragment #data=<base64url(JSON)>
+Handoff = { version: 1, textHash: string /* 64 hex, SHA-256 of cleaned text */, result: AnalysisResult,
+            source: { title: string, url: string } | null }
+```
+The page validates it, then stores it as an ordinary `SavedState`. The fragment itself is never sent to a server and is removed from the address bar.
+
 ### Input Limits
 - **Minimum 200 characters** (about two sentences): *"This looks too short to analyze. Paste the full document."*
 - **Maximum 20,000 characters** (about 5–6 pages / ~3,000 words): *"This document is too long. Paste the section with the requirements and deadlines."*
@@ -239,7 +291,7 @@ nextstep/
 ├── src/
 │   ├── app/
 │   │   ├── layout.tsx              # Archivo (wdth axis), metadata
-│   │   ├── page.tsx                # Page Shell: client state, load/save, wires components
+│   │   ├── page.tsx                # Page Shell: input, analysis, uploads; saved checklist via useSavedChecklist
 │   │   ├── globals.css             # Tailwind v4 + stamp-office tokens, form grid, stamp, perforation, ruled paste box
 │   │   └── api/
 │   │       └── analyze/
@@ -289,6 +341,31 @@ nextstep/
 └── devpost/                        # Devpost learning workspace (scope, prd, spec, checklist)
 ```
 
+### Added with the browser extension
+```
+nextstep/
+├── src/app/results/
+│   ├── page.tsx                    # Results Page: hand-off → validate → save → show
+│   └── layout.tsx                  # title + noindex
+├── src/components/site-header.tsx  # shared header (mark + name, links home)
+├── src/lib/
+│   ├── handoff.ts                  # encode/decode the extension → /results hand-off
+│   └── use-saved-checklist.ts      # shared restore/save/tick/clear hook (home + results)
+├── extension/
+│   ├── README.md                   # build, load in Chrome, test, permissions, limits
+│   ├── tsconfig.json               # strict, Chrome types
+│   ├── src/
+│   │   ├── popup.html, popup.css   # the popup (stamp-office tokens)
+│   │   ├── popup.ts                # Chrome APIs: tabs, scripting, open results
+│   │   ├── extract.ts              # main-text extractor (injected; self-contained)
+│   │   └── api.ts                  # supported pages, /api/analyze call, messages, hand-off
+│   └── dist/                       # build output (git-ignored); load this folder in Chrome
+├── scripts/build-extension.mjs     # esbuild + manifest + icons
+└── tests/
+    ├── handoff.test.ts, extension-extract.test.ts, extension-api.test.ts
+    └── page-results.test.tsx
+```
+
 ## External Services and Dependencies
 
 ### OpenAI (via `@langchain/openai`)
@@ -317,6 +394,11 @@ No other AI services. Hugging Face was considered as a second provider to save O
 - **The pdf.js worker fails to load under Turbopack** → verified first in slice 5. Fallback: use the legacy build or set `GlobalWorkerOptions.workerSrc` to the worker file shipped in `pdfjs-dist`, copied to `public/`.
 - **A big picture makes OCR slow** → a percentage progress message. Images over 5 MB are refused before reading.
 
+- **The extension is opened on a page Chrome won't let it read** (its own pages, the Web Store, the PDF viewer) → refused before injecting, or the injection error is caught; the message explains it and the button is disabled.
+- **A page keeps its content in a cross-origin iframe, canvas, or images** → the extractor finds little or no text; the "no readable text" message suggests the website's upload instead.
+- **The NextStep server isn't running or is unreachable** → the popup names the address it tried; the reviewed text stays for a retry.
+- **A results link is cut short or edited** → strict decoding and schema validation reject it; the saved checklist is untouched.
+
 ## What Was Simplified and Why
 - **Uploads are read in the browser and become editable text** instead of a server-side file pipeline. *(Revised in the build: upload was originally out of scope.)* There's no file storage, no upload size issues on the server, no tokens for reading, and the evidence check still runs against visible text.
 - **Scanned PDFs are not OCR'd**: the user uploads a photo or screenshot of the page instead. OCR on PDFs would need each page rendered to an image first.
@@ -325,6 +407,9 @@ No other AI services. Hugging Face was considered as a second provider to save O
 - **One LangChain chain with one model call** instead of multi-step or agent pipelines. The learner's original idea notes (kept outside this repo) asked for a simple chain. A second "verifier" model pass is unnecessary because evidence is checked with deterministic code.
 - **Exact-match excerpt search (after normalization)** instead of fuzzy matching. A strict check fits the promise that a quote must really be in the text. It may occasionally flag a near-quote as *Not found*, which errs on the side of honesty. Fuzzy matching could come later if that's too strict in practice.
 - **Run locally and record** instead of deploying. Deployment is deferred in the PRD and optional for the hackathon; Vercel is a one-step add later.
+
+- **The extension hands results over in the URL fragment** instead of a server-side results store or extension messaging. There's nothing new to secure or host, and it works with any deployment. A very large checklist makes a long URL; a typical one is a few kilobytes.
+- **One server per extension build** (`NEXTSTEP_URL`) instead of a settings page. The host permission stays exactly that one origin.
 
 ## Build Tooling (Agent Skills)
 Requested by the learner for `5-build`. Nothing is installed or run until the learner types `5-build`.

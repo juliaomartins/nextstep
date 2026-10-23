@@ -52,6 +52,7 @@ The learner approved these after the core loop was working. They come **after** 
 - **Every upload becomes text in the paste box first**, so the user can check or fix what was read before analyzing. Quotes are always verified against exactly that text, which protects the kernel.
 - **Download the checklist as Word or PDF**: generated in the browser.
 - **Efficient OpenAI token use**: OpenAI is used only for the one call that turns text into the checklist. Reading files, OCR, the evidence check, and downloads cost no tokens. Re-analyzing identical text reuses the saved result, and text is trimmed before sending.
+- **A Chrome extension** (learner decision, late in the build): on a web page with a posting or notice, *Analyze this page* reads the main text only after the user's click. The user reviews and edits it, and the same API and evidence check produce the checklist on a new `/results` page of the website. It brings the kernel to where people actually read postings, with no copy-paste.
 
 ## Later
 - Editing task titles *(from the learner's original idea notes (kept outside this repo); deferred to keep the first loop small. Bring it back if you want it in now)*.

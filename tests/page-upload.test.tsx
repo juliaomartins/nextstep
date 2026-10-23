@@ -26,14 +26,15 @@ function fixtureFile(name: string, type: string) {
 const box = () => screen.getByLabelText("Document text") as HTMLTextAreaElement;
 
 describe("uploading a file", () => {
-  test("a Word file fills the paste box with its text and a source note, without calling the API", async () => {
+  // The first import("mammoth") can take several seconds in a busy parallel run, beyond Vitest's 5 s default.
+  test("a Word file fills the paste box with its text and a source note, without calling the API", { timeout: 20_000 }, async () => {
     const fetchMock = stubApi(async () => Response.json({}));
     render(<Home />);
     await userEvent.upload(screen.getByLabelText("Upload a file"), fixtureFile("sample.docx", DOCX_TYPE));
 
     // The first dynamic import("mammoth") can be slow in a busy parallel test run.
     expect(
-      await screen.findByText(/Text from sample\.docx\. Check it before making your checklist\./, {}, { timeout: 5000 }),
+      await screen.findByText(/Text from sample\.docx\. Check it before making your checklist\./, {}, { timeout: 15_000 }),
     ).toBeTruthy();
     expect(box().value).toContain("A valid right to work in the country is required");
     expect(fetchMock).not.toHaveBeenCalled();

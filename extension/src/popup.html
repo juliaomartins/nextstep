@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NextStep</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header class="bar">
+      <svg class="mark" viewBox="0 0 64 64" aria-hidden="true">
+        <rect width="64" height="64" rx="12" fill="var(--ink)" />
+        <g transform="rotate(-8 32 32)">
+          <rect x="12" y="15" width="40" height="34" rx="4" fill="none" stroke="var(--highlight)" stroke-width="4.5" />
+          <path d="M21 32.5 28.5 40 43 24" fill="none" stroke="var(--highlight)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" />
+        </g>
+      </svg>
+      <span class="brand">NextStep</span>
+    </header>
+
+    <main>
+      <p class="page" id="page"><span class="page-title" id="page-title">This page</span><span class="page-host" id="page-host"></span></p>
+
+      <!-- 1. Start: nothing is read until the button is pressed. -->
+      <section id="view-start">
+        <h1>Turn this page into a checklist</h1>
+        <p class="muted">NextStep reads the main text of the page you're on. You check it before anything is sent.</p>
+        <button type="button" class="primary" id="analyze-page">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 8h8M7 12h10M7 16h6" /></svg>
+          Analyze this page
+        </button>
+      </section>
+
+      <!-- 2. Review: the user can edit or trim the text before sending it. -->
+      <section id="view-review" hidden>
+        <h1>Check the text</h1>
+        <p class="muted">Remove anything private or unrelated. Nothing is sent until you press the button.</p>
+        <label class="sr-only" for="text">Text from this page</label>
+        <textarea id="text" spellcheck="false"></textarea>
+        <p class="count" id="count" aria-live="polite"></p>
+        <p class="muted small">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
+          The text is sent to your NextStep server, which asks OpenAI to make the checklist. NextStep doesn't store it.
+        </p>
+        <div class="actions">
+          <button type="button" class="secondary" id="cancel">Start over</button>
+          <button type="button" class="primary" id="make-checklist">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 6 2 2 4-4M3 16l2 2 4-4M13 6h8M13 12h8M13 18h8" /></svg>
+            Make my checklist
+          </button>
+        </div>
+      </section>
+
+      <!-- 3. Done: the checklist opened in a new tab. -->
+      <section id="view-done" hidden>
+        <p class="stamp">Opened</p>
+        <p>Your checklist is open in a new tab, with every step stamped against the page's own words.</p>
+      </section>
+
+      <p class="status" id="status" role="status" hidden></p>
+      <p class="error" id="error" role="alert" hidden></p>
+    </main>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
