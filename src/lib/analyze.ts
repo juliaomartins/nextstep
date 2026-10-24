@@ -25,13 +25,15 @@ export async function analyzeDocument(text: string): Promise<AnalysisOutput> {
   );
   const { raw, parsed } = await chain.invoke({ document: text });
 
-  // Token visibility for the learner: counts only, never the document.
-  const usage = (raw as AIMessage).usage_metadata;
-  if (usage) {
-    console.info(
-      `[analyze] ${modelName} tokens: ${usage.input_tokens} in + ${usage.output_tokens} out = ${usage.total_tokens}`,
-    );
-  }
+  // Proof of each real OpenAI call: the model OpenAI says it served (not just our setting), its response id,
+  // and the tokens it billed. Counts and ids only, never the document.
+  const message = raw as AIMessage;
+  const usage = message.usage_metadata;
+  const served = (message.response_metadata?.model_name as string | undefined) ?? "unknown";
+  console.info(
+    `[analyze] requested ${modelName} · OpenAI served ${served} · response ${message.id ?? "unknown"} · tokens ` +
+      (usage ? `${usage.input_tokens} in + ${usage.output_tokens} out = ${usage.total_tokens}` : "not reported"),
+  );
 
   // Belt and braces: the structured-output parser already validates, but the UI must never see a malformed shape.
   return AnalysisSchema.parse(parsed);
