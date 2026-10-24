@@ -45,3 +45,6 @@ next-env.d.ts
 
 # Chrome Web Store upload packages (npm run pack:extension)
 /extension/*.zip
+
+# Extension download generated during deploy builds (scripts/prebuild.mjs)
+/public/downloads/

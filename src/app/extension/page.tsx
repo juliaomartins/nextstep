@@ -1,6 +1,8 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ClipboardCheck, LockKeyhole, MousePointerClick, PanelTop, ScanText, ShieldCheck } from "lucide-react";
+import { ClipboardCheck, Download, LockKeyhole, MousePointerClick, PanelTop, ScanText, ShieldCheck } from "lucide-react";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 
@@ -11,6 +13,19 @@ export const metadata: Metadata = {
 };
 
 const STORE_URL = process.env.NEXT_PUBLIC_EXTENSION_URL;
+
+// Built by scripts/prebuild.mjs during a deploy (for the site's own public address). Checked when the
+// page is rendered at build time, so a local build without a public address simply shows no download.
+const DOWNLOAD_HREF = "/downloads/nextstep-extension.zip";
+const hasDownload = () => existsSync(join(process.cwd(), "public", "downloads", "nextstep-extension.zip"));
+
+const INSTALL_STEPS = [
+  "Download the zip and unzip it (right-click → Extract All).",
+  "In Chrome, open chrome://extensions.",
+  "Turn on Developer mode (top right).",
+  "Click Load unpacked and choose the unzipped folder.",
+  "Pin NextStep from the puzzle-piece menu, then open any job posting and click it.",
+];
 
 const STEPS = [
   { Icon: MousePointerClick, title: "Click the NextStep icon", body: "On any job posting or notice, then press Analyze this page." },
@@ -61,6 +76,45 @@ export default function ExtensionPage() {
             </Link>
           </div>
         </section>
+
+        {hasDownload() && (
+          <section aria-labelledby="download-heading" className="border-2 border-ink bg-sheet p-5 shadow-[6px_6px_0_0_var(--ink)] sm:p-7">
+            <h2 id="download-heading" className="condensed flex items-center gap-2 text-3xl font-extrabold text-ink">
+              <Download className="size-6 text-ballpoint" aria-hidden />
+              Install it now
+            </h2>
+            <p className="mt-2 text-ink-soft">
+              {STORE_URL
+                ? "Prefer a manual install? Download it and add it yourself:"
+                : "While the Chrome Web Store listing is in review, you can install it yourself in a minute:"}
+            </p>
+            <a
+              href={DOWNLOAD_HREF}
+              download
+              className="press mt-5 inline-flex h-12 items-center gap-2 border-2 border-ink bg-ballpoint px-5 font-bold text-white shadow-[4px_4px_0_0_var(--ink)] hover:bg-ballpoint-deep focus-visible:ring-4 focus-visible:ring-ring/40 focus-visible:outline-none"
+            >
+              <Download className="size-5" aria-hidden />
+              Download for Chrome (.zip)
+            </a>
+            <ol className="mt-6 space-y-2">
+              {INSTALL_STEPS.map((step, i) => (
+                <li key={step} className="flex gap-3 text-ink-soft">
+                  <span
+                    aria-hidden
+                    className="condensed flex size-7 shrink-0 items-center justify-center border-2 border-ink text-sm font-black text-ink"
+                  >
+                    {i + 1}
+                  </span>
+                  <span className="pt-0.5">{step}</span>
+                </li>
+              ))}
+            </ol>
+            <p className="mt-4 text-sm text-muted-ink">
+              Chrome may remind you that a Developer-mode extension is on. That&apos;s normal for extensions installed
+              this way.
+            </p>
+          </section>
+        )}
 
         <section aria-labelledby="how-heading" className="border-2 border-ink bg-sheet">
           <h2 id="how-heading" className="condensed border-b-2 border-ink px-5 py-2.5 text-sm font-bold tracking-wide text-ink uppercase">

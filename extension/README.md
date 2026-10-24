@@ -77,6 +77,10 @@ npm run typecheck:extension   # strict TypeScript, with Chrome's types
 npm test                      # includes tests/extension-*.test.ts and tests/page-results.test.tsx
 ```
 
+## Download it from your deployed site
+
+Every deploy builds the extension for that site and publishes it at `/downloads/nextstep-extension.zip`, offered on the site's `/extension` page with install steps (unzip → `chrome://extensions` → Developer mode → *Load unpacked*). To build the same zip locally: `NEXTSTEP_URL=https://your-site npm run pack:extension -- --public`.
+
 ## Publish to the Chrome Web Store
 
 `NEXTSTEP_URL=https://your-site npm run pack:extension` builds the upload zip for your public site. The listing text, permission justifications, data-usage answers, and step-by-step publishing guide are in [`STORE.md`](STORE.md). The website links "Add to Chrome" to the listing once `NEXT_PUBLIC_EXTENSION_URL` is set.

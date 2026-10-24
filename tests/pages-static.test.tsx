@@ -1,4 +1,6 @@
 // @vitest-environment jsdom
+import { mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test } from "vitest";
 import ExtensionPage from "@/app/extension/page";
@@ -29,5 +31,30 @@ describe("/privacy", () => {
       expect(screen.getByRole("heading", { name: heading })).toBeTruthy();
     }
     expect(screen.getByText(/only after you click Analyze this page/)).toBeTruthy();
+  });
+});
+
+describe("/extension download", () => {
+  const zipDir = join(process.cwd(), "public", "downloads");
+  const zipPath = join(zipDir, "nextstep-extension.zip");
+
+  test("offers the download and the install steps when the build produced the zip", () => {
+    mkdirSync(zipDir, { recursive: true });
+    writeFileSync(zipPath, "test");
+    try {
+      render(<ExtensionPage />);
+      expect(screen.getByRole("link", { name: /Download for Chrome/ }).getAttribute("href")).toBe(
+        "/downloads/nextstep-extension.zip",
+      );
+      expect(screen.getByText(/Load unpacked/)).toBeTruthy();
+    } finally {
+      rmSync(zipPath, { force: true });
+    }
+  });
+
+  test("doesn't show a download link when there is no zip (e.g. a local build)", () => {
+    rmSync(zipPath, { force: true });
+    render(<ExtensionPage />);
+    expect(screen.queryByRole("link", { name: /Download for Chrome/ })).toBeNull();
   });
 });

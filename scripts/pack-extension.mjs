@@ -3,7 +3,7 @@
 // Usage (PowerShell):  $env:NEXTSTEP_URL="https://your-site.vercel.app"; npm run pack:extension
 // Usage (Git Bash):    NEXTSTEP_URL=https://your-site.vercel.app npm run pack:extension
 import { execFileSync } from "node:child_process";
-import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { copyFileSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import JSZip from "jszip";
@@ -36,3 +36,11 @@ const out = join(root, "extension", `nextstep-extension-${version}.zip`);
 writeFileSync(out, await zip.generateAsync({ type: "nodebuffer", compression: "DEFLATE" }));
 console.log(`\nStore package: ${relative(root, out)} (for ${new URL(site).origin})`);
 console.log("Next: upload it in the Chrome Web Store Developer Dashboard. See extension/STORE.md.");
+
+// --public: also publish it on the website as /downloads/nextstep-extension.zip (used by the deploy build).
+if (process.argv.includes("--public")) {
+  const downloads = join(root, "public", "downloads");
+  mkdirSync(downloads, { recursive: true });
+  copyFileSync(out, join(downloads, "nextstep-extension.zip"));
+  console.log("Download copy: public/downloads/nextstep-extension.zip");
+}

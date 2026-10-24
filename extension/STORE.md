@@ -8,6 +8,8 @@ Everything Google asks for, ready to paste. A few steps need **you** (the accoun
 2. **Check the site works there**: the sample analysis, `/results`, `/privacy`, and `/extension`.
 3. **Protect your OpenAI budget**: set a monthly limit in your OpenAI account. A public extension means public traffic.
 
+> **Shortcut:** after any deploy, the exact same package is already on your site at `https://YOUR-SITE/downloads/nextstep-extension.zip`. You can upload that file directly.
+
 ## Build the upload package
 
 PowerShell:

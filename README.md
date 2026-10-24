@@ -48,6 +48,21 @@ Open **http://localhost:3000**. Use `localhost` rather than your network address
 | `OPENAI_API_KEY` | yes | Your OpenAI key. Read only on the server, never sent to the browser. |
 | `OPENAI_MODEL` | no | A model that supports structured output, for example `gpt-4o-mini`. Defaults to `gpt-4.1-mini`. |
 
+## Deploy (Vercel)
+
+1. On [vercel.com](https://vercel.com), choose **Add New… → Project** and import this repository (Next.js defaults are fine).
+2. Add the environment variables `OPENAI_API_KEY` and `OPENAI_MODEL` (for example `gpt-4o-mini`), then **Deploy**.
+3. Set a monthly budget limit in your OpenAI account: a public site means public traffic.
+
+**The Chrome extension is built automatically on every deploy.** Before `next build`, `scripts/prebuild.mjs` packs the extension for the site's own production address (Vercel's `VERCEL_PROJECT_PRODUCTION_URL`, or `NEXTSTEP_URL` if you set it) and publishes it at `/downloads/nextstep-extension.zip`. The `/extension` page then shows **Download for Chrome** with install steps. If packing ever fails, the site still deploys, just without the download. Locally, with no public address, the step is skipped.
+
+Optional variables:
+
+| Variable | Meaning |
+|---|---|
+| `NEXTSTEP_URL` | The public `https://` address the extension should use, if it isn't Vercel's production domain (for example a custom domain). |
+| `NEXT_PUBLIC_EXTENSION_URL` | Your Chrome Web Store listing, once approved. "Add to Chrome" buttons then go straight to it. |
+
 ## Tests and checks
 
 ```bash

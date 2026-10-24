@@ -11,7 +11,8 @@
     "postinstall": "node scripts/copy-pdf-worker.mjs",
     "build:extension": "node scripts/build-extension.mjs",
     "typecheck:extension": "tsc -p extension/tsconfig.json",
-    "pack:extension": "node scripts/pack-extension.mjs"
+    "pack:extension": "node scripts/pack-extension.mjs",
+    "prebuild": "node scripts/prebuild.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
