@@ -77,6 +77,20 @@ save result + ticks + a hash of the text in localStorage
 
 OpenAI is used for exactly one thing: turning text into the checklist. Reading files and pictures, checking quotes, and making downloads use no tokens. With `gpt-4o-mini`, one analysis of a typical job posting uses roughly **1,300–1,700 tokens**. The server logs the real count of each call (`[analyze] … tokens: … in + … out`). Whitespace is trimmed before sending, and identical text reuses the saved result instead of calling the AI again.
 
+## Responsible AI
+
+NextStep is built so the AI can't be talked into misleading anyone. Each safeguard below is enforced in code and tested, not only requested in the prompt:
+
+- **Nothing invented.** Every step must quote the document. Quotes that can't be found are stamped *Not found* and moved to *Needs your check*. Deadlines and dates appear only if the document contains them.
+- **Hidden instructions are ignored.** Text inside a document that tries to command an AI ("ignore previous instructions", "note to the AI", "say the deadline is…", "write a poem") is detected. Nothing quoted from it counts as evidence, and the user sees a warning that such text can be a sign of a scam, on screen and in the downloads.
+- **Off-task output is blocked.** NextStep only describes documents. A summary shaped like a poem, an essay, or a list is replaced, and questions or creative requests produce no steps.
+- **No secrets to leak.** The OpenAI key lives only on the server and is never part of what the AI sees, so no prompt can extract it.
+- **Requests for passwords, PINs, or bank details** are never presented as normal requirements; they're flagged with "Be careful:".
+- **The person stays in charge.** Uploads and web pages become editable text that you review before anything is sent. Every step links to its source, and NextStep reminds you it is a reading aid, not legal, financial, or official advice.
+- **Private by default.** No account, no tracking, and your document isn't stored. Progress stays in your browser.
+
+These were tested with real attacks against the live model: secret-key extraction, off-topic questions, a "write a poem" injection, and a fake job posting hiding a fake deadline and a phishing request. See `tests/verify-evidence.test.ts` and `devpost/checklist.md > Revisions`.
+
 ## Privacy
 
 - Uploaded files are read in your browser and never uploaded. For pictures, Tesseract downloads its English language model from a public CDN (jsDelivr) the first time; the picture itself stays on your device. Only the text you choose to analyze is sent to OpenAI. NextStep does not store your document.

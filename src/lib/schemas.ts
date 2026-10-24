@@ -49,6 +49,13 @@ export const ResultItemSchema = AnalysisItemSchema.extend({
 
 export const AnalysisResultSchema = AnalysisSchema.extend({
   items: z.array(ResultItemSchema),
+  // Set by the evidence check. Optional so checklists saved before it existed still load.
+  safety: z
+    .object({
+      aiInstructions: z.boolean(), // the text contained instructions aimed at an AI; they were ignored
+      summaryReplaced: z.boolean(), // the model's summary was off-task (a poem, an essay) and was replaced
+    })
+    .optional(),
 });
 
 export type Group = z.infer<typeof GroupSchema>;

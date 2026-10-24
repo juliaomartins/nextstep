@@ -19,6 +19,9 @@ export function createDocx(model: ExportModel): Document {
 
     new Paragraph({ heading: HeadingLevel.HEADING_2, children: [run("In short", { bold: true, size: 26 })] }),
     new Paragraph({ spacing: { after: 240 }, children: [run(model.summary)] }),
+    ...(model.warning
+      ? [new Paragraph({ spacing: { after: 240 }, children: [run(model.warning, { bold: true, color: RED })] })]
+      : []),
 
     new Paragraph({ heading: HeadingLevel.HEADING_2, children: [run("Deadline", { bold: true, size: 26 })] }),
     new Paragraph({

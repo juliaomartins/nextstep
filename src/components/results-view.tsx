@@ -1,7 +1,8 @@
 "use client";
 
 import { forwardRef, useRef } from "react";
-import { ClipboardCheck, HardDriveDownload, Info, Trash2 } from "lucide-react";
+import { ClipboardCheck, HardDriveDownload, Info, ShieldAlert, Trash2 } from "lucide-react";
+import { AI_INSTRUCTIONS_WARNING } from "@/lib/export-model";
 import { gsap, MOTION_OK, thump, useGSAP } from "@/lib/motion";
 import type { AnalysisResult } from "@/lib/schemas";
 import { Checklist } from "./checklist";
@@ -102,6 +103,16 @@ export const ResultsView = forwardRef<HTMLElement, Props>(function ResultsView(
           </p>
         )}
 
+        {result.safety?.aiInstructions && (
+          <p
+            data-reveal
+            role="alert"
+            className="flex items-start gap-2 border-2 border-stamp-red bg-stamp-red-bg px-4 py-3 text-sm font-semibold text-stamp-red"
+          >
+            <ShieldAlert className="mt-0.5 size-5 shrink-0" aria-hidden />
+            <span>{AI_INSTRUCTIONS_WARNING}</span>
+          </p>
+        )}
         <SummaryCard summary={result.summary} />
         <DeadlineBanner deadline={result.deadline} />
         {total > 0 ? (

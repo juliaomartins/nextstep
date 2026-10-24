@@ -156,3 +156,20 @@ describe("createPdf", () => {
     expect(text).toContain("Step number 40 of the long list");
   });
 });
+
+describe("exports carry the AI-instructions warning", () => {
+  const flagged: AnalysisResult = { ...RESULT, safety: { aiInstructions: true, summaryReplaced: false } };
+
+  test("the model includes the warning only when the text had instructions aimed at AI tools", () => {
+    expect(buildExportModel(flagged, DONE, MADE_AT).warning).toMatch(/instructions aimed at AI tools/);
+    expect(buildExportModel(RESULT, DONE, MADE_AT).warning).toBeNull();
+  });
+
+  test("the PDF and Word files show it", async () => {
+    const model = buildExportModel(flagged, DONE, MADE_AT);
+    const { text } = await pdfText(createPdf(model, jsPDF).output("arraybuffer"));
+    expect(text).toContain("instructions aimed at AI tools");
+    const zip = await JSZip.loadAsync(await Packer.toBuffer(createDocx(model)));
+    expect(await zip.file("word/document.xml")!.async("string")).toContain("instructions aimed at AI tools");
+  });
+});

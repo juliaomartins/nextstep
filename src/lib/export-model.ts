@@ -1,5 +1,9 @@
 import type { AnalysisResult, Deadline, Group } from "./schemas";
 
+/** Shown on screen and in downloads when the text tried to give instructions to AI tools. */
+export const AI_INSTRUCTIONS_WARNING =
+  "This text contains instructions aimed at AI tools (for example, “ignore previous instructions”). NextStep ignored them, and anything quoted from them is marked Not found. Check the original document carefully: hidden instructions can be a sign of a scam.";
+
 /** Everything a downloaded checklist contains, shared by the Word and PDF exporters so both say the same thing. */
 export type ExportModel = {
   title: string;
@@ -13,6 +17,8 @@ export type ExportModel = {
     items: { done: boolean; title: string; deadline: string | null; quote: string; evidence: string; why: string }[];
   }[];
   reminder: string;
+  /** Set when the text contained instructions aimed at AI tools (prompt injection). */
+  warning: string | null;
 };
 
 const GROUPS: { group: Group; label: string }[] = [
@@ -45,6 +51,7 @@ export function buildExportModel(result: AnalysisResult, completedIds: Set<strin
     title: "NextStep checklist",
     madeOn: longDate(madeAt),
     summary: result.summary,
+    warning: result.safety?.aiInstructions ? AI_INSTRUCTIONS_WARNING : null,
     deadline: describeDeadline(result.deadline),
     groups: GROUPS.map(({ group, label }) => {
       const items = result.items

@@ -67,6 +67,11 @@ export function createPdf(model: ExportModel, PdfClass: typeof JsPdf): JsPdf {
   y += 16;
   font("normal", 11.5);
   paragraph(model.summary, MARGIN, contentWidth, 16);
+  if (model.warning) {
+    y += 6;
+    font("bold", 10, RED);
+    paragraph(model.warning, MARGIN, contentWidth, 14);
+  }
   y += 10;
 
   // Deadline box, sized to its (possibly long, quoted) label.

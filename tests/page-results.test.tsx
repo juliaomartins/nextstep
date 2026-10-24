@@ -89,3 +89,19 @@ describe("/results", () => {
     expect(screen.getByRole("link", { name: "Make a checklist" }).getAttribute("href")).toBe("/");
   });
 });
+
+describe("/results safety warning", () => {
+  test("warns when the text contained instructions aimed at AI tools", async () => {
+    const flagged: Handoff = { ...HANDOFF, result: { ...HANDOFF.result, safety: { aiInstructions: true, summaryReplaced: false } } };
+    at(`/results#data=${encodeHandoff(flagged)}`);
+    render(<ResultsPage />);
+    expect((await screen.findByText(/contains instructions aimed at AI tools/)).textContent).toMatch(/NextStep ignored them/);
+  });
+
+  test("shows no warning for an ordinary document", async () => {
+    at(`/results#data=${encodeHandoff(HANDOFF)}`);
+    render(<ResultsPage />);
+    await screen.findByRole("heading", { name: "Your checklist" });
+    expect(screen.queryByText(/instructions aimed at AI tools/)).toBeNull();
+  });
+});

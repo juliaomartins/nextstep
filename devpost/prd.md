@@ -175,6 +175,9 @@ Source: `scope.md > Added during the build (learner decision)`.
 - **New analysis while a result is saved:** the new result **replaces** the old one (only one checklist at a time).
 - **Return visit:** the saved result and ticks reappear. The paste area is empty because the document isn't stored.
 - **Trust boundary:** results are a reading aid, not legal, financial, or official advice. The footer reminds users to check important details against the original.
+- **Text that tries to instruct the AI (prompt injection):** it is ignored. Nothing quoted from it counts as evidence (stamped *Not found*), dates in it are never shown as a deadline, and a red warning says *"This text contains instructions aimed at AI tools… hidden instructions can be a sign of a scam."* The warning also appears in the Word and PDF downloads.
+- **Off-task text** (questions to an assistant, requests for poems or essays): no steps, and a one-sentence description of what the text is. An off-task summary is replaced with *"NextStep couldn't write a reliable summary of this text…"*
+- **Requests for passwords, PINs, bank details, or payment:** never shown as a normal requirement; listed under *Needs your check* as "Be careful: …".
 
 ## Product Decisions
 - **Upload, OCR, and download added during the build** (learner decision, after the core loop worked). Every upload becomes visible, editable text first, so evidence is always checked against what the user can see.
