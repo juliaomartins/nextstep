@@ -91,9 +91,9 @@ Build mode: fast
 
 ## Hands-on Checkpoints
 
-- [ ] Early usable behavior explored — after slice 2 (look, grouping, and motion feedback while it can still shape slices 3–4). *Partly done: the learner tested pasting (reported the grey button, now investigated) and asked for the bolder redesign; their visual check of the redesign is still pending and moves to the next checkpoint.*
-- [ ] Uploads explored — after slice 6 (real PDF, Word, and photo; OCR quality feedback before downloads are built)
-- [ ] Final kick-the-tires exploration and feedback completed
+- [x] Early usable behavior explored — after slice 2. The learner used the app and gave feedback that shaped everything after it: reported the grey *Make my checklist* button (fixed: `crypto.subtle` on a non-secure address), asked for a bolder look, then sent full-page screenshots of the result with a real document and judged it "AI slop" (→ the stamp-office redesign), spotted the header logo not matching the new icon (fixed), and asked for icons on every interaction (added).
+- [ ] Uploads explored — after slice 6 (real PDF, Word, and photo; OCR quality feedback before downloads are built). *Not yet done by the learner: they moved straight on to the redesign, downloads, and the extension. Uploads were verified mechanically (real PDF, Word, and OCR fixtures through the real API). Folded into the final kick-the-tires: the learner tries one real upload there.*
+- [ ] Final kick-the-tires exploration and feedback completed. *In progress: the learner has used the extension on real SEEK pages (feedback → link-heavy menus now skipped; "couldn't reach NextStep" → server not running, deploy guidance) and asked for misuse protection (→ prompt-injection hardening). Waiting for their final pass, including one real upload, and their confirmation.*
 
 ## Final Review
 
@@ -103,13 +103,13 @@ Build mode: fast
 
 - [ ] Learning activity complete — guided route, focused alternative, prior practice connected, or brief recap
 - [ ] Optional edit and transfer reflection addressed — offered/declined/already covered/not applicable as appropriate
-- [ ] `devpost/app-map.html` generated from finished code, checked, and shown, including a project-grounded practice to reuse
+- [x] `devpost/app-map.html` generated from finished code, checked, and shown, including a project-grounded practice to reuse
 
-Activity and evidence: 
-Route and stops: 
-Edit outcome: 
-Reflection: 
-Activity mode: 
+Activity and evidence: pending (offered to the learner on 25 Oct: a focused 3-minute look at how the prompt-injection probe exposed two holes and which tests now lock the fix).
+Route and stops: map route (reference, not yet toured): `src/components/input-panel.tsx` → `src/app/page.tsx` `analyze` → `src/app/api/analyze/route.ts` `POST` → `src/lib/analyze.ts` `analyzeDocument` → `src/lib/verify-evidence.ts` `verifyEvidence` / `isFoundIn` / `isAiInstruction`.
+Edit outcome: not yet offered.
+Reflection: not yet offered.
+Activity mode: pending. Map checked: snippet matches source exactly; no scripts or external URLs; renders with JavaScript off and offline; no horizontal scroll at 375 px; generated from commit e1897ce.
 
 ## Revisions
 
