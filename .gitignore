@@ -39,3 +39,6 @@ next-env.d.ts
 
 # Built Chrome extension (npm run build:extension)
 /extension/dist/
+
+# Packed extension (Chrome "Pack extension"); its .pem private key is already ignored by *.pem
+/extension/*.crx

@@ -53,19 +53,20 @@ afterEach(() => {
 });
 
 describe("downloading the checklist", () => {
-  test("Download as Word saves a dated .docx", async () => {
+  // The first import("docx") / import("jspdf") can take seconds in a busy parallel run (beyond waitFor's 1 s default).
+  test("Download as Word saves a dated .docx", { timeout: 20_000 }, async () => {
     render(<Home />);
     await userEvent.click(await screen.findByRole("button", { name: "Download as Word" }));
-    await waitFor(() => expect(downloads).toHaveLength(1));
+    await waitFor(() => expect(downloads).toHaveLength(1), { timeout: 15_000 });
     expect(downloads[0].name).toBe("nextstep-checklist-2026-10-23.docx");
     expect(downloads[0].blob.size).toBeGreaterThan(1000);
-    expect(await screen.findByText("Saved nextstep-checklist-2026-10-23.docx")).toBeTruthy();
+    expect(await screen.findByText("Saved nextstep-checklist-2026-10-23.docx", {}, { timeout: 10_000 })).toBeTruthy();
   });
 
-  test("Download as PDF saves a dated .pdf", async () => {
+  test("Download as PDF saves a dated .pdf", { timeout: 20_000 }, async () => {
     render(<Home />);
     await userEvent.click(await screen.findByRole("button", { name: "Download as PDF" }));
-    await waitFor(() => expect(downloads).toHaveLength(1));
+    await waitFor(() => expect(downloads).toHaveLength(1), { timeout: 15_000 });
     expect(downloads[0].name).toBe("nextstep-checklist-2026-10-23.pdf");
     const head = new TextDecoder().decode(await downloads[0].blob.slice(0, 5).arrayBuffer());
     expect(head).toBe("%PDF-");
