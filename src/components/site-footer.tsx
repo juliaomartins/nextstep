@@ -1,4 +1,5 @@
-import { FileLock2, LockKeyhole, Scale } from "lucide-react";
+import Link from "next/link";
+import { FileLock2, LockKeyhole, PanelTop, Scale } from "lucide-react";
 import { LogoMark } from "./logo-mark";
 
 export function SiteFooter() {
@@ -11,6 +12,16 @@ export function SiteFooter() {
             <span className="condensed text-3xl font-black text-ink uppercase">NextStep</span>
           </p>
           <p className="mt-2 text-ink-soft">From confusing documents to clear next steps.</p>
+          <nav aria-label="More" className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">
+            <Link href="/extension" className="inline-flex items-center gap-1.5 text-ballpoint underline-offset-4 hover:underline">
+              <PanelTop className="size-4" aria-hidden />
+              Chrome extension
+            </Link>
+            <Link href="/privacy" className="inline-flex items-center gap-1.5 text-ballpoint underline-offset-4 hover:underline">
+              <LockKeyhole className="size-4" aria-hidden />
+              Privacy policy
+            </Link>
+          </nav>
         </div>
         <ul className="space-y-3 text-sm leading-relaxed text-ink-soft">
           <li className="flex gap-2.5">

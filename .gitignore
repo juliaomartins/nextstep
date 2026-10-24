@@ -42,3 +42,6 @@ next-env.d.ts
 
 # Packed extension (Chrome "Pack extension"); its .pem private key is already ignored by *.pem
 /extension/*.crx
+
+# Chrome Web Store upload packages (npm run pack:extension)
+/extension/*.zip

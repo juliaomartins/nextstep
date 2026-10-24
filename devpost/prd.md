@@ -154,6 +154,17 @@ Source: `scope.md > Added during the build (learner decision)`.
 - [ ] The same page analyzed again keeps the ticks already saved for it.
 - [ ] A broken or tampered link shows *"This link doesn't contain a valid checklist."* and leaves the saved checklist alone.
 
+### Extension Recommendation
+- On a **first visit in a desktop Chromium browser** (Chrome, Edge, Brave), a slim band under the header offers **Add to Chrome** (the Chrome Web Store listing once published, otherwise the `/extension` page) or **Use it here** (scrolls to the paste box). A close button dismisses it. Any choice is remembered in this browser, so it appears once.
+- It never shows on phones or in browsers that can't install Chrome extensions; those visitors just use the website.
+- [ ] A first visit in desktop Chrome shows the band. After *Use it here*, *Add to Chrome*, or closing it, a reload doesn't show it again.
+- [ ] Firefox and Chrome on Android never show it.
+
+### Extension and Privacy Pages
+- `/extension`: what the extension does in three steps, what it can access and why, and an *Add to Chrome* button once the store listing exists (until then, "Coming to the Chrome Web Store").
+- `/privacy`: the privacy policy for the website and the extension (required by the Chrome Web Store): what is handled, where it goes, what stays on the device, and what NextStep never does.
+- Both are linked from the footer.
+
 ## States and Boundaries
 - **Unsupported file type:** *"NextStep can read PDF, Word (.docx), and pictures (PNG, JPG, WebP). Try one of those, or paste the text."*
 - **File too large (over 5 MB):** *"This file is too large (over 5 MB). Try a smaller file, or paste the relevant section."*

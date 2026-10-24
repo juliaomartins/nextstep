@@ -61,6 +61,26 @@ describe("extractMainText", () => {
     expect(text).toBe("Course requirements: a laptop and a student ID.");
   });
 
+  test("drops link-heavy lists and blocks (site menus outside <nav>), but keeps prose that contains links", () => {
+    page(`
+      <main>
+        <h1>Payroll Officer</h1>
+        <p>You must have two years of payroll experience. Read our <a href="/faq">application FAQ</a> before you apply.</p>
+        <div class="browse">
+          <h2>Jobs by city</h2>
+          <ul><li><a href="/a">Hobart</a></li><li><a href="/b">Darwin</a></li><li><a href="/c">Canberra</a></li></ul>
+        </div>
+        <ul><li><a href="/d">All Jobs</a></li><li><a href="/e">FIFO Jobs</a></li><li><a href="/f">Salary Calculator</a></li></ul>
+        <p>Please submit a cover letter and two references.</p>
+      </main>`);
+    const text = extractMainText(document);
+    expect(text).toContain("You must have two years of payroll experience. Read our application FAQ before you apply.");
+    expect(text).toContain("Please submit a cover letter and two references.");
+    for (const menu of ["Hobart", "Darwin", "Canberra", "All Jobs", "FIFO Jobs", "Salary Calculator"]) {
+      expect(text).not.toContain(menu);
+    }
+  });
+
   test("returns an empty string for a page without readable text", () => {
     page(`<nav>Menu</nav><img src="x.png" alt="" /><script>1</script>`);
     expect(extractMainText(document)).toBe("");

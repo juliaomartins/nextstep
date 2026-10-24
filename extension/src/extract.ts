@@ -48,6 +48,17 @@ export function extractMainText(doc: Document = document): string {
 
   const textLength = (el: Element | null) => (el?.textContent ?? "").replace(/\s+/g, " ").trim().length;
 
+  // Site menus often hide in plain lists (city lists, "All jobs", "Salary calculator"): a block whose
+  // text is mostly link text is navigation, not content. Prose that merely contains a link is kept.
+  const LINK_DENSITY_TAGS = new Set(["UL", "OL", "DL", "DIV", "SECTION", "TABLE", "TBODY", "TR", "P"]);
+  const isLinkHeavy = (el: Element): boolean => {
+    if (!LINK_DENSITY_TAGS.has(el.tagName)) return false;
+    const total = textLength(el);
+    if (total === 0) return false;
+    const linked = Array.from(el.querySelectorAll("a")).reduce((sum, a) => sum + textLength(a), 0);
+    return linked / total >= 0.7;
+  };
+
   // The largest main-content candidate wins; tiny or missing ones fall back to the whole body.
   const candidates = Array.from(doc.querySelectorAll("main, article, [role='main']"));
   const best = candidates.sort((a, b) => textLength(b) - textLength(a))[0] ?? null;
@@ -63,7 +74,7 @@ export function extractMainText(doc: Document = document): string {
     }
     if (node.nodeType !== ELEMENT) return;
     const el = node as Element;
-    if (el !== root && (isNoise(el) || !isVisible(el))) return;
+    if (el !== root && (isNoise(el) || isLinkHeavy(el) || !isVisible(el))) return;
     if (el.tagName === "BR") {
       parts.push("\n");
       return;

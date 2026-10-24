@@ -212,13 +212,24 @@ The NextStep mark and name (linking home) and "No account needed". Shared by bot
 Reads `window.location.hash` once after mount. A valid hand-off is shown and saved; if its `textHash` matches the saved checklist, the saved ticks are kept. The fragment is then removed with `history.replaceState`. Without a hand-off it shows the saved checklist or an empty state. An invalid hand-off shows an error and leaves storage alone. The layout sets `robots: noindex, nofollow`.
 PRD ref: `prd.md > Results Page`.
 
+### Extension Prompt (`components/extension-prompt.tsx`)
+First-visit band on the home page. After mount, it shows only if the user agent is desktop Chromium (`Chrome/`, not Mobile/Android/iPhone/iPad) and `localStorage['nextstep:extension-prompt']` isn't `dismissed`. *Add to Chrome* links to `NEXT_PUBLIC_EXTENSION_URL` (the store listing, new tab) or `/extension`. *Use it here* calls the page's `startPasting`. Every choice stores `dismissed`.
+PRD ref: `prd.md > Extension Recommendation`.
+
+### Extension and Privacy Pages (`app/extension/page.tsx`, `app/privacy/page.tsx`)
+Static server components with metadata, the shared header and footer, and footer links. `/extension` shows *Add to Chrome* only when `NEXT_PUBLIC_EXTENSION_URL` is set.
+PRD ref: `prd.md > Extension and Privacy Pages`.
+
+### Store Packaging (`scripts/pack-extension.mjs`, `extension/STORE.md`)
+`npm run pack:extension` refuses unless `NEXTSTEP_URL` is `https://`, runs the extension build, and zips `extension/dist` with `manifest.json` at the root (`extension/nextstep-extension-<version>.zip`, git-ignored). `STORE.md` holds the listing copy, single purpose, permission justifications, data-usage declarations, and the publishing steps only the account owner can do (developer registration and fee, upload, submit).
+
 ### Results Hand-off (`lib/handoff.ts`)
 `encodeHandoff` / `decodeHandoff` / `resultsUrl`: UTF-8 JSON → base64url in `#data=`. Decoding is strict: base64url characters only, fatal UTF-8 decoding, and Zod validation of the whole payload (`AnalysisResultSchema` plus a 64-hex `textHash`). Anything else returns `null`.
 
 ### Browser Extension (`extension/`)
 *Added with the learner's extension request.* Manifest V3 and strict TypeScript (`extension/tsconfig.json`, `types: ["chrome"]`). It is excluded from the web app's `tsconfig` and built separately.
 - **Popup** (`src/popup.html`, `src/popup.css`, `src/popup.ts`): the stamp-office tokens copied as CSS variables, and the views *start → review → done* with status and error lines. `popup.ts` is the only file that touches Chrome APIs.
-- **Extractor** (`src/extract.ts`): picks the largest of `main` / `article` / `[role=main]` (or `body` if under 200 characters). It walks the DOM, skipping noise tags (nav, aside, form, script, …), noise roles, page-level header/footer, `hidden` / `aria-hidden` / `display:none` / `checkVisibility()` false, and class/id words such as cookie, consent, ad(s), share, newsletter, sidebar, footer. Blocks become lines and list items get "- ". It is self-contained because Chrome injects it by source text; `doc` defaults to the page's `document`.
+- **Extractor** (`src/extract.ts`): picks the largest of `main` / `article` / `[role=main]` (or `body` if under 200 characters). It walks the DOM, skipping noise tags (nav, aside, form, script, …), noise roles, page-level header/footer, `hidden` / `aria-hidden` / `display:none` / `checkVisibility()` false, and class/id words such as cookie, consent, ad(s), share, newsletter, sidebar, footer. Blocks (UL, OL, DIV, SECTION, TABLE, P…) whose text is at least 70% link text are skipped as menus (headings exempt). Blocks become lines and list items get "- ". It is self-contained because Chrome injects it by source text; `doc` defaults to the page's `document`.
 - **API client** (`src/api.ts`): `isSupportedUrl`, `analyzeText` (shared `cleanText`, `POST /api/analyze`, the API's own error messages, a named-server network message, schema validation), and `buildHandoff` (shared `sha256Hex`).
 - **Build** (`scripts/build-extension.mjs`): esbuild IIFE bundle (`chrome120`, not minified so reviewers can read it, no `keepNames` so the injected function stays self-contained). `NEXTSTEP_URL` is injected via `define` (https required, except localhost). The manifest's single host permission is derived from it, and icons are rendered from `src/app/icon.svg`.
 - **Permissions:** `activeTab`, `scripting`, and the NextStep origin only. No background worker, no `tabs`, no `<all_urls>`.

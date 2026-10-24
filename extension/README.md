@@ -62,7 +62,7 @@ There is no background script, no `tabs` permission, no `<all_urls>`, no analyti
 |---|---|
 | `src/popup.html`, `src/popup.css` | The popup, in the website's "stamp office" style (same colour tokens) |
 | `src/popup.ts` | The only file that uses Chrome APIs: tabs, scripting, and opening the results tab |
-| `src/extract.ts` | Finds the main content (`main`, `article`, or the body) and skips navigation, sidebars, footers, cookie banners, ads, share bars, and hidden elements. Chrome injects it by its source text, so it is fully self-contained. |
+| `src/extract.ts` | Finds the main content (`main`, `article`, or the body) and skips navigation, sidebars, footers, cookie banners, ads, share bars, hidden elements, and link-heavy blocks (site menus written as plain lists). Chrome injects it by its source text, so it is fully self-contained. |
 | `src/api.ts` | Supported-page check, the call to `/api/analyze` (validated with the app's Zod schema), clear error messages, and the hand-off |
 | `../scripts/build-extension.mjs` | esbuild bundle + manifest (host permission derived from `NEXTSTEP_URL`) + icons |
 
@@ -76,6 +76,10 @@ The extension reuses the website's code rather than copying it: `cleanText`, the
 npm run typecheck:extension   # strict TypeScript, with Chrome's types
 npm test                      # includes tests/extension-*.test.ts and tests/page-results.test.tsx
 ```
+
+## Publish to the Chrome Web Store
+
+`NEXTSTEP_URL=https://your-site npm run pack:extension` builds the upload zip for your public site. The listing text, permission justifications, data-usage answers, and step-by-step publishing guide are in [`STORE.md`](STORE.md). The website links "Add to Chrome" to the listing once `NEXT_PUBLIC_EXTENSION_URL` is set.
 
 ## Limits
 

@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { AnalyzingState } from "@/components/analyzing-state";
+import { ExtensionPrompt } from "@/components/extension-prompt";
 import { Hero } from "@/components/hero";
 import { HowItWorks } from "@/components/how-it-works";
 import { InputPanel } from "@/components/input-panel";
@@ -130,6 +131,7 @@ export default function Home() {
   return (
     <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
       <SiteHeader />
+      <ExtensionPrompt onUseHere={startPasting} />
 
       <main>
         <div className="pt-12 pb-20 sm:pt-16 sm:pb-24">
