@@ -13,7 +13,7 @@ export function normalize(s: string): string {
   return s
     .normalize("NFKC") // full-width letters, "…" → "...", ligatures
     .toLowerCase()
-    .replace(/­/g, "") // soft hyphens hidden in PDF text
+    .replace(/\u00AD/g, "") // soft hyphens hidden in PDF text
     .replace(/[‘’‚′]/g, "'")
     .replace(/[“”„″]/g, '"')
     .replace(/[‐‑‒–—―−]/g, "-")
@@ -28,17 +28,18 @@ export function normalize(s: string): string {
  */
 const AI_INSTRUCTION_PATTERNS: RegExp[] = [
   /\bignore (?:all |any |the |your )*(?:previous|prior|above|earlier|preceding|system) (?:instructions?|prompts?|rules|directions)\b/,
-  /\b(?:system|developer|admin) (?:note|prompt|message|instructions?)\b/,
+  // A label opening its own chunk ("SYSTEM NOTE: …", "[admin message]"), not "follow admin instructions for leave".
+  /^\W*(?:system|developer|admin) (?:note|prompt|message|instructions?)\s*(?:[:\])>-]|$)/,
   /\b(?:note|message|instructions?|request) (?:to|for) (?:the |this )?(?:ai|assistant|model|chatbot|chatgpt|llm|language model)\b/,
   /\byou are now (?:in |an? |acting|the |my )/,
   /\b(?:debug|developer|jailbreak|god|dan) mode\b/,
   /\b(?:print|reveal|show|output|tell|give|display|leak|repeat|share)\b[^.!?]*\b(?:system prompt|api[ _-]?keys?|openai_api_key|secret keys?|environment variables?)\b/,
-  /\b(?:write|compose|generate|create)\b[^.!?]{0,40}\b(?:poem|story|essay|song|joke|haiku|limerick|code)\b/,
+  /\b(?:write|compose|generate|create)\b[^.!?]{0,40}\b(?:poem|story|essay|song|joke|haiku|limerick)\b/,
   /\b(?:put|place|insert|include)\b[^.!?]{0,40}\bin the (?:summary|output|response|json)\b/,
-  /\badd\b[^.!?]{0,30}\b(?:checklist |required |recommended )?items?\b/,
+  /\badd\b[^.!?]{0,30}\b(?:(?:checklist|required|recommended) items?|to (?:the|your) checklist)\b/,
   /\bdo not (?:analy[sz]e|summari[sz]e|follow)\b/,
   /\b(?:say|state|claim|pretend|tell (?:the user|them|me)) (?:that )?the deadline\b/,
-  /\b(?:as an ai|act as an?|pretend to be|role-?play as)\b/,
+  /\b(?:as an ai|act as (?:if you (?:are|were)|an? (?:ai|assistant|chatbot|language model))|pretend to be|role-?play as)\b/,
 ];
 
 export function isAiInstruction(sentence: string): boolean {
@@ -82,10 +83,25 @@ function isFoundIn(source: Source, excerpt: string | null): boolean {
   return false;
 }
 
-function isRealIsoDate(date: string | null): boolean {
+function isRealIsoDate(date: string | null): date is string {
   if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return false;
   const parsed = new Date(`${date}T00:00:00Z`);
   return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === date;
+}
+
+const MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+
+/**
+ * The quote must back the date itself: its day and month appear in it (month as a number or a name),
+ * and if the quote names a year, it is the date's year. A misread "15 November" as the 16th can't pass.
+ */
+function isDateInExcerpt(date: string, excerpt: string): boolean {
+  const [year, month, day] = date.split("-").map(Number);
+  const text = normalize(excerpt);
+  const numbers = (text.match(/\d+/g) ?? []).map(Number);
+  const years = numbers.filter((n) => n >= 1900 && n <= 2100);
+  const monthNamed = new RegExp(`\\b${MONTHS[month - 1]}`).test(text);
+  return numbers.includes(day) && (numbers.includes(month) || monthNamed) && (years.length === 0 || years.includes(year));
 }
 
 /** Every piece of deadline text that reaches the screen must be found in the document. */
@@ -99,7 +115,9 @@ function verifyDeadline(source: Source, deadline: Deadline): Deadline {
   const wording = isFoundIn(source, deadline.wording) ? deadline.wording : sourceExcerpt;
 
   if (status === "stated" || status === "relative") {
-    const supported = excerptFound && (status === "relative" || isRealIsoDate(deadline.date));
+    const supported =
+      sourceExcerpt !== null &&
+      (status === "relative" || (isRealIsoDate(deadline.date) && isDateInExcerpt(deadline.date, sourceExcerpt)));
     if (!supported) return { status: "unclear", date: null, wording, sourceExcerpt };
   }
 

@@ -17,7 +17,7 @@ Why this shape: a single app with a single server route is the smallest thing th
 PRD ref: `prd.md > The Core Journey`.
 
 1. **Open the page.** On load, the page reads `nextstep:v1` from localStorage. If a valid saved result exists, it shows that result and its ticks (*Return visit*). Otherwise it shows the empty input state.
-2. **Paste or Try a sample.** *Try a sample* copies the built-in sample posting from `sample-posting.ts` into the textarea. Nothing is sent yet.
+2. **Paste or use the sample.** *Use the sample job posting* copies the built-in sample posting from `sample-posting.ts` into the textarea. Nothing is sent yet.
 3. **Analyze.** The page `POST`s `{ text }` to `/api/analyze`. The button is disabled and a progress message shows.
 4. **Server checks the input.** A Zod request schema checks the length (see *Input Limits*). If it's too short or too long, the route returns a `400` with a plain message.
 5. **Server asks OpenAI.** The LangChain chain (prompt → `ChatOpenAI.withStructuredOutput(AnalysisSchema)`) returns a typed object: summary, deadline, items. If the call fails, times out, or returns something that doesn't fit the schema, the route returns a `502` with a plain message.
@@ -93,9 +93,9 @@ Node 24.13 / npm 11.8 are installed locally, which is enough for Next 16.
   - A committed **`.env.example`** lists both names with empty values.
 - **Start:** `npm install`, then `npm run dev`, then open **http://localhost:3000**.
 - **Check before recording:** `npm run test`, `npm run lint`, and `npm run build && npm run start`. Record against the production build.
-- **What to show in the demo video (about 1 minute):** Try a sample → Analyze → Summary + "No deadline stated in this document" → open a *Required* item and its highlighted ✓ excerpt → point out an item in *Needs your check* → tick two items → reload, and the ticks are still there.
+- **What to show in the demo video (about 1 minute):** Use the sample job posting → Make my checklist → Summary + "No deadline stated in this document" → open a *Required* item and its highlighted ✓ excerpt → point out an item in *Needs your check* → tick two items → reload, and the ticks are still there.
 - **Chrome extension:** `npm run build:extension` writes `extension/dist` for `http://localhost:3000` (or `NEXTSTEP_URL=https://… npm run build:extension`). Load it via `chrome://extensions` → Developer mode → *Load unpacked*. Full steps are in `extension/README.md`.
-- **Submission:** demo video + public GitHub repository. **Deployment is deferred** (`prd.md > Deferred From the POC`). If time remains, Vercel is the natural target: import the repo, add the two environment variables in the project settings, and deploy. Nothing in this design blocks that.
+- **Submission:** demo video + public GitHub repository. **Deployment is deferred** (`prd.md > Deferred From the POC`) and not done yet. The repo is Vercel-ready: `README.md > Deploy (Vercel)` lists the steps, and `scripts/prebuild.mjs` packs the extension for the deployed address during the build.
 
 ## Look and Feel
 Implements `prd.md > Look and Feel` ("stamp office" redesign, approved by the learner during the build).
@@ -115,7 +115,7 @@ A client component that owns the input state (text, loading, file reading, error
 PRD ref: `prd.md > Screens and Layout`, `prd.md > The Core Journey`.
 
 ### Input Panel (`components/input-panel.tsx`)
-The textarea, the *Try a sample* link, the *Analyze* button, and the Privacy Note. *Analyze* is disabled when the text is empty or an analysis is running. Shows the too-short / too-long / failure messages returned by the server under the textarea, and keeps the text so the user can retry. It also shows a live character count once the text is near the limit.
+The textarea, the *Use the sample job posting* link, the *Make my checklist* button, and the Privacy Note. *Make my checklist* is disabled when the text is empty or an analysis is running. Shows the too-short / too-long / failure messages returned by the server under the textarea, and keeps the text so the user can retry. It also shows a live character count once the text is near the limit.
 PRD ref: `prd.md > Document Input`, `prd.md > States and Boundaries`.
 
 ### Privacy Note (`components/input-panel.tsx`, `components/site-footer.tsx`)
@@ -273,7 +273,7 @@ ApiError = { error: { code: "too_short" | "too_long" | "invalid_request" | "anal
 
 | Data | Lives in | Updated when | After leaving and returning |
 |---|---|---|---|
-| Pasted text | React state only | User types / Try a sample | Gone (never saved) |
+| Pasted text | React state only | User types / uses the sample | Gone (never saved) |
 | Analysis result | React state + localStorage | Each successful analysis (replaces the old one) | Restored |
 | Ticks (`completedIds`) | React state + localStorage | Every tick or untick | Restored |
 | Expanded item | React state only | Click | Collapsed |
@@ -308,7 +308,7 @@ nextstep/
 │   │       └── analyze/
 │   │           └── route.ts        # Analyze Route: validate → analyze → verify → respond
 │   ├── components/
-│   │   ├── input-panel.tsx         # textarea, Try a sample, Analyze, input errors
+│   │   ├── input-panel.tsx         # textarea, sample link, Make my checklist, input errors
 │   │   ├── results-view.tsx        # summary + deadline + checklist + footer actions
 │   │   ├── summary-card.tsx
 │   │   ├── deadline-banner.tsx
@@ -377,6 +377,33 @@ nextstep/
     └── page-results.test.tsx
 ```
 
+### Added later in the build
+```
+nextstep/
+├── src/app/
+│   ├── extension/page.tsx          # what the extension does, its permissions, download / store link
+│   ├── privacy/page.tsx            # privacy policy for the site and the extension
+│   └── icon.svg, favicon.ico, apple-icon.png
+├── src/components/extension-prompt.tsx  # first-visit Add to Chrome / Use it here band
+├── src/lib/
+│   ├── sha256.ts                   # plain-JS SHA-256 fallback when crypto.subtle is unavailable (non-secure address)
+│   ├── export-model.ts             # shared shape for the Word and PDF downloads
+│   └── download.ts                 # saves a Blob to the device
+├── extension/STORE.md              # Chrome Web Store listing text and checklist
+├── scripts/
+│   ├── copy-pdf-worker.mjs         # postinstall: pdf.js worker → public/
+│   ├── make-fixtures.mjs           # sample.pdf / .docx / .png from the fictional posting
+│   ├── make-icons.mjs              # app and extension icons from the mark
+│   ├── pack-extension.mjs          # zip the built extension
+│   └── prebuild.mjs                # Vercel: build + pack the extension into public/downloads/
+└── tests/
+    ├── read-file.test.ts, ocr.test.ts, export.test.ts, handoff.test.ts
+    ├── input-panel.test.tsx, extension-prompt.test.tsx, pages-static.test.tsx
+    ├── page-upload.test.tsx, page-upload-image.test.tsx, page-download.test.tsx
+    ├── page-errors.test.tsx, page-persistence.test.tsx
+    └── helpers/browser.ts          # shared jsdom helpers
+```
+
 ## External Services and Dependencies
 
 ### OpenAI (via `@langchain/openai`)
@@ -417,7 +444,7 @@ No other AI services. Hugging Face was considered as a second provider to save O
 - **One saved checklist** instead of a history. Agreed in the PRD. A history would need a list view and an id per document.
 - **One LangChain chain with one model call** instead of multi-step or agent pipelines. The learner's original idea notes (kept outside this repo) asked for a simple chain. A second "verifier" model pass is unnecessary because evidence is checked with deterministic code.
 - **Exact-match excerpt search (after normalization)** instead of fuzzy matching. A strict check fits the promise that a quote must really be in the text. It may occasionally flag a near-quote as *Not found*, which errs on the side of honesty. Fuzzy matching could come later if that's too strict in practice.
-- **Run locally and record** instead of deploying. Deployment is deferred in the PRD and optional for the hackathon; Vercel is a one-step add later.
+- **Run locally and record** instead of deploying. Deployment is deferred in the PRD and optional for the hackathon; the repo is ready for Vercel (`README.md > Deploy (Vercel)`) if the learner chooses to deploy.
 
 - **The extension hands results over in the URL fragment** instead of a server-side results store or extension messaging. There's nothing new to secure or host, and it works with any deployment. A very large checklist makes a long URL; a typical one is a few kilobytes.
 - **One server per extension build** (`NEXTSTEP_URL`) instead of a settings page. The host permission stays exactly that one origin.

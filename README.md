@@ -32,7 +32,7 @@ AI summaries sound confident even when they are wrong. NextStep doesn't ask you 
 You need **Node.js 22.13 or newer** (required by pdf.js; developed on Node 24) and an **OpenAI API key**.
 
 ```bash
-git clone https://github.com/<your-account>/nextstep.git   # replace with this repository's URL
+git clone https://github.com/juliaomartins/nextstep.git
 cd nextstep
 npm install                  # also copies the pdf.js worker into public/
 cp .env.example .env.local   # then fill in the values
@@ -124,6 +124,7 @@ NextStep was planned and built during the *Build With AI: Basics* submission per
 - [`devpost/prd.md`](devpost/prd.md): what the product does, screen by screen, with checkable criteria
 - [`devpost/spec.md`](devpost/spec.md): the technical blueprint
 - [`devpost/checklist.md`](devpost/checklist.md): the build steps, and a *Revisions* log of every change of plan and why
+- [`devpost/app-map.html`](devpost/app-map.html): a one-page map of the finished code, from the paste box to the evidence check (open it in a browser)
 
 ## Credits and third-party code
 

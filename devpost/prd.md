@@ -11,9 +11,9 @@ Source: `scope.md > Who It's For`, `scope.md > The Unique Kernel`.
 ## The Core Journey
 Source: `scope.md > The Core Loop`, `scope.md > What "Working" Looks Like`.
 
-1. The user opens NextStep and sees a headline, a one-sentence explanation, a large paste area, a **Try a sample** link, and an **Analyze** button. A short privacy note sits under the paste area.
-2. They paste a document (or click **Try a sample** to fill the paste area with a sample job posting).
-3. They click **Analyze**. The button is disabled and a progress message shows that the document is being read.
+1. The user opens NextStep and sees a headline, a one-sentence explanation, a large paste area, a **Use the sample job posting** link, and an **Make my checklist** button. A short privacy note sits under the button.
+2. They paste a document (or click **Use the sample job posting** to fill the paste area with a sample job posting).
+3. They click **Make my checklist**. The button is disabled and a progress message shows that the document is being read.
 4. Results appear below the input, in this order: **Summary**, **Deadline**, then **the checklist**.
 5. They click a checklist item. Its **source excerpt** opens directly under it, with a label saying whether the quote was found in the document.
 6. They tick items as they complete them. A progress count updates for each group ("3 of 6 done").
@@ -23,10 +23,10 @@ Source: `scope.md > The Core Loop`, `scope.md > What "Working" Looks Like`.
 Success: an unfamiliar document becomes a checklist the user can check against the source, with nothing invented.
 
 ## Screens and Layout
-**One page**, in a single column on mobile and centered with a readable width on desktop:
+**The home page**, in a single column on mobile and centered with a readable width on desktop (the build later added `/results`, `/extension`, and `/privacy`, described below):
 
 - **Header:** NextStep name and tagline, *"From confusing documents to clear next steps."*
-- **Input section:** paste area, **Try a sample** link, **Analyze** button, privacy note.
+- **Input section:** paste area, **Use the sample job posting** link, **Make my checklist** button, privacy note.
 - **Results section** (appears after an analysis):
   - **Summary card:** 2–3 sentences on what the document is and what it asks of the reader.
   - **Deadline banner:** the main deadline and its status (see *Deadline Handling*).
@@ -51,10 +51,10 @@ Success: an unfamiliar document becomes a checklist the user can check against t
 
 ### Document Input
 Source: `scope.md > The POC Boundary`.
-- The user can paste text into the paste area, or click **Try a sample** to load a built-in sample job posting.
+- The user can paste text into the paste area, or click **Use the sample job posting** to load a built-in sample job posting.
 - The sample posting is fictional and realistic. It contains clearly required items, some preferred items, at least one vague line (e.g. "references may be requested"), and **no application deadline**, so one sample run demonstrates every flag.
-- [ ] Clicking **Try a sample** fills the paste area with the sample posting.
-- [ ] **Analyze** is disabled while the paste area is empty or an analysis is running.
+- [ ] Clicking **Use the sample job posting** fills the paste area with the sample posting.
+- [ ] **Make my checklist** is disabled while the paste area is empty or an analysis is running.
 
 ### Analysis
 - The document is sent for AI analysis. The result is only shown if it has the expected shape; otherwise the user sees an error (see *States and Boundaries*).
@@ -103,7 +103,7 @@ Source: `scope.md > The Unique Kernel`.
 
 ### Privacy Note
 - A short note near the paste area: the text is sent to an AI service to be analyzed, NextStep does not store the document, checklist progress stays in this browser, and no account is needed.
-- [ ] The note is visible on first load without scrolling on desktop.
+- [ ] The note sits directly under the **Make my checklist** button, so it is in view whenever the user is about to send text; the hero's *Your document is not stored* and *No account needed* badges are visible on first load without scrolling on desktop. *(Revised: the redesign added a hero above the paste area, so the full note moved next to the button.)*
 
 ### File Upload (PDF and Word)
 Source: `scope.md > Added during the build (learner decision)`.
@@ -176,9 +176,9 @@ Source: `scope.md > Added during the build (learner decision)`.
 - **Extension can't reach the server:** *"We couldn't reach NextStep at <address>. Check that it's running and that you're online…"* The text stays in the review box.
 - **Extension text over the limit:** the counter turns red and *Make my checklist* is disabled until the text is trimmed.
 - **Extension waiting for the analysis:** *"Making your checklist… this usually takes 10 to 20 seconds."* The box is read-only.
-- **First use:** empty paste area, **Try a sample** visible, no results section.
+- **First use:** empty paste area, **Use the sample job posting** visible, no results section.
 - **Analyzing:** the button is disabled and a progress message is shown. The paste area keeps its text.
-- **Empty input:** **Analyze** can't be clicked.
+- **Empty input:** **Make my checklist** can't be clicked.
 - **Too short:** under roughly a sentence or two of text, the message is *"This looks too short to analyze. Paste the full document."*
 - **Too long:** above the input limit (about 5–6 pages of text; exact number set in `4-spec`), the message says the document is too long and suggests pasting the relevant section.
 - **Nothing actionable found:** e.g. a news article or a story. The message is *"We couldn't find any requirements or steps in this text."* No empty checklist is shown.
@@ -206,7 +206,7 @@ Source: `scope.md > Added during the build (learner decision)`.
 - **Assumption, confirm at review:** the sample posting deliberately has no deadline, so the demo shows the "not stated" flag.
 
 ## What We're Building
-- One page with paste input, **Try a sample**, and **Analyze**.
+- A home page with paste input, **Use the sample job posting**, and **Make my checklist**.
 - AI analysis that returns a summary, a deadline with status, and a grouped checklist, and is only shown when correctly formed.
 - Source excerpts on every item, checked against the pasted text, with *Found* / *Not found* labels.
 - Checkboxes with progress counts per group.
