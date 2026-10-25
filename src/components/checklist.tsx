@@ -35,6 +35,8 @@ type Props = {
   items: ResultItem[];
   completedIds: Set<string>;
   onToggle: (id: string) => void;
+  /** Language of the titles and reasons (quotes stay in the document's own language). */
+  lang?: string;
 };
 
 /** When every required step is ticked, the slip gets a READY stamp. */
@@ -60,7 +62,7 @@ function RequiredDone() {
   );
 }
 
-export function Checklist({ items, completedIds, onToggle }: Props) {
+export function Checklist({ items, completedIds, onToggle, lang }: Props) {
   return (
     <div className="space-y-10">
       {GROUPS.map(({ group, label, hint, Icon, iconClass }) => {
@@ -89,7 +91,7 @@ export function Checklist({ items, completedIds, onToggle }: Props) {
             </div>
             <ul className="divide-y divide-dashed divide-rule">
               {groupItems.map((item) => (
-                <ChecklistItem key={item.id} item={item} done={completedIds.has(item.id)} onToggle={onToggle} />
+                <ChecklistItem key={item.id} item={item} done={completedIds.has(item.id)} onToggle={onToggle} lang={lang} />
               ))}
             </ul>
             {group === "required" && done === groupItems.length && <RequiredDone />}

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { cleanText } from "./clean-text";
+import { DEFAULT_LANGUAGE, LanguageSchema, type LanguageCode } from "./languages";
 
 export const MIN_CHARS = 200;
 export const MAX_CHARS = 20_000;
@@ -49,6 +50,8 @@ export const ResultItemSchema = AnalysisItemSchema.extend({
 
 export const AnalysisResultSchema = AnalysisSchema.extend({
   items: z.array(ResultItemSchema),
+  // The language the summary, titles, and reasons are written in. Optional so checklists saved before it existed still load (English).
+  language: LanguageSchema.optional(),
   // Set by the evidence check. Optional so checklists saved before it existed still load.
   safety: z
     .object({
@@ -69,9 +72,11 @@ export type ApiErrorCode = "too_short" | "too_long" | "invalid_request" | "analy
 
 export type ApiError = { error: { code: ApiErrorCode; message: string } };
 
-export type InputCheck = { ok: true; text: string } | { ok: false; code: Exclude<ApiErrorCode, "analysis_failed"> };
+export type InputCheck =
+  | { ok: true; text: string; language: LanguageCode }
+  | { ok: false; code: Exclude<ApiErrorCode, "analysis_failed"> };
 
-const AnalyzeRequestSchema = z.object({ text: z.string() });
+const AnalyzeRequestSchema = z.object({ text: z.string(), language: LanguageSchema.default(DEFAULT_LANGUAGE) });
 
 export function validateAnalyzeInput(body: unknown): InputCheck {
   const parsed = AnalyzeRequestSchema.safeParse(body);
@@ -80,5 +85,5 @@ export function validateAnalyzeInput(body: unknown): InputCheck {
   const text = cleanText(parsed.data.text);
   if (text.length < MIN_CHARS) return { ok: false, code: "too_short" };
   if (text.length > MAX_CHARS) return { ok: false, code: "too_long" };
-  return { ok: true, text };
+  return { ok: true, text, language: parsed.data.language };
 }

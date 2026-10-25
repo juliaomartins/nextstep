@@ -115,12 +115,12 @@ export const ResultsView = forwardRef<HTMLElement, Props>(function ResultsView(
           </p>
         )}
         <div className="space-y-4">
-          <SummaryCard summary={result.summary} />
+          <SummaryCard summary={result.summary} lang={result.language} />
           <EvidenceReceipt items={result.items} />
         </div>
         <DeadlineBanner deadline={result.deadline} />
         {total > 0 ? (
-          <Checklist items={result.items} completedIds={completedIds} onToggle={onToggle} />
+          <Checklist items={result.items} completedIds={completedIds} onToggle={onToggle} lang={result.language} />
         ) : (
           <p data-reveal className="text-ink-soft">
             We couldn&apos;t find any requirements or steps in this text.

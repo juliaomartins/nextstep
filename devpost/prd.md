@@ -132,7 +132,7 @@ Source: `scope.md > Added during the build (learner decision)`.
 ### Token Efficiency
 Source: `scope.md > Added during the build (learner decision)`.
 - OpenAI is used for exactly one thing: turning text into the checklist. Reading files, OCR, the evidence check, and downloads use no AI.
-- If the user analyzes text identical to the saved result's text, the saved result is reused without calling the AI, and its ticks are kept. A short note says "Same document as before, so your saved checklist was reused."
+- If the user analyzes text identical to the saved result's text, in the same checklist language, the saved result is reused without calling the AI, and its ticks are kept. A short note says "Same document as before, so your saved checklist was reused."
 - Extra blank lines and spaces are trimmed before the text is sent.
 - [ ] Analyzing the sample twice in a row makes only one AI call (visible in the server log), and the second result appears instantly.
 
@@ -180,7 +180,7 @@ Source: `scope.md > Added during the build (learner decision)`.
 
 ### Checklist Language
 Source: `scope.md > Who It's For`, `scope.md > Added during the build (learner decision)`.
-- A **Checklist language** choice next to **Make my checklist**: English (default), Español, Português, Français, Bahasa Indonesia, Filipino, Kiswahili, and Tetun.
+- A **Checklist language** choice next to **Make my checklist**: English (default), Español, Português, Français, Bahasa Indonesia, Filipino, and Kiswahili. *(Tetun was planned and dropped after real runs: the model left most step titles in English.)*
 - The summary, step titles, and "why it matters" lines are written in the chosen language. Every quote and the deadline wording stay exactly as written in the document, in its own language, and are checked by code as before. The interface itself stays in English.
 - The same text in the same language reuses the saved checklist; the same text in another language makes a new checklist.
 - Downloads contain the chosen language's wording and the original quotes.

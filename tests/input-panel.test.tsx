@@ -22,6 +22,8 @@ function Harness({
       reading={null}
       sourceNote={null}
       error={null}
+      language="en"
+      onLanguageChange={() => {}}
       onFile={() => {}}
       onTextChange={setText}
       onSample={(sample) => {

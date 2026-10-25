@@ -8,6 +8,14 @@ Built for Devpost's *Build With AI: Basics* hackathon.
 
 ![NextStep home page: "Turn confusing documents into clear next steps", with a fictional example document whose sentences are stamped Required, Recommended, and Check this, and a deadline stamped Not stated. Nothing invented.](docs/screenshots/home.png)
 
+## Who it's for
+
+Anyone who has to act on a document they find hard to read: a long job posting, a scholarship call, a form's small print. Above all, people reading in a language that isn't their own. There were an estimated **304 million international migrants** in 2024 ([UN DESA](https://www.un.org/en/global-issues/migration)), and they are also the easiest targets for fake job offers: reported losses to job and employment-agency scams in the US rose from **$90 million in 2020 to $501 million in 2024** ([FTC](https://www.ftc.gov/news-events/news/press-releases/2025/03/new-ftc-data-show-big-jump-reported-losses-fraud-125-billion-2024)).
+
+So NextStep can write the checklist **in your language, while every quote stays in the document's own words**, checked by code. You read the step in Spanish, Indonesian, or Swahili, and you can see the exact original sentence it came from. A machine translation alone asks for your trust; this shows you the proof.
+
+![The scholarship sample made in Spanish: the summary and every step are in Spanish, an opened step shows its original English sentence highlighted and stamped Found in document, the deadline 15 March 2027 is stamped Stated in document with its English quote, and a green line reads "Checked by code: 12 of 12 quotes found word for word in your document."](docs/screenshots/language.png)
+
 ## What makes it different
 
 AI summaries sound confident even when they are wrong. NextStep doesn't ask you to trust the model:
@@ -15,6 +23,8 @@ AI summaries sound confident even when they are wrong. NextStep doesn't ask you 
 - **Every quote is checked by code.** After the AI answers, the server searches your text for each quoted excerpt. A quote that can't be found is labelled *Not found in document* and moved to **Needs your check**.
 - **Deadlines are never invented.** A deadline is *Stated*, *Relative*, *Unclear*, or *Not stated*. A date whose quote can't be found, that isn't a real calendar date, or whose day, month, or year isn't in its quote is downgraded to *Unclear*.
 - **Groups follow the document's own wording:** *Required* (must, required), *Recommended* (preferred, a plus), and *Needs your check* (may, vague, or unsupported).
+- **You can see the check.** Every result says what the code found, for example *Checked by code: 12 of 12 quotes found word for word in your document*, on screen and in the downloads.
+- **Your language, the document's words.** Steps and summary can be written in Español, Português, Français, Bahasa Indonesia, Filipino, or Kiswahili. Quotes and deadline wording are never translated, so the evidence check works exactly the same.
 - **The document is data, not instructions.** Text such as "ignore previous instructions" is ignored, and anything that slipped through would still have to quote your document to count as *Found*.
 
 ![An opened checklist step, "Prepare a CV in PDF format", showing its source quote highlighted from the posting and stamped Found in document.](docs/screenshots/evidence.png)
@@ -23,17 +33,19 @@ AI summaries sound confident even when they are wrong. NextStep doesn't ask you 
 
 <img src="docs/screenshots/results.png" alt="A real checklist made from the built-in sample job posting: a short summary, a banner saying no deadline is stated in this document, Required, Recommended, and Needs your check groups with progress counts and Found stamps, and Download as Word or PDF buttons." width="420" align="right">
 
-- Paste a document, try the built-in fictional sample job posting, or **upload a PDF, a Word (.docx) file, or a photo or screenshot of the document**. Files are read in your browser (pictures with Tesseract OCR, no AI tokens) and become editable text before anything is analyzed.
+- Paste a document, try one of two built-in fictional samples (a job posting with no deadline, and a scholarship notice with one), or **upload a PDF, a Word (.docx) file, or a photo or screenshot of the document**. Files are read in your browser (pictures with Tesseract OCR, no AI tokens) and become editable text before anything is analyzed.
 - Summary, deadline banner, and a grouped checklist with progress counts.
+- **Checklist language:** English, Español, Português, Français, Bahasa Indonesia, Filipino, or Kiswahili, with the original quotes kept as proof. Only Latin-alphabet languages for now, so the PDF can draw every letter.
+- An evidence receipt under the summary: how many quotes the code found word for word.
 - Open any step to see its source quote, highlighted.
 - Ticks are saved in your browser and survive a reload. *Clear saved data* removes them.
-- Analyzing the same text again reuses the saved result, with **no second AI call**.
+- Analyzing the same text in the same language again reuses the saved result, with **no second AI call**.
 - **Download your checklist as Word or PDF**, made on your device: summary, deadline, every step with its tick state, quote, and Found / Not found stamp. The Word file stays editable; the PDF uses the same stamp style as the app.
 - Clear messages for text that is too short, too long, has nothing actionable, or when the AI service fails. Your text is always kept.
 - **Chrome extension:** on any job posting or notice, click *Analyze this page*, review the extracted text, and get the checklist on the site's `/results` page. Same API, same evidence check. See [`extension/README.md`](extension/README.md).
 - **First visit in desktop Chrome:** a one-time choice, *Add to Chrome* or *Use it here*, remembered in the browser. The [`/extension`](src/app/extension/page.tsx) page explains the extension and its permissions, and [`/privacy`](src/app/privacy/page.tsx) is the privacy policy.
 
-*Screenshots: the checklist and quote above are real output for the built-in fictional sample posting.*
+*Screenshots: the checklists and quotes above are real output for the built-in fictional samples.*
 
 <br clear="right">
 
@@ -102,7 +114,7 @@ save result + ticks + a hash of the text in localStorage
 
 ## Token use
 
-OpenAI is used for exactly one thing: turning text into the checklist. Reading files and pictures, checking quotes, and making downloads use no tokens. With `gpt-4o-mini`, one analysis of a typical job posting uses roughly **1,300–1,700 tokens**. The server logs the real count of each call (`[analyze] … tokens: … in + … out`). Whitespace is trimmed before sending, and identical text reuses the saved result instead of calling the AI again.
+OpenAI is used for exactly one thing: turning text into the checklist. Reading files and pictures, checking quotes, and making downloads use no tokens. With `gpt-4o-mini`, one checklist for the sample job posting or scholarship notice uses roughly **2,400–2,700 tokens** in any offered language (measured from the server log on 25 Oct 2026); text with nothing actionable uses about 1,650. The server logs the real count of each call (`[analyze] … tokens: … in + … out`). Whitespace is trimmed before sending, and identical text reuses the saved result instead of calling the AI again.
 
 ## Responsible AI
 

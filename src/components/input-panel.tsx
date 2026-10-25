@@ -5,11 +5,14 @@ import {
   FileCheck2,
   FileSearch,
   GraduationCap,
+  Languages,
   ListChecks,
   LoaderCircle,
   LockKeyhole,
+  Quote,
   TextCursorInput,
 } from "lucide-react";
+import { DEFAULT_LANGUAGE, LANGUAGES, type LanguageCode } from "@/lib/languages";
 import { MAX_CHARS } from "@/lib/schemas";
 import { SectionHeading } from "./section-heading";
 import { UploadControl } from "./upload-control";
@@ -25,6 +28,8 @@ type Props = {
   reading: string | null;
   sourceNote: string | null;
   error: string | null;
+  language: LanguageCode;
+  onLanguageChange: (language: LanguageCode) => void;
   onTextChange: (text: string) => void;
   onSample: (sample: SampleKind) => void;
   onAnalyze: () => void;
@@ -32,7 +37,7 @@ type Props = {
 };
 
 export const InputPanel = forwardRef<HTMLTextAreaElement, Props>(function InputPanel(
-  { text, loading, reading, sourceNote, error, onTextChange, onSample, onAnalyze, onFile },
+  { text, loading, reading, sourceNote, error, language, onLanguageChange, onTextChange, onSample, onAnalyze, onFile },
   textareaRef,
 ) {
   const [dragging, setDragging] = useState(false);
@@ -115,20 +120,46 @@ export const InputPanel = forwardRef<HTMLTextAreaElement, Props>(function InputP
               ? "Nothing pasted yet."
               : `${count.toLocaleString("en-GB")} of ${MAX_CHARS.toLocaleString("en-GB")} characters`}
           </p>
-          <button
-            type="button"
-            onClick={onAnalyze}
-            disabled={!canAnalyze}
-            className="press inline-flex h-12 items-center gap-2 border-2 border-ink bg-ballpoint px-6 text-base font-bold text-white shadow-[4px_4px_0_0_var(--ink)] hover:bg-ballpoint-deep hover:shadow-[5px_5px_0_0_var(--ink)] focus-visible:ring-4 focus-visible:ring-ring/40 focus-visible:outline-none disabled:cursor-not-allowed disabled:border-input disabled:bg-form-deep disabled:text-muted-ink disabled:shadow-none"
-          >
-            {loading ? (
-              <LoaderCircle className="size-5 animate-spin motion-reduce:animate-none" aria-hidden />
-            ) : (
-              <ListChecks className="size-5" aria-hidden />
-            )}
-            {loading ? "Reading…" : "Make my checklist"}
-          </button>
+          <div className="flex flex-wrap items-center justify-end gap-3">
+            <label className="flex items-center gap-2 text-sm font-semibold text-ink-soft">
+              <Languages className="size-4" aria-hidden />
+              <span>Checklist language</span>
+              <select
+                value={language}
+                onChange={(e) => onLanguageChange(e.target.value as LanguageCode)}
+                disabled={busy}
+                className="h-12 border-2 border-ink bg-sheet px-3 text-base font-semibold text-ink focus-visible:border-ballpoint focus-visible:ring-4 focus-visible:ring-ring/20 focus-visible:outline-none disabled:opacity-50"
+              >
+                {LANGUAGES.map((l) => (
+                  <option key={l.code} value={l.code} lang={l.code}>
+                    {l.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button
+              type="button"
+              onClick={onAnalyze}
+              disabled={!canAnalyze}
+              className="press inline-flex h-12 items-center gap-2 border-2 border-ink bg-ballpoint px-6 text-base font-bold text-white shadow-[4px_4px_0_0_var(--ink)] hover:bg-ballpoint-deep hover:shadow-[5px_5px_0_0_var(--ink)] focus-visible:ring-4 focus-visible:ring-ring/40 focus-visible:outline-none disabled:cursor-not-allowed disabled:border-input disabled:bg-form-deep disabled:text-muted-ink disabled:shadow-none"
+            >
+              {loading ? (
+                <LoaderCircle className="size-5 animate-spin motion-reduce:animate-none" aria-hidden />
+              ) : (
+                <ListChecks className="size-5" aria-hidden />
+              )}
+              {loading ? "Reading…" : "Make my checklist"}
+            </button>
+          </div>
         </div>
+
+        {language !== DEFAULT_LANGUAGE && (
+          <p className="flex items-start gap-1.5 text-sm text-ink-soft">
+            <Quote className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+            Steps and summary will be in {LANGUAGES.find((l) => l.code === language)?.label}. Quotes stay in the
+            document&apos;s own words, so you can check them against the original.
+          </p>
+        )}
 
         <p className="flex items-start gap-1.5 text-sm text-muted-ink">
           <LockKeyhole className="mt-0.5 size-3.5 shrink-0" aria-hidden />

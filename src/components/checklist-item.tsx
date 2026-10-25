@@ -10,6 +10,7 @@ type Props = {
   item: ResultItem;
   done: boolean;
   onToggle: (id: string) => void;
+  lang?: string;
 };
 
 /** Each row's stamp lands at a slightly different angle, like real ones do. */
@@ -18,7 +19,7 @@ function stampAngle(id: string) {
   return ((n % 7) - 3) * 1.5;
 }
 
-export function ChecklistItem({ item, done, onToggle }: Props) {
+export function ChecklistItem({ item, done, onToggle, lang }: Props) {
   const [open, setOpen] = useState(false);
   const rowRef = useRef<HTMLLIElement>(null);
   const evidenceRef = useRef<HTMLDivElement>(null);
@@ -113,6 +114,7 @@ export function ChecklistItem({ item, done, onToggle }: Props) {
           <span>
             <span
               data-title
+              lang={lang}
               className={
                 done
                   ? "strike text-[1.0625rem] text-muted-ink"
@@ -152,7 +154,9 @@ export function ChecklistItem({ item, done, onToggle }: Props) {
                 {found ? "Found in document" : "Not found in document. Check the original."}
               </Stamp>
             </span>
-            <p className="text-sm text-ink-soft">{item.whyItMatters}</p>
+            <p lang={lang} className="text-sm text-ink-soft">
+              {item.whyItMatters}
+            </p>
           </div>
         </div>
       )}

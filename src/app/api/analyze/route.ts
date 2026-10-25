@@ -25,8 +25,8 @@ export async function POST(request: Request) {
   if (!input.ok) return errorResponse(input.code, 400);
 
   try {
-    const output = await analyzeDocument(input.text);
-    return Response.json(verifyEvidence(input.text, output));
+    const output = await analyzeDocument(input.text, input.language);
+    return Response.json({ ...verifyEvidence(input.text, output), language: input.language });
   } catch (error) {
     // Log the reason, never the document.
     console.error("[analyze] failed:", error instanceof Error ? `${error.name}: ${error.message}` : error);

@@ -10,6 +10,7 @@ import { ResultsView } from "@/components/results-view";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { cleanText } from "@/lib/clean-text";
+import { DEFAULT_LANGUAGE, type LanguageCode } from "@/lib/languages";
 import { checkFile, fileErrorMessage, readFile } from "@/lib/read-file";
 import type { AnalysisResult, ApiError } from "@/lib/schemas";
 import { SAMPLE_POSTING } from "@/lib/sample-posting";
@@ -30,6 +31,7 @@ function bringIntoView(el: HTMLElement | null) {
 
 export default function Home() {
   const [text, setText] = useState("");
+  const [language, setLanguage] = useState<LanguageCode>(DEFAULT_LANGUAGE);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { result, completedIds, textHash, show, toggle, clear } = useSavedChecklist();
@@ -66,9 +68,10 @@ export default function Home() {
     const cleaned = cleanText(text);
     const hash = await hashText(cleaned);
 
-    // Token saver: identical text reuses the saved result and its ticks, with no AI call.
+    // Token saver: identical text in the same language reuses the saved result and its ticks, with no AI call.
+    // A result saved before languages existed is English.
     const saved = loadSaved();
-    if (saved && saved.textHash === hash) {
+    if (saved && saved.textHash === hash && (saved.result.language ?? DEFAULT_LANGUAGE) === language) {
       show(saved.result, hash, saved.completedIds);
       setNotice(REUSED_NOTICE);
       showResults();
@@ -80,7 +83,7 @@ export default function Home() {
       const res = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: cleaned }),
+        body: JSON.stringify({ text: cleaned, language }),
       });
       const data: AnalysisResult | ApiError = await res.json();
       if ("error" in data) {
@@ -149,6 +152,8 @@ export default function Home() {
             reading={reading}
             sourceNote={sourceNote}
             error={error}
+            language={language}
+            onLanguageChange={setLanguage}
             onTextChange={setText}
             onSample={loadSample}
             onAnalyze={analyze}

@@ -197,7 +197,7 @@ PRD ref: `prd.md > Download Checklist`.
 ### Token Savers (`lib/clean-text.ts`, `lib/storage.ts`, `app/api/analyze/route.ts`)
 *Added in the build (learner priority: efficient OpenAI token use).*
 - **`cleanText(text)`**, shared by the browser and the server: normalize line endings, turn tabs and runs of spaces into one space, collapse three or more newlines into two, and trim. The server applies it before the length checks and before calling OpenAI. Tested first.
-- **Reuse identical results:** after each successful analysis the page stores `textHash` (SHA-256 of the cleaned text, via `crypto.subtle`) with the saved result. Before calling the API, the page hashes the current cleaned text. If it matches, it reuses the saved result and its ticks and shows *"Same document as before, so your saved checklist was reused."* Only a hash is stored, never the document.
+- **Reuse identical results:** after each successful analysis the page stores `textHash` (SHA-256 of the cleaned text, via `crypto.subtle`) with the saved result. Before calling the API, the page hashes the current cleaned text. If it matches and the saved result is in the chosen checklist language (slice 10; no language means English), it reuses the saved result and its ticks and shows *"Same document as before, so your saved checklist was reused."* Only a hash is stored, never the document.
 - **Log real usage:** the route requests the raw model message (`withStructuredOutput(..., { includeRaw: true })`) and logs `usage_metadata` input/output/total tokens to the server console. It never logs the text.
 PRD ref: `prd.md > Token Efficiency`.
 
@@ -250,7 +250,7 @@ All shapes live in `lib/schemas.ts` (Zod). The TypeScript types are inferred fro
 ```ts
 // Request
 AnalyzeRequest = { text: string,             // trimmed; 200–20,000 chars
-                   language?: LanguageCode }  // "en" | "es" | "pt" | "fr" | "id" | "fil" | "sw" | "tet"; default "en" (slice 10)
+                   language?: LanguageCode }  // "en" | "es" | "pt" | "fr" | "id" | "fil" | "sw"; default "en" (slice 10)
 
 // What the AI must return (strict structured output: every field required; "optional" = nullable)
 AnalysisSchema = {
