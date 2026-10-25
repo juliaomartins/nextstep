@@ -80,6 +80,15 @@ describe("/results", () => {
     expect((await screen.findByRole("checkbox", { name: "Prepare a CV" })).getAttribute("aria-checked")).toBe("true");
   });
 
+  test("the same page in another language starts with no ticks (the steps are a different list)", async () => {
+    const earlier: SavedState = { version: 1, savedAt: "x", textHash: HANDOFF.textHash, result: HANDOFF.result, completedIds: ["item-1"] };
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(earlier));
+    const spanish: Handoff = { ...HANDOFF, result: { ...HANDOFF.result, language: "es" } };
+    at(`/results#data=${encodeHandoff(spanish)}`);
+    render(<ResultsPage />);
+    expect((await screen.findByRole("checkbox", { name: "Prepare a CV" })).getAttribute("aria-checked")).toBe("false");
+  });
+
   test("an invalid link says so and leaves the saved checklist alone", async () => {
     const earlier: SavedState = { version: 1, savedAt: "x", textHash: "c".repeat(64), result: HANDOFF.result, completedIds: [] };
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(earlier));

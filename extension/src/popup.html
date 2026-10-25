@@ -42,6 +42,12 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
           The text is sent to your NextStep server, which asks OpenAI to make the checklist. NextStep doesn't store it.
         </p>
+        <label class="language" for="language">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 8 6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6" /></svg>
+          Checklist language
+          <select id="language"></select>
+        </label>
+        <p class="muted small" id="language-note" hidden>Steps will be in your language. Quotes stay in the page's own words, so you can check them.</p>
         <div class="actions">
           <button type="button" class="secondary" id="cancel">Start over</button>
           <button type="button" class="primary" id="make-checklist">

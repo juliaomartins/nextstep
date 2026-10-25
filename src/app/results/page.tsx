@@ -7,6 +7,7 @@ import { ResultsView } from "@/components/results-view";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { decodeHandoff, type Handoff } from "@/lib/handoff";
+import { DEFAULT_LANGUAGE } from "@/lib/languages";
 import { loadSaved } from "@/lib/storage";
 import { useSavedChecklist } from "@/lib/use-saved-checklist";
 
@@ -69,9 +70,11 @@ export default function ResultsPage() {
         setView({ status: "unconfirmed", source: null });
         return;
       }
-      // The same page analyzed again keeps the ticks already saved for it.
+      // The same page analyzed again, in the same language, keeps the ticks already saved for it
+      // (in another language the steps are a different list).
       const saved = loadSaved();
-      const ticked = saved?.textHash === handoff.textHash ? saved.completedIds : [];
+      const sameLanguage = (saved?.result.language ?? DEFAULT_LANGUAGE) === (handoff.result.language ?? DEFAULT_LANGUAGE);
+      const ticked = saved?.textHash === handoff.textHash && sameLanguage ? saved.completedIds : [];
       show(handoff.result, handoff.result.items.length > 0 ? handoff.textHash : null, ticked);
       setView({ status: "ready", source: handoff.source });
     });

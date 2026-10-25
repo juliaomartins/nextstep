@@ -54,10 +54,10 @@ describe("seal", () => {
 
   test("falls back to a secret derived from the OpenAI key, which never appears in the seal", () => {
     delete process.env.HANDOFF_SECRET;
-    process.env.OPENAI_API_KEY = "sk-test-key-for-sealing";
+    process.env.OPENAI_API_KEY = "fake-openai-key-for-tests";
     const seal = sealResult(RESULT);
     expect(isSealed(RESULT, seal)).toBe(true);
-    expect(seal).not.toContain("sk-test");
+    expect(seal).not.toContain("fake-openai");
   });
 
   test("rejects malformed seals without throwing", () => {

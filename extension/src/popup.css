@@ -176,6 +176,41 @@ textarea {
   color: var(--ink);
 }
 
+.language {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+.language svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.language select {
+  margin-left: auto;
+  height: 34px;
+  padding: 0 8px;
+  border: 2px solid var(--ink);
+  background: var(--sheet);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+}
+.language select:focus-visible {
+  outline: 3px solid var(--ballpoint);
+  outline-offset: 2px;
+}
+
 .count {
   margin: 6px 0 10px;
   font-size: 12px;

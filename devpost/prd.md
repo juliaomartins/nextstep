@@ -143,6 +143,8 @@ Source: `scope.md > Added during the build (learner decision)`.
 - **Review before sending:** the text appears in an editable box with a character count against the 20,000 limit and a note that it will be sent to the NextStep server (which uses OpenAI) and not stored. **Make my checklist** sends it; **Start over** discards it.
 - The checklist is made by the **same** analysis and evidence check as the website. Nothing is invented: requirements, preferred qualifications, documents to submit, deadlines, and next steps come only from the page's own words.
 - When it's ready, the website's **/results** page opens in a new tab with the checklist.
+- *Added at final review (learner feedback):* a **Checklist language** choice on the review screen, with the same languages as the website. It is remembered for next time. The steps on `/results` are in that language; quotes stay in the page's own words. Ticks carry over only for the same page in the same language.
+- [ ] Choosing Español in the popup opens `/results` with Spanish steps and the page's original quotes stamped *Found*, and the popup remembers Español next time.
 - [ ] On a job posting, *Analyze this page* fills the review box with the posting and none of the site's navigation, cookie banner, ads, sidebar, or footer.
 - [ ] *Make my checklist* opens `/results` with the checklist, a "Read from" line naming the page, and every *Found* quote present in the reviewed text.
 - [ ] On `chrome://` pages, the Chrome Web Store, or a new tab, the popup explains it can't read the page and the button is disabled.
@@ -252,7 +254,7 @@ Source: `scope.md > Who It's For`, `scope.md > Added during the build (learner d
 ## Possible Later Enhancements
 - Export the checklist as Markdown or copy it to the clipboard.
 - More built-in samples (an administrative form). *(A scholarship notice was added during the build.)*
-- The checklist language in the Chrome extension, and languages in non-Latin scripts (needs an embedded PDF font).
+- Languages in non-Latin scripts (needs an embedded PDF font). *(The checklist language in the Chrome extension was added at final review.)*
 - Highlighting the excerpt inside the full original document.
 - Dark mode.
 

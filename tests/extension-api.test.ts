@@ -46,8 +46,15 @@ describe("analyzeText", () => {
     expect(fetchMock).toHaveBeenCalledWith(`${BASE}/api/analyze`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: TEXT.trim() }),
+      body: JSON.stringify({ text: TEXT.trim(), language: "en" }),
     });
+  });
+
+  test("sends the checklist language chosen in the popup", async () => {
+    const fetchMock = vi.fn<typeof fetch>(async () => Response.json({ ...RESULT, seal: SEAL }));
+    await analyzeText(BASE, TEXT, fetchMock, "pt");
+    const init = fetchMock.mock.calls[0][1] as RequestInit;
+    expect(JSON.parse(init.body as string)).toEqual({ text: TEXT.trim(), language: "pt" });
   });
 
   test("refuses empty text without calling the API", async () => {

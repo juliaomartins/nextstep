@@ -1,5 +1,6 @@
 import { cleanText } from "../../src/lib/clean-text";
 import type { Handoff } from "../../src/lib/handoff";
+import { DEFAULT_LANGUAGE, type LanguageCode } from "../../src/lib/languages";
 import { AnalysisResultSchema, type AnalysisResult, type ApiError } from "../../src/lib/schemas";
 import { sha256Hex } from "../../src/lib/sha256";
 
@@ -35,7 +36,12 @@ type Outcome = { ok: true; result: AnalysisResult; text: string; seal: string } 
  * Sends the reviewed text to the existing NextStep API (/api/analyze), the same LangChain + OpenAI
  * workflow and evidence check the website uses. The OpenAI key stays on that server.
  */
-export async function analyzeText(base: string, text: string, fetchImpl: typeof fetch): Promise<Outcome> {
+export async function analyzeText(
+  base: string,
+  text: string,
+  fetchImpl: typeof fetch,
+  language: LanguageCode = DEFAULT_LANGUAGE,
+): Promise<Outcome> {
   const cleaned = cleanText(text);
   if (!cleaned) return { ok: false, message: MESSAGES.empty };
 
@@ -44,7 +50,7 @@ export async function analyzeText(base: string, text: string, fetchImpl: typeof 
     response = await fetchImpl(`${base}/api/analyze`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: cleaned }),
+      body: JSON.stringify({ text: cleaned, language }),
     });
   } catch {
     return { ok: false, message: MESSAGES.network(base) };

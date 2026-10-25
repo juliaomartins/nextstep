@@ -9,6 +9,8 @@ Popup: "Analyze this page"  →  reads the page's main text (only after your cli
        →  opens  <NextStep>/results  with your checklist: ticks, downloads, "Read from …"
 ```
 
+**Checklist language:** on the review screen, choose the language for your checklist (English, Español, Português, Français, Bahasa Indonesia, Filipino, or Kiswahili). Steps are written in that language; quotes stay in the page's own words and are still checked by code. Your choice is remembered.
+
 ## Build
 
 From the project root:

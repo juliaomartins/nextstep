@@ -1,5 +1,6 @@
 import { cleanText } from "../../src/lib/clean-text";
 import { resultsUrl } from "../../src/lib/handoff";
+import { DEFAULT_LANGUAGE, LANGUAGES, type LanguageCode } from "../../src/lib/languages";
 import { MAX_CHARS } from "../../src/lib/schemas";
 import { analyzeText, buildHandoff, isSupportedUrl, MESSAGES } from "./api";
 import { extractMainText } from "./extract";
@@ -20,6 +21,8 @@ const ui = {
   count: $<HTMLParagraphElement>("count"),
   cancel: $<HTMLButtonElement>("cancel"),
   makeChecklist: $<HTMLButtonElement>("make-checklist"),
+  language: $<HTMLSelectElement>("language"),
+  languageNote: $<HTMLParagraphElement>("language-note"),
   status: $<HTMLParagraphElement>("status"),
   error: $<HTMLParagraphElement>("error"),
 };
@@ -52,12 +55,41 @@ function updateCount() {
   ui.makeChecklist.disabled = length === 0 || over;
 }
 
+// The checklist language: the same list as the website, remembered for next time in the popup's own storage.
+const LANGUAGE_KEY = "nextstep:language";
+
+function setUpLanguage() {
+  for (const { code, label } of LANGUAGES) {
+    const option = new Option(label, code);
+    option.lang = code;
+    ui.language.add(option);
+  }
+  let remembered: string | null = null;
+  try {
+    remembered = localStorage.getItem(LANGUAGE_KEY);
+  } catch {
+    // Storage unavailable: start from English.
+  }
+  ui.language.value = LANGUAGES.some((l) => l.code === remembered) ? remembered! : DEFAULT_LANGUAGE;
+  const update = () => {
+    ui.languageNote.hidden = ui.language.value === DEFAULT_LANGUAGE;
+    try {
+      localStorage.setItem(LANGUAGE_KEY, ui.language.value);
+    } catch {
+      // Not remembered, still used.
+    }
+  };
+  ui.language.addEventListener("change", update);
+  update();
+}
+
 async function activeTab(): Promise<chrome.tabs.Tab | undefined> {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   return tab;
 }
 
 async function init() {
+  setUpLanguage();
   const tab = await activeTab();
   ui.pageTitle.textContent = tab?.title || "This page";
   try {
@@ -109,12 +141,19 @@ async function init() {
     setError(null);
     ui.makeChecklist.disabled = true;
     ui.cancel.disabled = true;
+    ui.language.disabled = true;
     ui.text.readOnly = true;
     setStatus("Making your checklist… this usually takes 10 to 20 seconds.");
-    const outcome = await analyzeText(NEXTSTEP_URL, ui.text.value, fetch.bind(globalThis));
+    const outcome = await analyzeText(
+      NEXTSTEP_URL,
+      ui.text.value,
+      fetch.bind(globalThis),
+      ui.language.value as LanguageCode,
+    );
     setStatus(null);
     ui.text.readOnly = false;
     ui.cancel.disabled = false;
+    ui.language.disabled = false;
     if (!outcome.ok) {
       // Keep the text so the user can fix it or retry.
       setError(outcome.message);
