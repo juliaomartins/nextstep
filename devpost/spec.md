@@ -81,7 +81,7 @@ Versions are the latest on npm as of 2026-10-23 (checked with `npm view`). Insta
 
 Node 24.13 / npm 11.8 are installed locally, which is enough for Next 16.
 
-**Unverified, check in the first build step:**
+**Checked in the first build step (both confirmed; see `checklist.md > Revisions`):**
 - That `@langchain/core` 1.x `withStructuredOutput` accepts a **Zod 4** schema directly. If not, pin Zod to the newest version LangChain supports, or pass `z.toJSONSchema(...)` and parse with Zod ourselves.
 - That the model in `.env.local` supports structured output. A one-call smoke test with the sample posting settles both.
 
@@ -89,7 +89,7 @@ Node 24.13 / npm 11.8 are installed locally, which is enough for Next 16.
 - **Runtime:** local Next.js dev server. The browser page talks to the local server route, which calls OpenAI.
 - **Environment (`.env.local`, already present and git-ignored):**
   - `OPENAI_API_KEY`: server-only. Never prefixed with `NEXT_PUBLIC_`.
-  - `OPENAI_MODEL`: the model name (set by the learner). If it's unset, the code falls back to a small default model, verified during the first build step.
+  - `OPENAI_MODEL`: the model name (set by the learner). If it's unset, the code falls back to `gpt-4o-mini`, the model every recorded run used.
   - A committed **`.env.example`** lists both names with empty values.
 - **Start:** `npm install`, then `npm run dev`, then open **http://localhost:3000**.
 - **Check before recording:** `npm run test`, `npm run lint`, and `npm run build && npm run start`. Record against the production build.
@@ -235,6 +235,9 @@ PRD ref: `prd.md > Checklist Language`. `LANGUAGES` lists the offered codes, Eng
 ### Results Hand-off (`lib/handoff.ts`)
 `encodeHandoff` / `decodeHandoff` / `resultsUrl`: UTF-8 JSON → base64url in `#data=`. Decoding is strict: base64url characters only, fatal UTF-8 decoding, and Zod validation of the whole payload (`AnalysisResultSchema` plus a 64-hex `textHash`). Anything else returns `null`.
 
+### Handoff Seal (`lib/seal.ts`, `app/api/handoff/route.ts`)
+*Added after the second judge-style review, which showed that a hand-made `/results` link could display a fake checklist stamped Found.* `/api/analyze` adds `seal`, an HMAC-SHA256 over the schema-shaped result, keyed by `HANDOFF_SECRET` or, when unset, a key derived one-way from `OPENAI_API_KEY`. The extension requires the seal and carries it in the hand-off. `/results` posts `{ result, seal }` to `/api/handoff`, which answers `{ valid }` with a constant-time comparison; only a valid seal is shown and saved. Offline or refused: *"NextStep couldn't confirm it made this checklist."* The home page ignores the seal (its results come straight from the API).
+
 ### Browser Extension (`extension/`)
 *Added with the learner's extension request.* Manifest V3 and strict TypeScript (`extension/tsconfig.json`, `types: ["chrome"]`). It is excluded from the web app's `tsconfig` and built separately.
 - **Popup** (`extension/src/popup.html`, `extension/src/popup.css`, `extension/src/popup.ts`): the stamp-office tokens copied as CSS variables, and the views *start → review → done* with status and error lines. `popup.ts` is the only file that touches Chrome APIs.
@@ -296,7 +299,7 @@ ApiError = { error: { code: "too_short" | "too_long" | "invalid_request" | "anal
 ```ts
 // Extension → /results hand-off, in the URL fragment #data=<base64url(JSON)>
 Handoff = { version: 1, textHash: string /* 64 hex, SHA-256 of cleaned text */, result: AnalysisResult,
-            source: { title: string, url: string } | null }
+            seal: string /* 64 hex, HMAC-SHA256 by the server */, source: { title: string, url: string } | null }
 ```
 The page validates it, then stores it as an ordinary `SavedState`. The fragment itself is never sent to a server and is removed from the address bar.
 
@@ -402,8 +405,10 @@ nextstep/
 │   ├── evidence-receipt.ts         # the receipt line, shared by the page and the downloads (slice 9)
 │   ├── sample-scholarship.ts       # fictional scholarship notice with a stated deadline (slice 9)
 │   ├── languages.ts                # offered checklist languages (slice 10)
+│   ├── seal.ts                     # server-only seal for /results hand-offs
 │   ├── export-model.ts             # shared shape for the Word and PDF downloads
 │   └── download.ts                 # saves a Blob to the device
+├── src/app/api/handoff/route.ts    # confirms a hand-off's seal
 ├── extension/STORE.md              # Chrome Web Store listing text and checklist
 ├── scripts/
 │   ├── copy-pdf-worker.mjs         # postinstall: pdf.js worker → public/
@@ -416,6 +421,9 @@ nextstep/
     ├── input-panel.test.tsx, extension-prompt.test.tsx, pages-static.test.tsx
     ├── page-upload.test.tsx, page-upload-image.test.tsx, page-download.test.tsx
     ├── page-errors.test.tsx, page-persistence.test.tsx
+    ├── evidence-receipt.test.ts, samples.test.ts                         # slice 9
+    ├── languages.test.ts, analyze-route.test.ts, page-language.test.tsx  # slice 10
+    ├── seal.test.ts, handoff-route.test.ts                               # hand-off seal
     └── helpers/browser.ts          # shared jsdom helpers
 ```
 

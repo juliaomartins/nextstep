@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { CircleAlert, Globe, ListChecks } from "lucide-react";
+import { CircleAlert, Globe, ListChecks, ShieldAlert } from "lucide-react";
 import { ResultsView } from "@/components/results-view";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -10,7 +10,21 @@ import { decodeHandoff, type Handoff } from "@/lib/handoff";
 import { loadSaved } from "@/lib/storage";
 import { useSavedChecklist } from "@/lib/use-saved-checklist";
 
-type Status = "loading" | "ready" | "invalid";
+type Status = "loading" | "ready" | "invalid" | "unconfirmed";
+
+async function confirmSeal(handoff: Handoff): Promise<boolean> {
+  try {
+    const res = await fetch("/api/handoff", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ result: handoff.result, seal: handoff.seal }),
+    });
+    const data: unknown = await res.json();
+    return (data as { valid?: unknown }).valid === true;
+  } catch {
+    return false;
+  }
+}
 
 function hostOf(url: string) {
   try {
@@ -30,25 +44,37 @@ export default function ResultsPage() {
   const { status, source } = view;
 
   // One-time read of the URL fragment after mount (the hand-off from the browser extension).
+  // The ref keeps it to one read: React's StrictMode runs effects twice in development, and the first run
+  // has already cleared the fragment from the address bar.
+  const handled = useRef(false);
   useEffect(() => {
+    if (handled.current) return;
+    handled.current = true;
     const fragment = window.location.hash;
-    let next: { status: Status; source: Handoff["source"] } = { status: "ready", source: null };
-    if (fragment) {
-      const handoff = decodeHandoff(fragment);
-      // Take the data out of the address bar so it isn't bookmarked or shared by accident.
-      window.history.replaceState(null, "", window.location.pathname + window.location.search);
-      if (handoff) {
-        // The same page analyzed again keeps the ticks already saved for it.
-        const saved = loadSaved();
-        const ticked = saved?.textHash === handoff.textHash ? saved.completedIds : [];
-        show(handoff.result, handoff.result.items.length > 0 ? handoff.textHash : null, ticked);
-        next = { status: "ready", source: handoff.source };
-      } else {
-        next = { status: "invalid", source: null };
-      }
+    if (!fragment) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing from the URL, an external source, once
+      setView({ status: "ready", source: null });
+      return;
     }
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing from the URL, an external source, once
-    setView(next);
+    const handoff = decodeHandoff(fragment);
+    // Take the data out of the address bar so it isn't bookmarked or shared by accident.
+    window.history.replaceState(null, "", window.location.pathname + window.location.search);
+    if (!handoff) {
+      setView({ status: "invalid", source: null });
+      return;
+    }
+    // Only a checklist this server sealed, unchanged, is shown or saved; a hand-made link can't fake one.
+    confirmSeal(handoff).then((valid) => {
+      if (!valid) {
+        setView({ status: "unconfirmed", source: null });
+        return;
+      }
+      // The same page analyzed again keeps the ticks already saved for it.
+      const saved = loadSaved();
+      const ticked = saved?.textHash === handoff.textHash ? saved.completedIds : [];
+      show(handoff.result, handoff.result.items.length > 0 ? handoff.textHash : null, ticked);
+      setView({ status: "ready", source: handoff.source });
+    });
   }, [show]);
 
   return (
@@ -63,6 +89,19 @@ export default function ResultsPage() {
               This link doesn&apos;t contain a valid checklist.
             </p>
             <p className="mt-2 text-ink-soft">It may have been cut short when copied. Analyze the page again from the extension.</p>
+          </div>
+        )}
+
+        {status === "unconfirmed" && (
+          <div role="alert" className="border-2 border-stamp-red bg-stamp-red-bg p-6">
+            <p className="flex items-center gap-2 font-semibold text-stamp-red">
+              <ShieldAlert className="size-5" aria-hidden />
+              NextStep couldn&apos;t confirm it made this checklist.
+            </p>
+            <p className="mt-2 text-ink-soft">
+              The link may have been changed, made somewhere else, or opened while offline, so it wasn&apos;t shown or
+              saved. Analyze the page again from the extension.
+            </p>
           </div>
         )}
 

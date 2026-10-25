@@ -4,6 +4,7 @@ import { decodeHandoff, encodeHandoff, resultsUrl, type Handoff } from "@/lib/ha
 const HANDOFF: Handoff = {
   version: 1,
   textHash: "a".repeat(64),
+  seal: "b".repeat(64),
   source: { title: "Vaga Servisu – Senior IT Officer", url: "https://example.org/jobs/42" },
   result: {
     summary: "Anúncio de emprego com ação — “aspas” ✓",
@@ -25,6 +26,12 @@ const HANDOFF: Handoff = {
 describe("handoff", () => {
   test("round-trips a result, including non-English text and symbols", () => {
     expect(decodeHandoff(`#data=${encodeHandoff(HANDOFF)}`)).toEqual(HANDOFF);
+  });
+
+  test("refuses a hand-off without the server's seal", () => {
+    const unsealed: Partial<Handoff> = { ...HANDOFF };
+    delete unsealed.seal;
+    expect(decodeHandoff(`#data=${encodeHandoff(unsealed as Handoff)}`)).toBeNull();
   });
 
   test("encodes to URL-safe characters only", () => {

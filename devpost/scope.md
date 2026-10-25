@@ -26,7 +26,7 @@ The wider vision stays open: application notices, academic requirements, and adm
 They come back to tick things off as they work through the application, or to paste the next posting.
 
 ## Inspiration & Identity
-It should feel like a polished productivity app, not a chatbot. That means strong typography and hierarchy, a restrained color palette, consistent components, readable and accessible text, and no decorative dashboards or unnecessary animation. *(From the learner's original idea notes (kept outside this repo).)*
+It should feel like a polished productivity app, not a chatbot. That means strong typography and hierarchy, a restrained color palette, consistent components, readable and accessible text, and no decorative dashboards or unnecessary animation. *(From the learner's original idea notes (kept outside this repo).)* *Revised during the build:* the learner asked for a bolder, memorable look, so the "stamp office" design added purposeful GSAP motion (stamps landing, ticks), always skipped when the system asks for reduced motion; see `prd.md > Look and Feel`.
 
 ## Why This Matters to the Learner
 Not shared beyond the product goal: *"Turn information overload into actionable progress."*

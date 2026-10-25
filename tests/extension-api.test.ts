@@ -20,6 +20,7 @@ const RESULT: AnalysisResult = {
   ],
 };
 const TEXT = "Please submit your CV. ".repeat(20);
+const SEAL = "e".repeat(64);
 
 describe("isSupportedUrl", () => {
   test.each([
@@ -39,9 +40,9 @@ describe("isSupportedUrl", () => {
 
 describe("analyzeText", () => {
   test("posts the cleaned text to the existing /api/analyze route and returns the validated result", async () => {
-    const fetchMock = vi.fn(async () => Response.json(RESULT));
+    const fetchMock = vi.fn(async () => Response.json({ ...RESULT, seal: SEAL }));
     const outcome = await analyzeText(BASE, `  ${TEXT}\n\n\n\n`, fetchMock);
-    expect(outcome).toEqual({ ok: true, result: RESULT, text: TEXT.trim() });
+    expect(outcome).toEqual({ ok: true, result: RESULT, text: TEXT.trim(), seal: SEAL });
     expect(fetchMock).toHaveBeenCalledWith(`${BASE}/api/analyze`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -79,12 +80,18 @@ describe("analyzeText", () => {
   });
 });
 
+test("rejects a result without the server's seal, so /results can confirm NextStep made it", async () => {
+  const unsealed = vi.fn(async () => Response.json(RESULT));
+  expect(await analyzeText(BASE, TEXT, unsealed)).toEqual({ ok: false, message: MESSAGES.unexpected });
+});
+
 describe("buildHandoff", () => {
-  test("carries the result, the page it came from, and the same text hash the website uses", () => {
-    expect(buildHandoff(RESULT, TEXT.trim(), { title: "Job", url: "https://example.org/jobs/42" })).toEqual({
+  test("carries the result, its seal, the page it came from, and the same text hash the website uses", () => {
+    expect(buildHandoff(RESULT, TEXT.trim(), { title: "Job", url: "https://example.org/jobs/42" }, SEAL)).toEqual({
       version: 1,
       textHash: sha256Hex(TEXT.trim()),
       result: RESULT,
+      seal: SEAL,
       source: { title: "Job", url: "https://example.org/jobs/42" },
     });
   });

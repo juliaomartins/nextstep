@@ -20,6 +20,7 @@ const SECTIONS: { heading: string; body: string[] }[] = [
     body: [
       "Files you upload are read in your browser and are never uploaded.",
       "When you press Make my checklist, the text is sent to the NextStep server, which sends it to OpenAI's API to create the checklist and returns the result. OpenAI processes it under its API data policies.",
+      "When the extension opens your checklist on the NextStep results page, the checklist (not your text) is sent back to the NextStep server once, to confirm NextStep made it. It is not stored.",
       "The NextStep server does not store your text. Its logs record only technical details, such as the AI model used and the number of tokens, never your text.",
     ],
   },
@@ -52,7 +53,7 @@ export default function PrivacyPage() {
       <SiteHeader />
       <main className="mx-auto mt-12 max-w-3xl pb-8 sm:mt-16">
         <h1 className="condensed text-5xl font-black text-ink uppercase">Privacy policy</h1>
-        <p className="mt-3 text-muted-ink">Applies to the NextStep website and the NextStep Chrome extension. Last updated 24 October 2026.</p>
+        <p className="mt-3 text-muted-ink">Applies to the NextStep website and the NextStep Chrome extension. Last updated 25 October 2026.</p>
         <div className="mt-10 space-y-9">
           {SECTIONS.map(({ heading, body }) => (
             <section key={heading} aria-labelledby={heading}>

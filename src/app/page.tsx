@@ -12,7 +12,7 @@ import { SiteHeader } from "@/components/site-header";
 import { cleanText } from "@/lib/clean-text";
 import { DEFAULT_LANGUAGE, type LanguageCode } from "@/lib/languages";
 import { checkFile, fileErrorMessage, readFile } from "@/lib/read-file";
-import type { AnalysisResult, ApiError } from "@/lib/schemas";
+import { AnalysisResultSchema, type ApiError } from "@/lib/schemas";
 import { SAMPLE_POSTING } from "@/lib/sample-posting";
 import { SAMPLE_SCHOLARSHIP } from "@/lib/sample-scholarship";
 import { hashText, loadSaved } from "@/lib/storage";
@@ -85,11 +85,19 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: cleaned, language }),
       });
-      const data: AnalysisResult | ApiError = await res.json();
-      if ("error" in data) {
-        setError(data.error.message);
+      const body: unknown = await res.json();
+      const failure = body as Partial<ApiError> | null;
+      if (failure?.error?.message) {
+        setError(failure.error.message);
         return;
       }
+      // Never show or save an answer that isn't a well-formed, checked result.
+      const parsed = AnalysisResultSchema.safeParse(body);
+      if (!parsed.success) {
+        setError(NETWORK_ERROR);
+        return;
+      }
+      const data = parsed.data;
       // Nothing actionable: show the message, but don't replace the saved checklist with an empty one.
       show(data, data.items.length > 0 ? hash : null);
       showResults();

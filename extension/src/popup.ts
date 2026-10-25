@@ -121,7 +121,7 @@ async function init() {
       updateCount();
       return;
     }
-    const handoff = buildHandoff(outcome.result, outcome.text, { title: tab.title ?? "", url: tab.url ?? "" });
+    const handoff = buildHandoff(outcome.result, outcome.text, { title: tab.title ?? "", url: tab.url ?? "" }, outcome.seal);
     await chrome.tabs.create({ url: resultsUrl(NEXTSTEP_URL, handoff) });
     showView("done");
   });

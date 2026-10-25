@@ -33,12 +33,18 @@ const AI_INSTRUCTION_PATTERNS: RegExp[] = [
   /\b(?:note|message|instructions?|request) (?:to|for) (?:the |this )?(?:ai|assistant|model|chatbot|chatgpt|llm|language model)\b/,
   /\byou are now (?:in |an? |acting|the |my )/,
   /\b(?:debug|developer|jailbreak|god|dan) mode\b/,
-  /\b(?:print|reveal|show|output|tell|give|display|leak|repeat|share)\b[^.!?]*\b(?:system prompt|api[ _-]?keys?|openai_api_key|secret keys?|environment variables?)\b/,
-  /\b(?:write|compose|generate|create)\b[^.!?]{0,40}\b(?:poem|story|essay|song|joke|haiku|limerick)\b/,
-  /\b(?:put|place|insert|include)\b[^.!?]{0,40}\bin the (?:summary|output|response|json)\b/,
+  // Asking the AI for *its* secrets ("reveal your API key", "print the OPENAI_API_KEY"), not "share API keys securely".
+  /\b(?:print|reveal|show|output|tell|give|display|leak|repeat|share)\b(?: (?:me|us))? (?:your|its)\b[^.!?]{0,30}\b(?:system prompt|prompt|instructions|api[ _-]?keys?|secret keys?|environment variables?)\b/,
+  /\b(?:print|reveal|show|output|tell|give|display|leak|repeat|share)\b[^.!?]{0,40}\b(?:openai_api_key|system prompt)\b(?!s)/,
+  // Creative writing nobody asks a reader for; "essay" and "story" are left out (scholarship essays, story ideas).
+  /\b(?:write|compose|generate|create)\b[^.!?]{0,40}\b(?:poem|song|joke|haiku|limerick)\b/,
+  // "…in the summary." ends the clause; "in the summary section of your CV" doesn't.
+  /\b(?:put|place|insert|include)\b[^.!?]{0,40}\bin the (?:summary|output|response|json)(?=\s*(?:[.!?,;:]|$|and\b|instead\b))/,
   /\badd\b[^.!?]{0,30}\b(?:(?:checklist|required|recommended) items?|to (?:the|your) checklist)\b/,
-  /\bdo not (?:analy[sz]e|summari[sz]e|follow)\b/,
-  /\b(?:say|state|claim|pretend|tell (?:the user|them|me)) (?:that )?the deadline\b/,
+  // "Do not follow your instructions", not "do not follow up by phone".
+  /\bdo not (?:analy[sz]e|summari[sz]e)\b|\bdo not follow (?:\w+ ){0,2}(?:instructions|rules|prompt|system)\b/,
+  // "Say the deadline is …", not "state the deadline you can start by".
+  /\b(?:say|state|claim|pretend|tell (?:the user|them|me)) (?:that )?the deadline (?:is|was|will be)\b/,
   /\b(?:as an ai|act as (?:if you (?:are|were)|an? (?:ai|assistant|chatbot|language model))|pretend to be|role-?play as)\b/,
 ];
 
@@ -89,19 +95,48 @@ function isRealIsoDate(date: string | null): date is string {
   return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === date;
 }
 
-const MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+// Month names and common abbreviations, lowercased, in English and every offered checklist language
+// (Spanish, Portuguese, French, Indonesian, Filipino, Swahili), so documents in those languages verify too.
+const MONTH_NAMES: string[][] = [
+  ["january", "jan", "enero", "ene", "janeiro", "janvier", "janv", "januari"],
+  ["february", "feb", "febrero", "fevereiro", "fev", "février", "févr", "februari", "pebrero"],
+  ["march", "mar", "marzo", "março", "mars", "maret", "marso", "machi"],
+  ["april", "apr", "abril", "abr", "avril", "avr", "aprili"],
+  ["may", "mayo", "maio", "mai", "mei"],
+  ["june", "jun", "junio", "junho", "juin", "juni", "hunyo"],
+  ["july", "jul", "julio", "julho", "juillet", "juil", "juli", "hulyo", "julai"],
+  ["august", "aug", "agosto", "ago", "août", "agustus", "agosti"],
+  ["september", "sept", "sep", "septiembre", "setiembre", "setembro", "set", "septembre", "setyembre", "septemba"],
+  ["october", "oct", "octubre", "outubro", "out", "octobre", "oktober", "okt", "oktubre", "oktoba"],
+  ["november", "nov", "noviembre", "novembro", "novembre", "nobyembre", "novemba"],
+  ["december", "dec", "diciembre", "dic", "dezembro", "dez", "décembre", "déc", "desember", "des", "disyembre", "desemba"],
+];
 
 /**
- * The quote must back the date itself: its day and month appear in it (month as a number or a name),
- * and if the quote names a year, it is the date's year. A misread "15 November" as the 16th can't pass.
+ * The quote must back the date itself: the date's month must sit right next to its day ("15 de enero",
+ * "June 15", "Nov. 3rd") or both must be in a numeric date ("15.06.2027", "2027-06-15"), and if the quote
+ * names a year, it is the date's year. So a misread day, a "may" or "Decisions" mistaken for a month, or a
+ * wrong year can't pass.
  */
 function isDateInExcerpt(date: string, excerpt: string): boolean {
   const [year, month, day] = date.split("-").map(Number);
   const text = normalize(excerpt);
-  const numbers = (text.match(/\d+/g) ?? []).map(Number);
-  const years = numbers.filter((n) => n >= 1900 && n <= 2100);
-  const monthNamed = new RegExp(`\\b${MONTHS[month - 1]}`).test(text);
-  return numbers.includes(day) && (numbers.includes(month) || monthNamed) && (years.length === 0 || years.includes(year));
+  const years = (text.match(/\d+/g) ?? []).map(Number).filter((n) => n >= 1900 && n <= 2100);
+  if (years.length > 0 && !years.includes(year)) return false;
+
+  const numeric = [...text.matchAll(/\b(\d{1,4})[./-](\d{1,2})[./-](\d{1,4})\b/g)].some((m) => {
+    const parts = m.slice(1, 4).map(Number);
+    return parts.includes(day) && parts.includes(month);
+  });
+  if (numeric) return true;
+
+  const names = MONTH_NAMES[month - 1].join("|");
+  const dayText = `0?${day}(?:st|nd|rd|th|er|º|°)?`;
+  const notLetter = "(?![\\p{L}])";
+  return (
+    new RegExp(`(?<![\\p{L}\\d])${dayText}\\s*(?:\\.\\s*|de\\s+|of\\s+|-\\s*)?(?:${names})\\.?${notLetter}`, "u").test(text) ||
+    new RegExp(`(?<![\\p{L}])(?:${names})\\.?\\s+(?:de\\s+)?${dayText}(?!\\d)`, "u").test(text)
+  );
 }
 
 /** Every piece of deadline text that reaches the screen must be found in the document. */

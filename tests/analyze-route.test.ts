@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import type { AnalysisOutput } from "@/lib/schemas";
+import { AnalysisResultSchema, type AnalysisOutput } from "@/lib/schemas";
+import { isSealed } from "@/lib/seal";
 
 const DOCUMENT = `Applicants must submit a CV in PDF format. ${"More detail about the role. ".repeat(10)}`;
 
@@ -28,7 +29,17 @@ const { POST } = await import("@/app/api/analyze/route");
 const post = (body: unknown) =>
   POST(new Request("http://localhost/api/analyze", { method: "POST", body: JSON.stringify(body) }));
 
-beforeEach(() => analyzeDocument.mockClear());
+beforeEach(() => {
+  analyzeDocument.mockClear();
+  process.env.HANDOFF_SECRET = "test-secret";
+});
+
+describe("POST /api/analyze: seal", () => {
+  test("seals every result so the /results page can confirm NextStep made it", async () => {
+    const { seal, ...result } = await (await post({ text: DOCUMENT })).json();
+    expect(isSealed(AnalysisResultSchema.parse(result), seal)).toBe(true);
+  });
+});
 
 describe("POST /api/analyze: checklist language", () => {
   test("passes the chosen language to the AI and stamps it on the result", async () => {

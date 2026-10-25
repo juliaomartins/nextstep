@@ -39,6 +39,15 @@ describe("failures keep the user's text", () => {
     expect(screen.queryByRole("heading", { name: "Your checklist" })).toBeNull();
   });
 
+  test("a malformed answer is never shown or saved", async () => {
+    stubApi(async () => Response.json({ summary: "Looks fine", items: [{ title: "No quote, no evidence" }] }));
+    render(<Home />);
+    await pasteAndAnalyze();
+    expect((await screen.findByRole("alert")).textContent).toContain("Please try again.");
+    expect(screen.queryByRole("heading", { name: "Your checklist" })).toBeNull();
+    expect(window.localStorage.getItem(STORAGE_KEY)).toBeNull();
+  });
+
   test("a network failure shows the retry message and keeps the text", async () => {
     stubApi(async () => {
       throw new TypeError("Failed to fetch");

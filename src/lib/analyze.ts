@@ -7,7 +7,8 @@ import { AnalysisSchema, type AnalysisOutput } from "./schemas";
 import { languageName, type LanguageCode } from "./languages";
 import { languageRule, SYSTEM_PROMPT } from "./prompt";
 
-const DEFAULT_MODEL = "gpt-4.1-mini";
+// The model every recorded run used (see devpost/checklist.md > Revisions).
+const DEFAULT_MODEL = "gpt-4o-mini";
 
 const prompt = ChatPromptTemplate.fromMessages([
   ["system", SYSTEM_PROMPT],

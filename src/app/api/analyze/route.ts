@@ -1,5 +1,6 @@
 import { analyzeDocument } from "@/lib/analyze";
 import { validateAnalyzeInput, type ApiError, type ApiErrorCode } from "@/lib/schemas";
+import { sealResult } from "@/lib/seal";
 import { verifyEvidence } from "@/lib/verify-evidence";
 
 const MESSAGES: Record<ApiErrorCode, string> = {
@@ -26,7 +27,9 @@ export async function POST(request: Request) {
 
   try {
     const output = await analyzeDocument(input.text, input.language);
-    return Response.json({ ...verifyEvidence(input.text, output), language: input.language });
+    const result = { ...verifyEvidence(input.text, output), language: input.language };
+    // The seal lets /results confirm that a checklist opened from a link was made here, unchanged.
+    return Response.json({ ...result, seal: sealResult(result) });
   } catch (error) {
     // Log the reason, never the document.
     console.error("[analyze] failed:", error instanceof Error ? `${error.name}: ${error.message}` : error);

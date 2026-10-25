@@ -1,15 +1,17 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from "@testing-library/react";
+import { StrictMode } from "react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import ResultsPage from "@/app/results/page";
 import { encodeHandoff, type Handoff } from "@/lib/handoff";
 import { STORAGE_KEY, type SavedState } from "@/lib/storage";
-import { setUpBrowser } from "./helpers/browser";
+import { setUpBrowser, stubApi } from "./helpers/browser";
 
 const HANDOFF: Handoff = {
   version: 1,
   textHash: "b".repeat(64),
+  seal: "5".repeat(64),
   source: { title: "Senior IT Officer", url: "https://jobs.example.org/42" },
   result: {
     summary: "A job posting from a web page.",
@@ -31,8 +33,12 @@ const HANDOFF: Handoff = {
 const at = (url: string) => window.history.replaceState(null, "", url);
 const saved = () => JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? "null") as SavedState | null;
 
+// The only fake: the server's answer to "did NextStep seal this checklist?".
+let confirmSeal: ReturnType<typeof stubApi>;
+
 beforeEach(() => {
   setUpBrowser();
+  confirmSeal = stubApi(async () => Response.json({ valid: true }));
   at("/results");
 });
 afterEach(() => {
@@ -48,7 +54,8 @@ describe("/results", () => {
     expect(await screen.findByRole("heading", { name: "Your checklist" })).toBeTruthy();
     expect(screen.getByText("Senior IT Officer")).toBeTruthy();
     expect(screen.getByText("jobs.example.org")).toBeTruthy();
-    expect(saved()?.textHash).toBe(HANDOFF.textHash);
+    // The seal is confirmed asynchronously, so the save can land just after the first render.
+    await waitFor(() => expect(saved()?.textHash).toBe(HANDOFF.textHash));
     expect(window.location.hash).toBe("");
   });
 
@@ -80,6 +87,47 @@ describe("/results", () => {
     render(<ResultsPage />);
     expect(await screen.findByText("This link doesn't contain a valid checklist.")).toBeTruthy();
     expect(saved()?.textHash).toBe("c".repeat(64));
+  });
+
+  test("still shows the hand-off under React's StrictMode, which runs effects twice in development", async () => {
+    at(`/results#data=${encodeHandoff(HANDOFF)}`);
+    render(
+      <StrictMode>
+        <ResultsPage />
+      </StrictMode>,
+    );
+    expect(await screen.findByRole("heading", { name: "Your checklist" })).toBeTruthy();
+    expect(screen.getByText("Senior IT Officer")).toBeTruthy();
+  });
+
+  test("asks the server to confirm the seal before showing anything", async () => {
+    at(`/results#data=${encodeHandoff(HANDOFF)}`);
+    render(<ResultsPage />);
+    await screen.findByRole("heading", { name: "Your checklist" });
+    const [url, init] = confirmSeal.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toBe("/api/handoff");
+    expect(JSON.parse(init.body as string)).toEqual({ result: HANDOFF.result, seal: HANDOFF.seal });
+  });
+
+  test("a forged or edited link is refused and leaves the saved checklist alone", async () => {
+    stubApi(async () => Response.json({ valid: false }));
+    const earlier: SavedState = { version: 1, savedAt: "x", textHash: "c".repeat(64), result: HANDOFF.result, completedIds: [] };
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(earlier));
+    at(`/results#data=${encodeHandoff(HANDOFF)}`);
+    render(<ResultsPage />);
+    expect(await screen.findByText("NextStep couldn't confirm it made this checklist.")).toBeTruthy();
+    expect(screen.queryByRole("heading", { name: "Your checklist" })).toBeNull();
+    expect(saved()?.textHash).toBe("c".repeat(64));
+  });
+
+  test("if the seal can't be checked (offline), nothing is shown or saved", async () => {
+    stubApi(async () => {
+      throw new TypeError("Failed to fetch");
+    });
+    at(`/results#data=${encodeHandoff(HANDOFF)}`);
+    render(<ResultsPage />);
+    expect(await screen.findByText("NextStep couldn't confirm it made this checklist.")).toBeTruthy();
+    expect(saved()).toBeNull();
   });
 
   test("without a hand-off it shows the saved checklist", async () => {

@@ -29,7 +29,7 @@ export function isSupportedUrl(url: string | undefined): boolean {
   return !(parsed.hostname === "chrome.google.com" && parsed.pathname.startsWith("/webstore"));
 }
 
-type Outcome = { ok: true; result: AnalysisResult; text: string } | { ok: false; message: string };
+type Outcome = { ok: true; result: AnalysisResult; text: string; seal: string } | { ok: false; message: string };
 
 /**
  * Sends the reviewed text to the existing NextStep API (/api/analyze), the same LangChain + OpenAI
@@ -60,11 +60,14 @@ export async function analyzeText(base: string, text: string, fetchImpl: typeof 
   const apiError = data as Partial<ApiError>;
   if (apiError?.error && typeof apiError.error.message === "string") return { ok: false, message: apiError.error.message };
 
+  // The seal lets the website's /results page confirm this checklist came from NextStep, unchanged.
   const parsed = AnalysisResultSchema.safeParse(data);
-  return parsed.success ? { ok: true, result: parsed.data, text: cleaned } : { ok: false, message: MESSAGES.unexpected };
+  const seal = (data as { seal?: unknown }).seal;
+  if (!parsed.success || typeof seal !== "string") return { ok: false, message: MESSAGES.unexpected };
+  return { ok: true, result: parsed.data, text: cleaned, seal };
 }
 
 /** The same SHA-256 text hash the website stores, so "same document as before" also works for pages. */
-export function buildHandoff(result: AnalysisResult, text: string, source: Handoff["source"]): Handoff {
-  return { version: 1, textHash: sha256Hex(text), result, source };
+export function buildHandoff(result: AnalysisResult, text: string, source: Handoff["source"], seal: string): Handoff {
+  return { version: 1, textHash: sha256Hex(text), result, seal, source };
 }

@@ -11,7 +11,7 @@ Source: `scope.md > Who It's For`, `scope.md > The Unique Kernel`.
 ## The Core Journey
 Source: `scope.md > The Core Loop`, `scope.md > What "Working" Looks Like`.
 
-1. The user opens NextStep and sees a headline, a one-sentence explanation, a large paste area, a **Use the sample job posting** link, and an **Make my checklist** button. A short privacy note sits under the button.
+1. The user opens NextStep and sees a headline, a one-sentence explanation, a large paste area, a **Use the sample job posting** link, and a **Make my checklist** button. A short privacy note sits under the button.
 2. They paste a document (or click **Use the sample job posting** to fill the paste area with a sample job posting).
 3. They click **Make my checklist**. The button is disabled and a progress message shows that the document is being read.
 4. Results appear below the input, in this order: **Summary**, **Deadline**, then **the checklist**.
@@ -153,6 +153,8 @@ Source: `scope.md > Added during the build (learner decision)`.
 - [ ] After opening from the extension, the address bar shows plain `/results`, and a reload still shows the checklist (restored from this browser).
 - [ ] The same page analyzed again keeps the ticks already saved for it.
 - [ ] A broken or tampered link shows *"This link doesn't contain a valid checklist."* and leaves the saved checklist alone.
+- *Added after the second judge-style review:* the checklist in a link is shown only after the NextStep server confirms it sealed it, unchanged. A hand-made or edited link, or one opened while offline, shows *"NextStep couldn't confirm it made this checklist."* and nothing is shown or saved.
+- [ ] A link whose checklist was edited (for example a changed step or evidence label) is refused, and the saved checklist is untouched.
 
 ### Extension Recommendation
 - On a **first visit in a desktop Chromium browser** (Chrome, Edge, Brave), a slim band under the header offers **Add to Chrome** (the Chrome Web Store listing once published, otherwise the `/extension` page) or **Use it here** (scrolls to the paste box). A close button dismisses it. Any choice is remembered in this browser, so it appears once.
@@ -264,5 +266,5 @@ Source: `scope.md > Who It's For`, `scope.md > Added during the build (learner d
 - **Authoritative advice:** NextStep helps people read a document; it doesn't replace it.
 
 ## Open Questions
-- **Exact input size limit:** decide in `4-spec` (does not block approval).
-- **Sample posting text:** to be written during the build, following the description in *Document Input* (does not block approval).
+- ~~**Exact input size limit**~~ Resolved: 200–20,000 characters (`spec.md > Input Limits`).
+- ~~**Sample posting text**~~ Resolved: written in slice 1 (`src/lib/sample-posting.ts`); a scholarship notice was added in slice 9.

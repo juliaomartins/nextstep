@@ -68,7 +68,8 @@ Open **http://localhost:3000**. Use `localhost` rather than your network address
 | Variable | Required | Meaning |
 |---|---|---|
 | `OPENAI_API_KEY` | yes | Your OpenAI key. Read only on the server, never sent to the browser. |
-| `OPENAI_MODEL` | no | A model that supports structured output, for example `gpt-4o-mini`. Defaults to `gpt-4.1-mini`. |
+| `OPENAI_MODEL` | no | A model that supports structured output. Defaults to `gpt-4o-mini`, the model every recorded run used. |
+| `HANDOFF_SECRET` | no | Secret for sealing checklists handed to `/results`. If unset, one is derived from `OPENAI_API_KEY`. |
 
 ## Deploy (Vercel)
 
@@ -118,17 +119,18 @@ OpenAI is used for exactly one thing: turning text into the checklist. Reading f
 
 ## Responsible AI
 
-NextStep is built so the AI can't be talked into misleading anyone. Each safeguard below is enforced in code and tested, not only requested in the prompt:
+NextStep is built so the AI can't be talked into misleading anyone. Most safeguards below are enforced in code and covered by tests; the two that rely on the prompt say so.
 
 - **Nothing invented.** Every step must quote the document. Quotes that can't be found are stamped *Not found* and moved to *Needs your check*. Deadlines and dates appear only if the document contains them.
 - **Hidden instructions are ignored.** Text inside a document that tries to command an AI ("ignore previous instructions", "note to the AI", "say the deadline is…", "write a poem") is detected. Nothing quoted from it counts as evidence, and the user sees a warning that such text can be a sign of a scam, on screen and in the downloads.
-- **Off-task output is blocked.** NextStep only describes documents. A summary shaped like a poem, an essay, or a list is replaced, and questions or creative requests produce no steps.
+- **Off-task output is blocked.** NextStep only describes documents. A summary shaped like a poem, an essay, or a list is replaced in code. The prompt also tells the model to return no steps for questions or creative requests.
+- **Results can't be faked by a link.** The server seals every checklist it makes, and the `/results` page shows a checklist opened from a link only after the server confirms the seal. A hand-made or edited link is refused.
 - **No secrets to leak.** The OpenAI key lives only on the server and is never part of what the AI sees, so no prompt can extract it.
-- **Requests for passwords, PINs, or bank details** are never presented as normal requirements; they're flagged with "Be careful:".
+- **Requests for passwords, PINs, or bank details** are flagged with "Be careful:" instead of being listed as normal requirements. This one is a prompt rule, checked in live runs rather than by a unit test.
 - **The person stays in charge.** Uploads and web pages become editable text that you review before anything is sent. Every step links to its source, and NextStep reminds you it is a reading aid, not legal, financial, or official advice.
 - **Private by default.** No account, no tracking, and your document isn't stored. Progress stays in your browser.
 
-These were tested with real attacks against the live model: secret-key extraction, off-topic questions, a "write a poem" injection, and a fake job posting hiding a fake deadline and a phishing request. See `tests/verify-evidence.test.ts` and `devpost/checklist.md > Revisions`.
+During the build these were also tried against the live model: secret-key extraction, off-topic questions, a "write a poem" injection, and a fake job posting hiding a fake deadline and a phishing request. The runs are recorded in `devpost/checklist.md > Revisions`; the code paths are covered by `tests/verify-evidence.test.ts`, `tests/seal.test.ts`, and the page tests.
 
 ## Privacy
 
