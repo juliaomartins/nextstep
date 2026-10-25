@@ -6,7 +6,7 @@ Paste a job posting, an application notice, course requirements, or a form's ins
 
 Built for Devpost's *Build With AI: Basics* hackathon.
 
-![NextStep home page: "Turn confusing documents into clear next steps", with a fictional example document whose sentences are stamped Required, Recommended, and Check this, and a deadline stamped Not stated. Nothing invented.](docs/screenshots/home.png)
+![NextStep home page: "Turn confusing documents into clear next steps", beside a fictional job abroad. Each original English sentence is highlighted and stamped Required or Recommended with its step in Spanish underneath, a request to pay a USD 150 processing fee is stamped Be careful, and the deadline is stamped Not stated. Nothing invented.](docs/screenshots/home.png)
 
 ## Who it's for
 

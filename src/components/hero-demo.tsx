@@ -1,29 +1,41 @@
 "use client";
 
 import { useRef } from "react";
-import { CalendarX2, FileText, RotateCcw } from "lucide-react";
+import { CalendarX2, CornerDownRight, FileText, RotateCcw } from "lucide-react";
 import { gsap, MOTION_OK, thump, useGSAP } from "@/lib/motion";
 import { Stamp, type StampTone } from "./stamp";
 
-/* A fictional notice, shown as the product's own proof: each sentence is highlighted,
-   then stamped with what the document's wording makes it. */
-const LINES: { quote: string; stamp: string; tone: StampTone; rotate: number }[] = [
+/* A fictional job abroad, read by someone whose first language is Spanish: the product's own proof.
+   Each original sentence is highlighted and stamped with what its wording makes it, the step appears in
+   the reader's language, and a request for money is flagged, as NextStep does with payment requests. */
+const STEP_LANGUAGE = { code: "es", label: "Español" };
+
+const LINES: { quote: string; step: string; stamp: string; tone: StampTone; rotate: number }[] = [
   {
-    quote: "Applicants must hold a bachelor's degree or be in their final year of study.",
+    quote: "Applicants must hold a valid work permit for the country.",
+    step: "Confirma que tienes un permiso de trabajo válido.",
     stamp: "Required",
     tone: "required",
     rotate: -4,
   },
   {
-    quote: "Please upload a CV and a personal statement of up to 500 words.",
+    quote: "Please send your CV and a copy of your passport photo page.",
+    step: "Envía tu CV y una copia de la página de foto de tu pasaporte.",
     stamp: "Required",
     tone: "required",
     rotate: 3,
   },
-  { quote: "A full driving licence would be an advantage.", stamp: "Recommended", tone: "recommended", rotate: -2 },
   {
-    quote: "Shortlisted candidates may be invited to an assessment day.",
-    stamp: "Check this",
+    quote: "Basic English is an advantage.",
+    step: "Menciona tu nivel básico de inglés si lo tienes.",
+    stamp: "Recommended",
+    tone: "recommended",
+    rotate: -2,
+  },
+  {
+    quote: "Pay a USD 150 processing fee to reserve your interview.",
+    step: "Ten cuidado: piden dinero para una entrevista.",
+    stamp: "Be careful",
     tone: "check",
     rotate: 4,
   },
@@ -52,7 +64,9 @@ export function HeroDemo() {
             { backgroundSize: "0% 100%" },
             { backgroundSize: "100% 100%", duration: 0.55, ease: "power1.inOut" },
             i === 0 ? "+=0.15" : "+=0.1",
-          ).add(thump(`[data-demo='stamp-${i}']`, "[data-demo='sheet']"), "-=0.05");
+          )
+            .add(thump(`[data-demo='stamp-${i}']`, "[data-demo='sheet']"), "-=0.05")
+            .fromTo(`[data-demo='step-${i}']`, { autoAlpha: 0, y: 4 }, { autoAlpha: 1, y: 0, duration: 0.3 }, "-=0.1");
         });
 
         tl.add(thump("[data-demo='deadline']", "[data-demo='sheet']"), "+=0.25").fromTo(
@@ -84,9 +98,9 @@ export function HeroDemo() {
         <div className="flex items-center justify-between gap-3 border-b-2 border-ink px-5 py-2.5">
           <p className="condensed flex items-center gap-2 text-sm font-bold tracking-wide text-ink uppercase">
             <FileText className="size-4" aria-hidden />
-            Graduate Programme 2027
+            Warehouse assistant · work abroad
           </p>
-          <p className="text-xs text-muted-ink">Fictional example</p>
+          <p className="text-xs text-muted-ink">Fictional example · steps in {STEP_LANGUAGE.label}</p>
         </div>
 
         <ol className="divide-y divide-dashed divide-rule">
@@ -95,11 +109,22 @@ export function HeroDemo() {
               <span aria-hidden className="condensed mt-0.5 w-5 shrink-0 text-sm font-bold text-muted-ink">
                 {String(i + 1).padStart(2, "0")}
               </span>
-              <p className="flex-1 text-[0.975rem] leading-relaxed text-ink-soft">
-                <span data-demo={`mark-${i}`} className="evidence-mark">
-                  {line.quote}
-                </span>
-              </p>
+              <div className="flex-1">
+                <p className="text-[0.975rem] leading-relaxed text-ink-soft">
+                  <span data-demo={`mark-${i}`} className="evidence-mark">
+                    {line.quote}
+                  </span>
+                </p>
+                <p
+                  data-demo={`step-${i}`}
+                  data-demo-reveal
+                  lang={STEP_LANGUAGE.code}
+                  className="mt-1.5 flex items-start gap-1.5 text-sm font-semibold text-ballpoint"
+                >
+                  <CornerDownRight className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+                  {line.step}
+                </p>
+              </div>
               <span data-demo={`stamp-${i}`} data-demo-reveal className="mt-0.5 inline-block shrink-0">
                 <Stamp tone={line.tone} rotate={line.rotate} className="text-[0.7rem]">
                   {line.stamp}
