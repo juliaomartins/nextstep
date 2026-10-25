@@ -6,16 +6,22 @@ Paste a job posting, an application notice, course requirements, or a form's ins
 
 Built for Devpost's *Build With AI: Basics* hackathon.
 
+![NextStep home page: "Turn confusing documents into clear next steps", with a fictional example document whose sentences are stamped Required, Recommended, and Check this, and a deadline stamped Not stated. Nothing invented.](docs/screenshots/home.png)
+
 ## What makes it different
 
 AI summaries sound confident even when they are wrong. NextStep doesn't ask you to trust the model:
 
 - **Every quote is checked by code.** After the AI answers, the server searches your text for each quoted excerpt. A quote that can't be found is labelled *Not found in document* and moved to **Needs your check**.
-- **Deadlines are never invented.** A deadline is *Stated*, *Relative*, *Unclear*, or *Not stated*. A date whose quote can't be found, or that isn't a real calendar date, is downgraded to *Unclear*.
+- **Deadlines are never invented.** A deadline is *Stated*, *Relative*, *Unclear*, or *Not stated*. A date whose quote can't be found, that isn't a real calendar date, or whose day, month, or year isn't in its quote is downgraded to *Unclear*.
 - **Groups follow the document's own wording:** *Required* (must, required), *Recommended* (preferred, a plus), and *Needs your check* (may, vague, or unsupported).
 - **The document is data, not instructions.** Text such as "ignore previous instructions" is ignored, and anything that slipped through would still have to quote your document to count as *Found*.
 
+![An opened checklist step, "Prepare a CV in PDF format", showing its source quote highlighted from the posting and stamped Found in document.](docs/screenshots/evidence.png)
+
 ## Features
+
+<img src="docs/screenshots/results.png" alt="A real checklist made from the built-in sample job posting: a short summary, a banner saying no deadline is stated in this document, Required, Recommended, and Needs your check groups with progress counts and Found stamps, and Download as Word or PDF buttons." width="420" align="right">
 
 - Paste a document, try the built-in fictional sample job posting, or **upload a PDF, a Word (.docx) file, or a photo or screenshot of the document**. Files are read in your browser (pictures with Tesseract OCR, no AI tokens) and become editable text before anything is analyzed.
 - Summary, deadline banner, and a grouped checklist with progress counts.
@@ -26,6 +32,10 @@ AI summaries sound confident even when they are wrong. NextStep doesn't ask you 
 - Clear messages for text that is too short, too long, has nothing actionable, or when the AI service fails. Your text is always kept.
 - **Chrome extension:** on any job posting or notice, click *Analyze this page*, review the extracted text, and get the checklist on the site's `/results` page. Same API, same evidence check. See [`extension/README.md`](extension/README.md).
 - **First visit in desktop Chrome:** a one-time choice, *Add to Chrome* or *Use it here*, remembered in the browser. The [`/extension`](src/app/extension/page.tsx) page explains the extension and its permissions, and [`/privacy`](src/app/privacy/page.tsx) is the privacy policy.
+
+*Screenshots: the checklist and quote above are real output for the built-in fictional sample posting.*
+
+<br clear="right">
 
 ## Run it locally
 
