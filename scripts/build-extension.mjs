@@ -58,9 +58,9 @@ const manifest = {
   manifest_version: 3,
   name: "NextStep: checklist from this page",
   short_name: "NextStep",
-  version: "0.1.0",
+  version: "0.2.0",
   description:
-    "Turn the job posting or notice you're reading into a checklist where every step is backed by a quote from the page.",
+    "Turn the job posting or notice you're reading into a checklist, in your language, with every step backed by a quote from the page.",
   minimum_chrome_version: "120",
   action: { default_popup: "popup.html", default_title: "Analyze this page with NextStep", default_icon: icons },
   icons,

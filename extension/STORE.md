@@ -20,7 +20,7 @@ Git Bash:
 ```bash
 NEXTSTEP_URL=https://YOUR-SITE.vercel.app npm run pack:extension
 ```
-This creates `extension/nextstep-extension-0.1.0.zip`, with `manifest.json` at the zip's root, built for your site only. To publish an update later, raise `version` in `scripts/build-extension.mjs` and pack again.
+This creates `extension/nextstep-extension-0.2.0.zip`, with `manifest.json` at the zip's root, built for your site only. To publish an update later, raise `version` in `scripts/build-extension.mjs` and pack again.
 
 ## Create the listing (you)
 
@@ -34,16 +34,20 @@ This creates `extension/nextstep-extension-0.1.0.zip`, with `manifest.json` at t
 **Name:** NextStep: checklist from this page
 
 **Summary (≤ 132 characters):**
-Turn the job posting or notice you're reading into a checklist where every step is backed by a quote from the page.
+Turn the job posting or notice you're reading into a checklist, in your language, with every step backed by a quote from the page.
 
 **Description:**
 > Long job postings and official notices hide what you actually need to do. NextStep reads the page you're on, after you click, and turns it into a clear checklist: what's required, what's recommended, and what needs your check.
 >
 > Every step is stamped with the exact sentence it came from, so you can verify it. Anything NextStep can't find in the page is flagged, never invented. Deadlines are only shown when the page states them.
 >
+> Reading in a language that isn't your own? Choose English, Español, Português, Français, Bahasa Indonesia, Filipino, or Kiswahili: the steps are written in your language, and every quote stays in the page's own words, so the proof is always the original.
+>
+> Watch for warning signs: a posting that asks for money, passwords, or bank details gets a "Be careful" step instead of a normal one.
+>
 > How it works:
 > 1. Open a job posting or notice and click the NextStep icon.
-> 2. Check the page's text (remove anything private) and press Make my checklist.
+> 2. Check the page's text (remove anything private), choose your checklist language, and press Make my checklist.
 > 3. Your checklist opens on the NextStep website, where you can tick steps off and download it as Word or PDF.
 >
 > Private by design: the page is read only when you click, you review the text before it's sent, there's no account, no tracking, and your text isn't stored.
@@ -67,12 +71,12 @@ Turn the web page the user is reading (a job posting or notice) into a checklist
 |---|---|
 | `activeTab` | Reads the current tab only after the user clicks the extension and presses *Analyze this page*. No access to other tabs or in the background. |
 | `scripting` | Runs the text reader once on that tab, after the click, to collect the page's main text (menus, ads, and footers are skipped). |
-| Host permission (your NextStep site only) | Sends the text the user reviewed and approved to the NextStep website's analysis endpoint, then opens the checklist there. |
+| Host permission (your NextStep site only) | Sends the text the user reviewed and approved, and the chosen checklist language, to the NextStep website's analysis endpoint, then opens the checklist there. |
 
 **Remote code:** No. All code is bundled in the package.
 
 **Data usage (what to declare):**
-- **Website content**: yes. The page text the user chooses to analyze is sent to the NextStep server, which uses OpenAI's API to create the checklist. It is not stored.
+- **Website content**: yes. The page text the user chooses to analyze is sent to the NextStep server, which uses OpenAI's API to create the checklist. It is not stored. When the checklist opens on the NextStep website, the checklist (not the page text) is sent back to the server once to confirm NextStep made it; it is not stored either.
 - Not collected: personally identifiable information, health, financial, authentication information, personal communications, location, web history, user activity.
 - Certify: not sold to third parties; not used or transferred for purposes unrelated to the single purpose; not used to determine creditworthiness or for lending.
 

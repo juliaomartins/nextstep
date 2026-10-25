@@ -29,8 +29,21 @@ const INSTALL_STEPS = [
 
 const STEPS = [
   { Icon: MousePointerClick, title: "Click the NextStep icon", body: "On any job posting or notice, then press Analyze this page." },
-  { Icon: ScanText, title: "Check the text", body: "NextStep shows the page's main text. Remove anything private before sending." },
-  { Icon: ClipboardCheck, title: "Get your checklist", body: "Every step is stamped with the sentence it came from. Nothing is invented." },
+  {
+    Icon: ScanText,
+    title: "Check the text, choose a language",
+    body: "Remove anything private, then pick the checklist language: English, Español, Português, Français, Bahasa Indonesia, Filipino, or Kiswahili.",
+  },
+  {
+    Icon: ClipboardCheck,
+    title: "Get your checklist",
+    body: "Steps arrive in your language; quotes stay in the page's own words, each stamped Found by code. Nothing is invented.",
+  },
+  {
+    Icon: ShieldCheck,
+    title: "Spot the warning signs",
+    body: "A posting that asks for money, passwords, or bank details gets a Be careful step instead of a normal one.",
+  },
 ];
 
 const PERMISSIONS = [
@@ -120,9 +133,10 @@ export default function ExtensionPage() {
           <h2 id="how-heading" className="condensed border-b-2 border-ink px-5 py-2.5 text-sm font-bold tracking-wide text-ink uppercase">
             How it works
           </h2>
-          <ol className="grid divide-y-2 divide-ink sm:grid-cols-3 sm:divide-x-2 sm:divide-y-0">
+          {/* The 2px gap over an ink background draws the ruled lines between the four steps. */}
+          <ol className="grid gap-0.5 bg-ink sm:grid-cols-2">
             {STEPS.map(({ Icon, title, body }) => (
-              <li key={title} className="p-5">
+              <li key={title} className="bg-sheet p-5">
                 <Icon className="size-6 text-ballpoint" aria-hidden />
                 <h3 className="condensed mt-3 text-xl font-extrabold text-ink">{title}</h3>
                 <p className="mt-1 text-ink-soft">{body}</p>

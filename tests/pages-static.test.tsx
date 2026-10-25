@@ -17,6 +17,13 @@ describe("/extension", () => {
     expect(screen.getByRole("link", { name: /Use it on the website/ }).getAttribute("href")).toBe("/");
   });
 
+  test("says the checklist can be in your language, with quotes kept, and that payment requests are flagged", () => {
+    render(<ExtensionPage />);
+    expect(screen.getByText(/in your language/)).toBeTruthy();
+    expect(screen.getByText(/quotes stay in the page's own words/)).toBeTruthy();
+    expect(screen.getByText(/Be careful/)).toBeTruthy();
+  });
+
   test("without a published store listing, says it's coming instead of showing a dead install button", () => {
     render(<ExtensionPage />);
     expect(screen.getByText("Coming to the Chrome Web Store.")).toBeTruthy();
