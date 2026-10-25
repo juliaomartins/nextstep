@@ -15,6 +15,8 @@ For the proof of concept: **a job seeker who has a long job posting in front of 
 
 The wider vision stays open: application notices, academic requirements, and administrative documents should fit the same model later without a rewrite.
 
+*Sharpened during the build (learner decision, 25 Oct):* the reader NextStep helps most is anyone who must act on a document written in a language they don't read comfortably: a job seeker abroad, an international student, a newcomer facing an official notice. There were an estimated **304 million international migrants** in 2024 ([UN DESA](https://www.un.org/en/global-issues/migration)). The same readers are the easiest targets for fake job offers: reported losses to job and employment-agency scams in the US rose from **$90 million in 2020 to $501 million in 2024**, and the number of reports tripled ([FTC, March 2025](https://www.ftc.gov/news-events/news/press-releases/2025/03/new-ftc-data-show-big-jump-reported-losses-fraud-125-billion-2024)). A quote for every step serves both: the checklist can be in the reader's language while the proof stays in the document's own words, and a request for passwords or payment is flagged instead of listed as a normal step.
+
 ## The Core Loop
 1. Paste a job posting.
 2. Get a short summary, a prioritized checklist of requirements and tasks, and a deadline status.
@@ -53,6 +55,9 @@ The learner approved these after the core loop was working. They come **after** 
 - **Download the checklist as Word or PDF**: generated in the browser.
 - **Efficient OpenAI token use**: OpenAI is used only for the one call that turns text into the checklist. Reading files, OCR, the evidence check, and downloads cost no tokens. Re-analyzing identical text reuses the saved result, and text is trimmed before sending.
 - **A Chrome extension** (learner decision, late in the build): on a web page with a posting or notice, *Analyze this page* reads the main text only after the user's click. The user reviews and edits it, and the same API and evidence check produce the checklist on a new `/results` page of the website. It brings the kernel to where people actually read postings, with no copy-paste.
+- **An evidence receipt** (learner decision, 25 Oct, after an independent judge-style review): every result states how many quotes the code found word for word, so the kernel is visible instead of implied.
+- **A second built-in sample, a fictional scholarship notice**, so the "not only job postings" claim can be tried in one click. It has a real deadline, so the *Stated* path is demonstrated too.
+- **The checklist in the reader's language** (English (default), Español, Português, Français, Bahasa Indonesia, Filipino, Kiswahili, and Tetun). Summary, steps, and reasons are written in the chosen language; every quote and deadline stays in the document's own words and is still checked by code. AI translation is where trust is weakest, so the original quote is the proof.
 
 ## Later
 - Editing task titles *(from the learner's original idea notes (kept outside this repo); deferred to keep the first loop small. Bring it back if you want it in now)*.

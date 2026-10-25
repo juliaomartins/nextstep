@@ -5,7 +5,7 @@ import { AnalyzingState } from "@/components/analyzing-state";
 import { ExtensionPrompt } from "@/components/extension-prompt";
 import { Hero } from "@/components/hero";
 import { HowItWorks } from "@/components/how-it-works";
-import { InputPanel } from "@/components/input-panel";
+import { InputPanel, type SampleKind } from "@/components/input-panel";
 import { ResultsView } from "@/components/results-view";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -13,6 +13,7 @@ import { cleanText } from "@/lib/clean-text";
 import { checkFile, fileErrorMessage, readFile } from "@/lib/read-file";
 import type { AnalysisResult, ApiError } from "@/lib/schemas";
 import { SAMPLE_POSTING } from "@/lib/sample-posting";
+import { SAMPLE_SCHOLARSHIP } from "@/lib/sample-scholarship";
 import { hashText, loadSaved } from "@/lib/storage";
 import { useSavedChecklist } from "@/lib/use-saved-checklist";
 
@@ -52,8 +53,8 @@ export default function Home() {
     textareaRef.current?.focus({ preventScroll: true });
   }
 
-  function loadSample() {
-    setText(SAMPLE_POSTING);
+  function loadSample(sample: SampleKind = "job") {
+    setText(sample === "scholarship" ? SAMPLE_SCHOLARSHIP : SAMPLE_POSTING);
     setSourceNote(null);
     setError(null);
     bringIntoView(inputSectionRef.current);
@@ -135,7 +136,7 @@ export default function Home() {
 
       <main>
         <div className="pt-12 pb-20 sm:pt-16 sm:pb-24">
-          <Hero onStart={startPasting} onSample={loadSample} />
+          <Hero onStart={startPasting} onSample={() => loadSample("job")} />
         </div>
 
         <HowItWorks />

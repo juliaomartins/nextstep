@@ -223,6 +223,15 @@ PRD ref: `prd.md > Extension and Privacy Pages`.
 ### Store Packaging (`scripts/pack-extension.mjs`, `extension/STORE.md`)
 `npm run pack:extension` refuses unless `NEXTSTEP_URL` is `https://`, runs the extension build, and zips `extension/dist` with `manifest.json` at the root (`extension/nextstep-extension-<version>.zip`, git-ignored). `STORE.md` holds the listing copy, single purpose, permission justifications, data-usage declarations, and the publishing steps only the account owner can do (developer registration and fee, upload, submit).
 
+### Evidence Receipt (`components/evidence-receipt.tsx`)
+PRD ref: `prd.md > Evidence Receipt`. A pure `evidenceReceipt(items)` in `lib/evidence-receipt.ts` returns the line (or null with no items) from the `evidence` field the Evidence Check already sets; the component shows it under the summary with a stamp icon, and `lib/export-model.ts` passes the same text to both downloads. No new data, no extra AI call.
+
+### Scholarship Sample (`lib/sample-scholarship.ts`)
+PRD ref: `prd.md > Second Sample Document`. A fictional scholarship notice (made-up foundation), with required documents, an eligibility condition, a "may be invited" interview, and a stated closing date. The input panel's second link loads it exactly like the job posting.
+
+### Checklist Language (`lib/languages.ts`)
+PRD ref: `prd.md > Checklist Language`. `LANGUAGES` lists the offered codes, English names (for the prompt), and native labels (for the select); `LanguageSchema` is derived from it. The request's optional `language` (default `en`, unknown codes → `invalid_request`) reaches `analyzeDocument`, whose prompt says which language to write summary, titles, and reasons in, and repeats that quotes, deadline wording, and dates stay exactly as in the document. The Evidence Check is unchanged: it only ever compares quotes with the original text, so translation can't weaken it. The route stamps `language` on the result; the page reuses a saved result only when the text hash **and** the language match. Translated text carries a `lang` attribute. Latin-script languages only, because `lib/export-pdf.ts` uses jsPDF's built-in WinAnsi fonts (`toPdfSafe`).
+
 ### Results Hand-off (`lib/handoff.ts`)
 `encodeHandoff` / `decodeHandoff` / `resultsUrl`: UTF-8 JSON → base64url in `#data=`. Decoding is strict: base64url characters only, fatal UTF-8 decoding, and Zod validation of the whole payload (`AnalysisResultSchema` plus a 64-hex `textHash`). Anything else returns `null`.
 
@@ -240,7 +249,8 @@ All shapes live in `lib/schemas.ts` (Zod). The TypeScript types are inferred fro
 
 ```ts
 // Request
-AnalyzeRequest = { text: string }            // trimmed; 200–20,000 chars
+AnalyzeRequest = { text: string,             // trimmed; 200–20,000 chars
+                   language?: LanguageCode }  // "en" | "es" | "pt" | "fr" | "id" | "fil" | "sw" | "tet"; default "en" (slice 10)
 
 // What the AI must return (strict structured output: every field required; "optional" = nullable)
 AnalysisSchema = {
@@ -263,6 +273,7 @@ AnalysisSchema = {
 // What the API returns and the page stores
 AnalysisResult = AnalysisSchema, with each item extended by
   { id: string, evidence: "found" | "not_found" }   // group may be forced to "needs_check"
+  plus language?: LanguageCode                       // the checklist's language; absent = English (older saved results)
 
 // localStorage key "nextstep:v1"
 SavedState = { version: 1, savedAt: string /* ISO */, textHash: string /* SHA-256 of cleaned text */, result: AnalysisResult, completedIds: string[] }
@@ -385,8 +396,12 @@ nextstep/
 │   ├── privacy/page.tsx            # privacy policy for the site and the extension
 │   └── icon.svg, favicon.ico, apple-icon.png
 ├── src/components/extension-prompt.tsx  # first-visit Add to Chrome / Use it here band
+├── src/components/evidence-receipt.tsx   # "Checked by code: N of N quotes found" (slice 9)
 ├── src/lib/
 │   ├── sha256.ts                   # plain-JS SHA-256 fallback when crypto.subtle is unavailable (non-secure address)
+│   ├── evidence-receipt.ts         # the receipt line, shared by the page and the downloads (slice 9)
+│   ├── sample-scholarship.ts       # fictional scholarship notice with a stated deadline (slice 9)
+│   ├── languages.ts                # offered checklist languages (slice 10)
 │   ├── export-model.ts             # shared shape for the Word and PDF downloads
 │   └── download.ts                 # saves a Blob to the device
 ├── extension/STORE.md              # Chrome Web Store listing text and checklist

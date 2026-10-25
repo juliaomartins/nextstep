@@ -1,3 +1,4 @@
+import { evidenceReceipt } from "./evidence-receipt";
 import type { AnalysisResult, Deadline, Group } from "./schemas";
 
 /** Shown on screen and in downloads when the text tried to give instructions to AI tools. */
@@ -9,6 +10,8 @@ export type ExportModel = {
   title: string;
   madeOn: string;
   summary: string;
+  /** What the code check found, e.g. "Checked by code: 9 of 10 quotes found…". Null with no steps. */
+  receipt: string | null;
   deadline: { label: string; status: string };
   groups: {
     label: string;
@@ -51,6 +54,7 @@ export function buildExportModel(result: AnalysisResult, completedIds: Set<strin
     title: "NextStep checklist",
     madeOn: longDate(madeAt),
     summary: result.summary,
+    receipt: evidenceReceipt(result.items),
     warning: result.safety?.aiInstructions ? AI_INSTRUCTIONS_WARNING : null,
     deadline: describeDeadline(result.deadline),
     groups: GROUPS.map(({ group, label }) => {

@@ -67,6 +67,11 @@ export function createPdf(model: ExportModel, PdfClass: typeof JsPdf): JsPdf {
   y += 16;
   font("normal", 11.5);
   paragraph(model.summary, MARGIN, contentWidth, 16);
+  if (model.receipt) {
+    y += 4;
+    font("bold", 9.5, GREEN);
+    paragraph(model.receipt, MARGIN, contentWidth, 13);
+  }
   if (model.warning) {
     y += 6;
     font("bold", 10, RED);

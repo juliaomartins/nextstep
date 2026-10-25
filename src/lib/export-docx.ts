@@ -18,7 +18,10 @@ export function createDocx(model: ExportModel): Document {
     new Paragraph({ spacing: { after: 240 }, children: [run(`Made on ${model.madeOn}`, { color: MUTED })] }),
 
     new Paragraph({ heading: HeadingLevel.HEADING_2, children: [run("In short", { bold: true, size: 26 })] }),
-    new Paragraph({ spacing: { after: 240 }, children: [run(model.summary)] }),
+    new Paragraph({ spacing: { after: model.receipt ? 120 : 240 }, children: [run(model.summary)] }),
+    ...(model.receipt
+      ? [new Paragraph({ spacing: { after: 240 }, children: [run(model.receipt, { bold: true, color: GREEN, size: 20 })] })]
+      : []),
     ...(model.warning
       ? [new Paragraph({ spacing: { after: 240 }, children: [run(model.warning, { bold: true, color: RED })] })]
       : []),

@@ -1,10 +1,23 @@
 "use client";
 
 import { forwardRef, useState } from "react";
-import { FileCheck2, FileSearch, ListChecks, LoaderCircle, LockKeyhole, TextCursorInput } from "lucide-react";
+import {
+  FileCheck2,
+  FileSearch,
+  GraduationCap,
+  ListChecks,
+  LoaderCircle,
+  LockKeyhole,
+  TextCursorInput,
+} from "lucide-react";
 import { MAX_CHARS } from "@/lib/schemas";
 import { SectionHeading } from "./section-heading";
 import { UploadControl } from "./upload-control";
+
+export type SampleKind = "job" | "scholarship";
+
+const SAMPLE_LINK =
+  "press inline-flex items-center gap-1.5 text-sm font-semibold text-sheet underline decoration-sheet/40 underline-offset-4 hover:decoration-highlight focus-visible:ring-3 focus-visible:ring-highlight focus-visible:outline-none disabled:opacity-50";
 
 type Props = {
   text: string;
@@ -13,7 +26,7 @@ type Props = {
   sourceNote: string | null;
   error: string | null;
   onTextChange: (text: string) => void;
-  onSample: () => void;
+  onSample: (sample: SampleKind) => void;
   onAnalyze: () => void;
   onFile: (file: File) => void;
 };
@@ -36,15 +49,16 @@ export const InputPanel = forwardRef<HTMLTextAreaElement, Props>(function InputP
         title="Your document"
         Icon={TextCursorInput}
         aside={
-          <button
-            type="button"
-            onClick={onSample}
-            disabled={busy}
-            className="press inline-flex items-center gap-1.5 text-sm font-semibold text-sheet underline decoration-sheet/40 underline-offset-4 hover:decoration-highlight focus-visible:ring-3 focus-visible:ring-highlight focus-visible:outline-none disabled:opacity-50"
-          >
-            <FileSearch className="size-4" aria-hidden />
-            Use the sample job posting
-          </button>
+          <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1">
+            <button type="button" onClick={() => onSample("job")} disabled={busy} className={SAMPLE_LINK}>
+              <FileSearch className="size-4" aria-hidden />
+              Use the sample job posting
+            </button>
+            <button type="button" onClick={() => onSample("scholarship")} disabled={busy} className={SAMPLE_LINK}>
+              <GraduationCap className="size-4" aria-hidden />
+              or a scholarship notice
+            </button>
+          </div>
         }
       />
 

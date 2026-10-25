@@ -165,6 +165,30 @@ Source: `scope.md > Added during the build (learner decision)`.
 - `/privacy`: the privacy policy for the website and the extension (required by the Chrome Web Store): what is handled, where it goes, what stays on the device, and what NextStep never does.
 - Both are linked from the footer.
 
+### Evidence Receipt
+Source: `scope.md > The Unique Kernel`, `scope.md > Added during the build (learner decision)`.
+- Under the summary, one line states what the code check found: *Checked by code: 10 of 10 quotes found word for word in your document.* If some were not found: *Checked by code: 8 of 10 quotes found word for word in your document. 2 moved to Needs your check.*
+- No receipt when there are no steps.
+- The Word and PDF downloads carry the same line.
+- [ ] A result where every quote is found shows "N of N"; a result with a missing quote shows the found count and how many moved to *Needs your check*.
+- [ ] The downloaded Word and PDF files contain the receipt line.
+
+### Second Sample Document
+Source: `scope.md > Added during the build (learner decision)`.
+- Next to **Use the sample job posting**, an **or a scholarship notice** link fills the paste box with a fictional scholarship application notice: documents to submit, an eligibility condition, a conditional interview, and a stated closing date.
+- [ ] Clicking it fills the paste box; the checklist shows a *Stated* deadline with its quote.
+
+### Checklist Language
+Source: `scope.md > Who It's For`, `scope.md > Added during the build (learner decision)`.
+- A **Checklist language** choice next to **Make my checklist**: English (default), Español, Português, Français, Bahasa Indonesia, Filipino, Kiswahili, and Tetun.
+- The summary, step titles, and "why it matters" lines are written in the chosen language. Every quote and the deadline wording stay exactly as written in the document, in its own language, and are checked by code as before. The interface itself stays in English.
+- The same text in the same language reuses the saved checklist; the same text in another language makes a new checklist.
+- Downloads contain the chosen language's wording and the original quotes.
+- Only languages written in the Latin alphabet are offered for now, so the PDF download can draw every character.
+- [ ] Choosing Español and making a checklist from the English sample gives Spanish step titles and English quotes stamped *Found*.
+- [ ] Making it again in Español reuses the saved checklist; switching to Português makes a new one.
+- [ ] The Word and PDF downloads show the accented letters correctly.
+
 ## States and Boundaries
 - **Unsupported file type:** *"NextStep can read PDF, Word (.docx), and pictures (PNG, JPG, WebP). Try one of those, or paste the text."*
 - **File too large (over 5 MB):** *"This file is too large (over 5 MB). Try a smaller file, or paste the relevant section."*
@@ -195,6 +219,7 @@ Source: `scope.md > Added during the build (learner decision)`.
 - **OCR in the browser (Tesseract.js), not Hugging Face** (learner followed the agent's recommendation). It costs no tokens, needs no extra account or key, and the image never leaves the device.
 - **OpenAI used only for the checklist itself** (learner priority: efficient token use).
 - **A Chrome extension, reusing the existing API and AI workflow** (learner decision). The extension never holds the OpenAI key. It reads a page only after the user's click (`activeTab`), and the user reviews the text before anything is sent.
+- **Evidence receipt, a scholarship sample, and the checklist language** (learner approved all three on 25 Oct, after an independent judge-style review scored Impact and Innovation lowest). The interface stays in English; only the checklist is translated, and quotes are never translated.
 - **Results hand-off through the URL fragment** (agent's call, accepted with the build): no new server endpoint or storage is needed, and the fragment never reaches a server.
 - **Job posting for the proof of concept, document-neutral design.** The learner chose a job posting as the example, while keeping the product useful for students and administrative documents. All labels avoid job-specific wording.
 - **One checklist, not separate requirement and task lists.** The learner approved the agent's recommendation: it avoids duplication and keeps the evidence attached to the action.
@@ -215,6 +240,7 @@ Source: `scope.md > Added during the build (learner decision)`.
 - A layout that works on desktop and mobile.
 - *Added during the build:* uploading PDF, Word, and pictures (OCR in the browser); downloading the checklist as Word or PDF; reusing the saved result for identical text.
 - *Added during the build:* a Chrome extension (*Analyze this page* → review → checklist) and the website's `/results` page.
+- *Added during the build:* an evidence receipt, a scholarship-notice sample, and the checklist in the reader's language with original quotes.
 
 ## Deferred From the POC
 - **Editing item titles:** in the learner's original idea notes (kept outside this repo); deferred in scope to keep the first loop small.
@@ -223,7 +249,8 @@ Source: `scope.md > Added during the build (learner decision)`.
 
 ## Possible Later Enhancements
 - Export the checklist as Markdown or copy it to the clipboard.
-- More built-in samples (a university application notice, an administrative form).
+- More built-in samples (an administrative form). *(A scholarship notice was added during the build.)*
+- The checklist language in the Chrome extension, and languages in non-Latin scripts (needs an embedded PDF font).
 - Highlighting the excerpt inside the full original document.
 - Dark mode.
 

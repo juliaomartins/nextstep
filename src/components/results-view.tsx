@@ -8,6 +8,7 @@ import type { AnalysisResult } from "@/lib/schemas";
 import { Checklist } from "./checklist";
 import { DeadlineBanner } from "./deadline-banner";
 import { DownloadActions } from "./download-actions";
+import { EvidenceReceipt } from "./evidence-receipt";
 import { SectionHeading } from "./section-heading";
 import { SummaryCard } from "./summary-card";
 
@@ -113,7 +114,10 @@ export const ResultsView = forwardRef<HTMLElement, Props>(function ResultsView(
             <span>{AI_INSTRUCTIONS_WARNING}</span>
           </p>
         )}
-        <SummaryCard summary={result.summary} />
+        <div className="space-y-4">
+          <SummaryCard summary={result.summary} />
+          <EvidenceReceipt items={result.items} />
+        </div>
         <DeadlineBanner deadline={result.deadline} />
         {total > 0 ? (
           <Checklist items={result.items} completedIds={completedIds} onToggle={onToggle} />

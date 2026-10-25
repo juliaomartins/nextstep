@@ -7,7 +7,13 @@ import { InputPanel } from "@/components/input-panel";
 
 afterEach(cleanup);
 
-function Harness({ onAnalyze = () => {} }: { onAnalyze?: () => void }) {
+function Harness({
+  onAnalyze = () => {},
+  onSample = () => {},
+}: {
+  onAnalyze?: () => void;
+  onSample?: (sample: "job" | "scholarship") => void;
+}) {
   const [text, setText] = useState("");
   return (
     <InputPanel
@@ -18,7 +24,10 @@ function Harness({ onAnalyze = () => {} }: { onAnalyze?: () => void }) {
       error={null}
       onFile={() => {}}
       onTextChange={setText}
-      onSample={() => setText("Sample posting text")}
+      onSample={(sample) => {
+        onSample(sample);
+        setText(`Sample ${sample} text`);
+      }}
       onAnalyze={onAnalyze}
     />
   );
@@ -29,6 +38,14 @@ describe("InputPanel", () => {
     render(<Harness />);
     expect(screen.getByText(/sent to OpenAI to make your checklist/)).toBeTruthy();
     expect(screen.getByText(/NextStep doesn't store it/)).toBeTruthy();
+  });
+
+  test("offers two samples: the job posting and a scholarship notice", async () => {
+    const onSample = vi.fn();
+    render(<Harness onSample={onSample} />);
+    await userEvent.click(screen.getByRole("button", { name: "Use the sample job posting" }));
+    await userEvent.click(screen.getByRole("button", { name: "or a scholarship notice" }));
+    expect(onSample.mock.calls).toEqual([["job"], ["scholarship"]]);
   });
 
   test("the analyze button is disabled while the box is empty", () => {

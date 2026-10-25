@@ -157,6 +157,22 @@ describe("createPdf", () => {
   });
 });
 
+describe("exports carry the evidence receipt", () => {
+  const receipt = "Checked by code: 2 of 3 quotes found word for word in your document. 1 moved to Needs your check.";
+
+  test("the model has the same receipt as the screen", () => {
+    expect(buildExportModel(RESULT, DONE, MADE_AT).receipt).toBe(receipt);
+  });
+
+  test("the PDF and Word files show it", async () => {
+    const model = buildExportModel(RESULT, DONE, MADE_AT);
+    const { text } = await pdfText(createPdf(model, jsPDF).output("arraybuffer"));
+    expect(text).toContain("Checked by code: 2 of 3 quotes found word for word");
+    const zip = await JSZip.loadAsync(await Packer.toBuffer(createDocx(model)));
+    expect(await zip.file("word/document.xml")!.async("string")).toContain("Checked by code: 2 of 3 quotes found");
+  });
+});
+
 describe("exports carry the AI-instructions warning", () => {
   const flagged: AnalysisResult = { ...RESULT, safety: { aiInstructions: true, summaryReplaced: false } };
 

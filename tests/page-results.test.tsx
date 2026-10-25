@@ -52,6 +52,12 @@ describe("/results", () => {
     expect(window.location.hash).toBe("");
   });
 
+  test("shows the evidence receipt under the summary", async () => {
+    at(`/results#data=${encodeHandoff(HANDOFF)}`);
+    render(<ResultsPage />);
+    expect(await screen.findByText("Checked by code: 1 of 1 quote found word for word in your document.")).toBeTruthy();
+  });
+
   test("ticks on the results page are saved like on the home page", async () => {
     at(`/results#data=${encodeHandoff(HANDOFF)}`);
     render(<ResultsPage />);
