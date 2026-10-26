@@ -122,15 +122,15 @@ Build mode: fast
 
 ## Code Tour and App Map
 
-- [ ] Learning activity complete — guided route, focused alternative, prior practice connected, or brief recap
-- [ ] Optional edit and transfer reflection addressed — offered/declined/already covered/not applicable as appropriate
+- [x] Learning activity complete — guided route, focused alternative, prior practice connected, or brief recap (brief recap, 26 Oct)
+- [x] Optional edit and transfer reflection addressed — offered/declined/already covered/not applicable as appropriate (both offered; the learner chose to finish without them)
 - [x] `devpost/app-map.html` generated from finished code, checked, and shown, including a project-grounded practice to reuse. *Regenerated 26 Oct from the final code (commit 6aa15f1, after final review): languages, the date-in-quote check, the Be careful check, the seal, and the live site; the practice to reuse now includes the USD 80 fee caught on the last day. Checked: every symbol and all 30 paths exist, the isFoundIn snippet matches the source exactly, no scripts or loaded resources, renders offline with JavaScript off, no overflow at 1280 px or 375 px.*
 
-Activity and evidence: pending (offered to the learner on 25 Oct: a focused 3-minute look at how the prompt-injection probe exposed two holes and which tests now lock the fix).
-Route and stops: map route (reference, not yet toured): `src/components/input-panel.tsx` → `src/app/page.tsx` `analyze` → `src/app/api/analyze/route.ts` `POST` → `src/lib/analyze.ts` `analyzeDocument` → `src/lib/verify-evidence.ts` `verifyEvidence` / `isFoundIn` / `isAiInstruction`.
-Edit outcome: not yet offered.
-Reflection: not yet offered.
-Activity mode: pending. Map checked (regenerated 26 Oct from commit 6aa15f1): snippet matches source exactly; every path and symbol exists; no scripts or loaded resources; renders with JavaScript off and offline; no horizontal scroll at 375 px.
+Activity and evidence: brief recap, not hands-on practice. Offered on 26 Oct: a focused activity on the USD 80 registration fee the AI listed as a normal step (screenshot `docs/screenshots/safety.png`), the code check that now catches it (`src/lib/verify-evidence.ts`, `isCautionRequest`), and its tests (`tests/verify-evidence.test.ts`, "requests for money or credentials are flagged by code"), with an invitation to add one real sentence to the tests. The learner chose to finish ("approve all do it"), so the agent gave a recap of that evidence and the practice it shows.
+Route and stops: reference route in the map (not toured): `src/components/input-panel.tsx` → `src/app/page.tsx` `analyze` → `src/app/api/analyze/route.ts` `POST` → `src/lib/analyze.ts` `analyzeDocument` → `src/lib/verify-evidence.ts` `verifyEvidence` / `isFoundIn` / `isAiInstruction` / `isCautionRequest`.
+Edit outcome: offered (add one real sentence to the caution tests); declined.
+Reflection: offered; declined.
+Activity mode: brief recap. Map checked (regenerated 26 Oct from commit 6aa15f1): snippet matches source exactly; every path and symbol exists; no scripts or loaded resources; renders with JavaScript off and offline; no horizontal scroll at 375 px.
 
 ## Revisions
 
