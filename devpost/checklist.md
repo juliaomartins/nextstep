@@ -124,13 +124,13 @@ Build mode: fast
 
 - [ ] Learning activity complete — guided route, focused alternative, prior practice connected, or brief recap
 - [ ] Optional edit and transfer reflection addressed — offered/declined/already covered/not applicable as appropriate
-- [ ] `devpost/app-map.html` generated from finished code, checked, and shown, including a project-grounded practice to reuse. *Reopened 25 Oct: the map (commit e1897ce) predates slices 9–10 and the hand-off seal, so it will be regenerated from the final code at the learning wrap-up, after the final review.*
+- [x] `devpost/app-map.html` generated from finished code, checked, and shown, including a project-grounded practice to reuse. *Regenerated 26 Oct from the final code (commit 6aa15f1, after final review): languages, the date-in-quote check, the Be careful check, the seal, and the live site; the practice to reuse now includes the USD 80 fee caught on the last day. Checked: every symbol and all 30 paths exist, the isFoundIn snippet matches the source exactly, no scripts or loaded resources, renders offline with JavaScript off, no overflow at 1280 px or 375 px.*
 
 Activity and evidence: pending (offered to the learner on 25 Oct: a focused 3-minute look at how the prompt-injection probe exposed two holes and which tests now lock the fix).
 Route and stops: map route (reference, not yet toured): `src/components/input-panel.tsx` → `src/app/page.tsx` `analyze` → `src/app/api/analyze/route.ts` `POST` → `src/lib/analyze.ts` `analyzeDocument` → `src/lib/verify-evidence.ts` `verifyEvidence` / `isFoundIn` / `isAiInstruction`.
 Edit outcome: not yet offered.
 Reflection: not yet offered.
-Activity mode: pending. Map checked: snippet matches source exactly; no scripts or external URLs; renders with JavaScript off and offline; no horizontal scroll at 375 px; generated from commit e1897ce.
+Activity mode: pending. Map checked (regenerated 26 Oct from commit 6aa15f1): snippet matches source exactly; every path and symbol exists; no scripts or loaded resources; renders with JavaScript off and offline; no horizontal scroll at 375 px.
 
 ## Revisions
 
