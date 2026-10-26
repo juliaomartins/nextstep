@@ -42,6 +42,10 @@ AI summaries sound confident even when they are wrong. NextStep doesn't ask you 
 - **Stack:** Next.js 16 (App Router, TypeScript), React 19, LangChain JS with `@langchain/openai`, Zod 4, Tailwind CSS 4, Lucide icons, GSAP for motion (skipped when your system asks for reduced motion).
 - **The kernel:** [`src/lib/verify-evidence.ts`](src/lib/verify-evidence.ts), with tests in [`tests/verify-evidence.test.ts`](tests/verify-evidence.test.ts). A full code tour is in [`devpost/app-map.html`](devpost/app-map.html).
 
+### The flow, step by step
+
+![The request flow between three lanes: You (your browser, the website or the Chrome extension), the NextStep server (/api/analyze, Next.js), and OpenAI (gpt-4o-mini through LangChain). 1, you paste, upload a file or photo, or analyze a page, and choose a language. 2, your text and language go to the server. 3, the server checks the input is 200 to 20,000 characters. 4, it sends instructions plus the document to OpenAI. 5, OpenAI returns steps, quotes, and the deadline as JSON. 6, the kernel: the server checks every quote word for word, the deadline, and hidden instructions. 7, it seals the result. 8, the checklist with Found and Not found stamps comes back to you. 9, your browser saves the result, your ticks, and a hash of the text. 10, you can download it as Word or PDF, made on your device. AI is used only in steps 4 and 5; step 6 decides what you see.](docs/flow.png)
+
 ## Features
 
 <img src="docs/screenshots/results.png" alt="A real checklist made from the built-in sample job posting: a short summary, a banner saying no deadline is stated in this document, Required, Recommended, and Needs your check groups with progress counts and Found stamps, and Download as Word or PDF buttons." width="420" align="right">
