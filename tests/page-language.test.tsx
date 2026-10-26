@@ -80,5 +80,6 @@ describe("checklist language", () => {
     await makeChecklist("pt");
     expect(sentLanguages()).toEqual(["es", "pt"]);
     expect(await screen.findByText("Step in pt")).toBeTruthy();
-  });
+    // Three simulated pastes and analyses: about 2 s alone, more when the whole suite runs in parallel.
+  }, 15_000);
 });

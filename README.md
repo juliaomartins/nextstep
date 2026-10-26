@@ -6,6 +6,8 @@ Paste a job posting, an application notice, course requirements, or a form's ins
 
 Built for Devpost's *Build With AI: Basics* hackathon.
 
+**Jump to:** [Who it's for](#who-its-for) · [What makes it different](#what-makes-it-different) · [How it works](#how-it-works) · [Features](#features) · [Chrome extension](#chrome-extension) · [Run it locally](#run-it-locally) · [Responsible AI](#responsible-ai) · [How it was built](#how-it-was-built)
+
 ![NextStep home page: "Turn confusing documents into clear next steps", beside a fictional job abroad. Each original English sentence is highlighted and stamped Required or Recommended with its step in Spanish underneath, a request to pay a USD 150 processing fee is stamped Be careful, and the deadline is stamped Not stated. Nothing invented.](docs/screenshots/home.png)
 
 ## Who it's for
@@ -29,6 +31,17 @@ AI summaries sound confident even when they are wrong. NextStep doesn't ask you 
 
 ![An opened checklist step, "Prepare a CV in PDF format", showing its source quote highlighted from the posting and stamped Found in document.](docs/screenshots/evidence.png)
 
+## How it works
+
+![How NextStep works, in three columns. 1, You bring a document, in your browser: paste text or use a sample (Next.js 16, React 19); upload a PDF or Word file, read on your device (pdf.js, mammoth); upload a photo or screenshot, OCR on your device (Tesseract.js); or analyze the page you're on with the Chrome extension; choose one of 7 checklist languages. 2, NextStep checks it, on the server at /api/analyze: check the input, 200 to 20,000 characters (Zod); ask the AI for steps and quotes, the only step that uses AI (LangChain, OpenAI gpt-4o-mini); check every quote by code, word for word, plus deadlines and hidden instructions, the kernel; seal the result so /results links can't be faked (HMAC-SHA256); log the model and token count, never the text. 3, You get a checklist, back in your browser: every step stamped Found or Not found with its quote and a receipt (Tailwind CSS, GSAP); the deadline stated, relative, unclear, or not stated, never invented; requests for money or passwords flagged with a Be careful step; ticks saved in this browser (localStorage, SHA-256); download as Word or PDF (docx, jsPDF). Footer: one AI call per checklist, about 2,400 to 2,700 tokens; the OpenAI key never leaves the server.](docs/how-it-works.png)
+
+1. **You bring a document.** Paste it, upload a PDF, Word file, or photo (read on your device, no AI), or use the Chrome extension on the page you're reading. Pick the checklist language.
+2. **NextStep checks it.** The server validates the text and makes **one** OpenAI call (LangChain, structured JSON). Then ordinary, tested code checks every quote against your text word for word, downgrades any deadline the text doesn't support, ignores instructions hidden for the AI, and seals the result.
+3. **You get a checklist you can trust.** Every step shows its quote and a *Found* or *Not found* stamp. Ticks stay in your browser, and you can download the checklist as Word or PDF.
+
+- **Stack:** Next.js 16 (App Router, TypeScript), React 19, LangChain JS with `@langchain/openai`, Zod 4, Tailwind CSS 4, Lucide icons, GSAP for motion (skipped when your system asks for reduced motion).
+- **The kernel:** [`src/lib/verify-evidence.ts`](src/lib/verify-evidence.ts), with tests in [`tests/verify-evidence.test.ts`](tests/verify-evidence.test.ts). A full code tour is in [`devpost/app-map.html`](devpost/app-map.html).
+
 ## Features
 
 <img src="docs/screenshots/results.png" alt="A real checklist made from the built-in sample job posting: a short summary, a banner saying no deadline is stated in this document, Required, Recommended, and Needs your check groups with progress counts and Found stamps, and Download as Word or PDF buttons." width="420" align="right">
@@ -42,12 +55,33 @@ AI summaries sound confident even when they are wrong. NextStep doesn't ask you 
 - Analyzing the same text in the same language again reuses the saved result, with **no second AI call**.
 - **Download your checklist as Word or PDF**, made on your device: summary, deadline, every step with its tick state, quote, and Found / Not found stamp. The Word file stays editable; the PDF uses the same stamp style as the app.
 - Clear messages for text that is too short, too long, has nothing actionable, or when the AI service fails. Your text is always kept.
-- **Chrome extension:** on any job posting or notice, click *Analyze this page*, review the extracted text, and get the checklist on the site's `/results` page. Same API, same evidence check. See [`extension/README.md`](extension/README.md).
+- **Chrome extension:** on any job posting or notice, click *Analyze this page*, review the extracted text, and get the checklist on the site's `/results` page. Same API, same evidence check, and the same checklist languages. See [Chrome extension](#chrome-extension).
 - **First visit in desktop Chrome:** a one-time choice, *Add to Chrome* or *Use it here*, remembered in the browser. The [`/extension`](src/app/extension/page.tsx) page explains the extension and its permissions, and [`/privacy`](src/app/privacy/page.tsx) is the privacy policy.
 
 *Screenshots: the checklists and quotes above are real output for the built-in fictional samples.*
 
 <br clear="right">
+
+## Chrome extension
+
+Reading a job posting in your browser? The NextStep extension turns the page you're on into the same evidence-checked checklist, with no copy and paste.
+
+<table>
+  <tr>
+    <td width="36%" valign="top"><img src="docs/screenshots/extension-popup.png" alt="The extension popup on a fictional Community Health Officer posting: the page's main text in an editable box, a note that it is sent to the NextStep server and not stored, Checklist language set to Español, and the Start over and Make my checklist buttons."></td>
+    <td width="64%" valign="top"><img src="docs/screenshots/extension-results.png" alt="The checklist the extension opened on the NextStep website: Read from Community Health Officer, a Spanish summary, Checked by code: 5 of 5 quotes found word for word, the deadline 30 November 2026 stamped Stated in document, and Spanish steps, the first opened to show its original English quote stamped Found in document."></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>1.</b> Click the NextStep icon, then <i>Analyze this page</i>. Check the text, remove anything private, and choose your language.</td>
+    <td valign="top"><b>2.</b> The checklist opens on the website, with the page it came from. Steps are in your language; every quote stays in the page's own words, checked by code.</td>
+  </tr>
+</table>
+
+- **Private by design:** it reads only the tab you're on, only after your click (`activeTab`), and you review the text before anything is sent. The OpenAI key stays on the server.
+- **Can't be faked:** the server seals each checklist, and `/results` opens a link only after the server confirms the seal.
+- **Install:** build it with `npm run build:extension` and load `extension/dist` in `chrome://extensions` (Developer mode, *Load unpacked*). Full steps, permissions, and the Chrome Web Store listing are in [`extension/README.md`](extension/README.md) and [`extension/STORE.md`](extension/STORE.md).
+
+*Screenshots: real runs on a fictional posting, with a real model call.*
 
 ## Run it locally
 
@@ -97,21 +131,6 @@ npm run build:extension      # Chrome extension → extension/dist (load it unpa
 npm run typecheck:extension
 NEXTSTEP_URL=https://your-site npm run pack:extension   # Chrome Web Store upload zip (see extension/STORE.md)
 ```
-
-## How it works
-
-```
-Browser (Next.js page)                         Server (/api/analyze)                  OpenAI
-paste or sample → Make my checklist ─ text ─▶  clean whitespace, check 200–20,000 chars
-                                               prompt + <document> ────────────────▶ structured
-                                               ◀──────────────────── JSON (Zod) ───── answer
-                                               verify every quote against the text
-◀────────── checklist with Found / Not found labels ─────
-save result + ticks + a hash of the text in localStorage
-```
-
-- **Stack:** Next.js 16 (App Router, TypeScript), LangChain JS with `@langchain/openai`, Zod 4, Tailwind CSS 4, Lucide icons, GSAP for motion (skipped when your system asks for reduced motion).
-- **The kernel:** [`src/lib/verify-evidence.ts`](src/lib/verify-evidence.ts), with tests in [`tests/verify-evidence.test.ts`](tests/verify-evidence.test.ts).
 
 ## Token use
 
