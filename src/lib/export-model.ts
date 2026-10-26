@@ -17,7 +17,16 @@ export type ExportModel = {
     label: string;
     done: number;
     total: number;
-    items: { done: boolean; title: string; deadline: string | null; quote: string; evidence: string; why: string }[];
+    items: {
+      done: boolean;
+      title: string;
+      deadline: string | null;
+      quote: string;
+      evidence: string;
+      why: string;
+      /** The quote asks for money or credentials ("Be careful"), as flagged by the evidence check. */
+      caution: boolean;
+    }[];
   }[];
   reminder: string;
   /** Set when the text contained instructions aimed at AI tools (prompt injection). */
@@ -67,6 +76,7 @@ export function buildExportModel(result: AnalysisResult, completedIds: Set<strin
           quote: item.sourceExcerpt,
           evidence: item.evidence === "found" ? "Found in document" : "Not found in document",
           why: item.whyItMatters,
+          caution: item.caution === true,
         }));
       return { label, done: items.filter((i) => i.done).length, total: items.length, items };
     }).filter((g) => g.total > 0),

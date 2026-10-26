@@ -137,6 +137,12 @@ export function createPdf(model: ExportModel, PdfClass: typeof JsPdf): JsPdf {
         font("normal", 9.5, BALLPOINT);
         paragraph(`Deadline: ${item.deadline}`, textX, textWidth, 13);
       }
+      if (item.caution) {
+        ensureSpace(16);
+        y += 2;
+        stamp("Be careful", textX, y, RED);
+        y += 12;
+      }
 
       // The quote, with a highlighter stroke behind every line.
       y += 3;

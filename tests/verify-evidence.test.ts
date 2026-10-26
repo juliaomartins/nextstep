@@ -376,3 +376,35 @@ describe("verifyEvidence: instructions aimed at the AI are never evidence", () =
     expect(result.safety?.summaryReplaced).toBe(true);
   });
 });
+
+describe("verifyEvidence: requests for money or credentials are flagged by code", () => {
+  test.each([
+    "To reserve your training place, pay a registration fee of USD 80 by bank transfer before your interview.",
+    "A processing fee of $150 must be paid before the interview.",
+    "Send a refundable deposit of 50 euros to secure your place.",
+    "Please send us your online banking password so we can set up your salary.",
+    "Share your card number and CVV to verify your identity.",
+  ])("moves the step to Needs your check and marks it Be careful: %s", (quote) => {
+    const result = verifyEvidence(`Some posting text. ${quote}`, output({ items: [item(quote, "required")] }));
+    expect(result.items[0]).toMatchObject({ evidence: "found", group: "needs_check", caution: true });
+  });
+
+  test.each([
+    "We pay a monthly salary of USD 800.",
+    "The foundation will never ask you to pay an application fee.",
+    "There is no application fee.",
+    "The scholarship covers tuition fees and a living allowance.",
+    "Create an account on the careers portal to apply.",
+  ])("leaves an ordinary sentence alone: %s", (quote) => {
+    const result = verifyEvidence(`Some posting text. ${quote}`, output({ items: [item(quote, "required")] }));
+    expect(result.items[0]).toMatchObject({ group: "required" });
+    expect(result.items[0].caution).toBeUndefined();
+  });
+
+  test("a quote that isn't in the document is never marked, only Not found", () => {
+    const quote = "Pay a registration fee of USD 80.";
+    const result = verifyEvidence("Some unrelated posting text.", output({ items: [item(quote, "required")] }));
+    expect(result.items[0]).toMatchObject({ evidence: "not_found", group: "needs_check" });
+    expect(result.items[0].caution).toBeUndefined();
+  });
+});

@@ -170,15 +170,37 @@ function isOffTaskSummary(summary: string): boolean {
  * outside any instruction aimed at an AI; anything unsupported is moved to "needs_check", and
  * unsupported deadlines are downgraded to "unclear" so an invented date can't reach the screen.
  */
+/*
+ * Requests for the reader's money or credentials, a common sign of a fake job offer. Checked in code on the
+ * verified quote, so the warning doesn't depend on the AI following its instructions. Narrow on purpose: a
+ * salary ("we pay USD 800") or a reassurance ("there is no application fee") is not a request.
+ */
+const CAUTION_PATTERNS: RegExp[] = [
+  // A fee or deposit the reader must pay: "pay a registration fee", "a processing fee of $150 must be paid".
+  /\b(?:pay|paid|send|transfer|deposit)\b[^.!?]{0,60}\b(?:fee|fees|deposit|charge)\b/,
+  /\b(?:fee|fees|deposit|charge)\b[^.!?]{0,60}\b(?:pay|paid|send|sent|transfer|transferred)\b/,
+  /\b(?:registration|processing|training|placement|application|visa|reservation|booking) fee of\b/,
+  // Handing over secrets: "send us your online banking password", "share your card number and CVV".
+  /\b(?:send|share|give|provide|enter|tell)\b[^.!?]{0,40}\b(?:password|passcode|pin|one-time code|otp|card number|cvv|security code|bank(?:ing)? (?:login|password|details))\b/,
+];
+const NEGATED = /\b(?:never|no|not|without|free of)\b|n't\b/;
+
+function isCautionRequest(quote: string): boolean {
+  const s = normalize(quote);
+  return !NEGATED.test(s) && CAUTION_PATTERNS.some((pattern) => pattern.test(s));
+}
+
 export function verifyEvidence(text: string, output: AnalysisOutput): AnalysisResult {
   const source = readSource(text);
 
   const checked = output.items.map((item) => {
     const found = isFoundIn(source, item.sourceExcerpt);
+    const caution = found && isCautionRequest(item.sourceExcerpt);
     return {
       ...item,
       evidence: found ? ("found" as const) : ("not_found" as const),
-      group: found ? item.group : ("needs_check" as const),
+      group: found && !caution ? item.group : ("needs_check" as const),
+      ...(caution ? { caution: true as const } : {}),
       // A step's own deadline is shown only if the document contains it; dates are never made up.
       deadline: isFoundIn(source, item.deadline) ? item.deadline : null,
     };

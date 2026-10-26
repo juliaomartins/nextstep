@@ -189,3 +189,19 @@ describe("exports carry the AI-instructions warning", () => {
     expect(await zip.file("word/document.xml")!.async("string")).toContain("instructions aimed at AI tools");
   });
 });
+
+describe("exports mark steps that ask for money or credentials", () => {
+  const risky: AnalysisResult = {
+    ...RESULT,
+    items: [{ ...item("item-1", "Pay the registration fee", "needs_check"), caution: true }],
+  };
+
+  test("the model carries the caution, and both files show Be careful", async () => {
+    const model = buildExportModel(risky, new Set(), MADE_AT);
+    expect(model.groups[0].items[0].caution).toBe(true);
+    const { text } = await pdfText(createPdf(model, jsPDF).output("arraybuffer"));
+    expect(text).toContain("BE CAREFUL");
+    const zip = await JSZip.loadAsync(await Packer.toBuffer(createDocx(model)));
+    expect(await zip.file("word/document.xml")!.async("string")).toContain("Be careful");
+  });
+});

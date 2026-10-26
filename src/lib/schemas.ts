@@ -46,6 +46,8 @@ export const EvidenceSchema = z.enum(["found", "not_found"]);
 export const ResultItemSchema = AnalysisItemSchema.extend({
   id: z.string(),
   evidence: EvidenceSchema,
+  // Set by the evidence check when the quote asks for money or credentials ("Be careful").
+  caution: z.literal(true).optional(),
 });
 
 export const AnalysisResultSchema = AnalysisSchema.extend({

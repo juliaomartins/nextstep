@@ -70,7 +70,7 @@ There is no background script, no `tabs` permission, no `<all_urls>`, no analyti
 
 The extension reuses the website's code rather than copying it: `cleanText`, the SHA-256 text hash, the result schema, and the results hand-off all come from `src/lib`.
 
-**The hand-off to the website:** the result travels in the URL fragment (`/results#data=…`). Browsers never send the fragment to any server. The page validates it with the same schema as the API, saves it in your browser like any checklist (so the same page analyzed again keeps its ticks), and removes it from the address bar.
+**The hand-off to the website:** the result travels in the URL fragment (`/results#data=…`). Browsers never send the fragment to any server. The page validates it with the same schema as the API, asks the server to confirm its seal (`/api/handoff`; only a checklist NextStep made, unchanged, is shown), saves it in your browser like any checklist (so the same page analyzed again, in the same language, keeps its ticks), and removes it from the address bar.
 
 ## Checks
 

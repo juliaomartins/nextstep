@@ -52,6 +52,7 @@ export function createDocx(model: ExportModel): Document {
           children: [
             run(item.done ? "☑ " : "☐ ", { color: BALLPOINT, size: 26 }),
             run(item.title, { bold: true }),
+            ...(item.caution ? [run("  ⚠ Be careful", { bold: true, color: RED })] : []),
             ...(item.deadline ? [run(`  (${item.deadline})`, { color: BALLPOINT })] : []),
           ],
         }),

@@ -7,7 +7,7 @@ import { Stamp, type StampTone } from "./stamp";
 
 /* A fictional job abroad, read by someone whose first language is Spanish: the product's own proof.
    Each original sentence is highlighted and stamped with what its wording makes it, the step appears in
-   the reader's language, and a request for money is flagged, as NextStep does with payment requests. */
+   the reader's language, and a request for money gets a "be careful" step, as NextStep does with payment requests. */
 const STEP_LANGUAGE = { code: "es", label: "Español" };
 
 const LINES: { quote: string; step: string; stamp: string; tone: StampTone; rotate: number }[] = [
@@ -34,6 +34,7 @@ const LINES: { quote: string; step: string; stamp: string; tone: StampTone; rota
   },
   {
     quote: "Pay a USD 150 processing fee to reserve your interview.",
+    // As in the app: a payment request is moved to Needs your check and stamped Be careful by code.
     step: "Ten cuidado: piden dinero para una entrevista.",
     stamp: "Be careful",
     tone: "check",

@@ -208,7 +208,7 @@ Source: `scope.md > Who It's For`, `scope.md > Added during the build (learner d
 - **Analyzing:** the button is disabled and a progress message is shown. The paste area keeps its text.
 - **Empty input:** **Make my checklist** can't be clicked.
 - **Too short:** under roughly a sentence or two of text, the message is *"This looks too short to analyze. Paste the full document."*
-- **Too long:** above the input limit (about 5–6 pages of text; exact number set in `4-spec`), the message says the document is too long and suggests pasting the relevant section.
+- **Too long:** above the input limit (20,000 characters, about 5–6 pages; see `spec.md > Input Limits`), the message says the document is too long and suggests pasting the relevant section.
 - **Nothing actionable found:** e.g. a news article or a story. The message is *"We couldn't find any requirements or steps in this text."* No empty checklist is shown.
 - **AI or network failure, or an unusable response:** a plain message such as *"We couldn't analyze this document right now. Please try again."* The pasted text is kept so the user can retry.
 - **New analysis while a result is saved:** the new result **replaces** the old one (only one checklist at a time).
@@ -216,7 +216,7 @@ Source: `scope.md > Who It's For`, `scope.md > Added during the build (learner d
 - **Trust boundary:** results are a reading aid, not legal, financial, or official advice. The footer reminds users to check important details against the original.
 - **Text that tries to instruct the AI (prompt injection):** it is ignored. Nothing quoted from it counts as evidence (stamped *Not found*), dates in it are never shown as a deadline, and a red warning says *"This text contains instructions aimed at AI tools… hidden instructions can be a sign of a scam."* The warning also appears in the Word and PDF downloads.
 - **Off-task text** (questions to an assistant, requests for poems or essays): no steps, and a one-sentence description of what the text is. An off-task summary is replaced with *"NextStep couldn't write a reliable summary of this text…"*
-- **Requests for passwords, PINs, bank details, or payment:** never shown as a normal requirement; listed under *Needs your check* as "Be careful: …".
+- **Requests for passwords, PINs, bank details, or payment:** never shown as a normal requirement; listed under *Needs your check* as "Be careful: …". *Since the third judge-style review this is checked in code on the verified quote (a real run showed the AI listing a USD 80 registration fee as a normal step): the step gets a **Be careful** stamp on screen and in the downloads.*
 
 ## Product Decisions
 - **Upload, OCR, and download added during the build** (learner decision, after the core loop worked). Every upload becomes visible, editable text first, so evidence is always checked against what the user can see.

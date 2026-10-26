@@ -168,3 +168,19 @@ describe("/results safety warning", () => {
     expect(screen.queryByText(/instructions aimed at AI tools/)).toBeNull();
   });
 });
+
+describe("/results caution", () => {
+  test("a step asking for money or credentials carries a Be careful stamp", async () => {
+    const risky: Handoff = {
+      ...HANDOFF,
+      result: {
+        ...HANDOFF.result,
+        items: [{ ...HANDOFF.result.items[0], title: "Pay the registration fee", group: "needs_check", caution: true }],
+      },
+    };
+    at(`/results#data=${encodeHandoff(risky)}`);
+    render(<ResultsPage />);
+    await screen.findByRole("heading", { name: "Your checklist" });
+    expect(screen.getByText("Be careful")).toBeTruthy();
+  });
+});

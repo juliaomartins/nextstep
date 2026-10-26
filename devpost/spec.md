@@ -235,6 +235,9 @@ PRD ref: `prd.md > Checklist Language`. `LANGUAGES` lists the offered codes, Eng
 ### Results Hand-off (`lib/handoff.ts`)
 `encodeHandoff` / `decodeHandoff` / `resultsUrl`: UTF-8 JSON → base64url in `#data=`. Decoding is strict: base64url characters only, fatal UTF-8 decoding, and Zod validation of the whole payload (`AnalysisResultSchema` plus a 64-hex `textHash`). Anything else returns `null`.
 
+### Caution Check (`lib/verify-evidence.ts`)
+*Added after the third judge-style review.* After a quote is verified, `isCautionRequest` tests it for a request for the reader's money (pay or transfer a fee, deposit, or charge; "registration fee of …") or credentials (send or share a password, PIN, card number, CVV, or bank login). Negated sentences ("never", "no", "not") are skipped, so "there is no application fee" and a salary aren't flagged. A match sets `caution: true` and forces the group to `needs_check`; the checklist item and both downloads show a **Be careful** stamp. English phrasing only, like the injection detector.
+
 ### Handoff Seal (`lib/seal.ts`, `app/api/handoff/route.ts`)
 *Added after the second judge-style review, which showed that a hand-made `/results` link could display a fake checklist stamped Found.* `/api/analyze` adds `seal`, an HMAC-SHA256 over the schema-shaped result, keyed by `HANDOFF_SECRET` or, when unset, a key derived one-way from `OPENAI_API_KEY`. The extension requires the seal and carries it in the hand-off. `/results` posts `{ result, seal }` to `/api/handoff`, which answers `{ valid }` with a constant-time comparison; only a valid seal is shown and saved. Offline or refused: *"NextStep couldn't confirm it made this checklist."* The home page ignores the seal (its results come straight from the API).
 

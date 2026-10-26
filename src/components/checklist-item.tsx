@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { ChevronDown, Clock, Quote } from "lucide-react";
+import { ChevronDown, Clock, Quote, TriangleAlert } from "lucide-react";
 import { gsap, MOTION_OK, thump, useGSAP } from "@/lib/motion";
 import type { ResultItem } from "@/lib/schemas";
 import { Stamp } from "./stamp";
@@ -127,6 +127,14 @@ export function ChecklistItem({ item, done, onToggle, lang }: Props) {
               <span className="mt-1 flex items-center gap-1 text-sm font-medium text-ballpoint">
                 <Clock className="size-3.5" aria-hidden />
                 {item.deadline}
+              </span>
+            )}
+            {item.caution && (
+              <span className="mt-1.5 flex">
+                <Stamp tone="check" rotate={-3} className="text-[0.65rem]">
+                  <TriangleAlert className="size-3" aria-hidden />
+                  Be careful
+                </Stamp>
               </span>
             )}
           </span>
