@@ -117,7 +117,7 @@ Build mode: fast
 
 ## Final Review
 
-- [ ] Checklist language in the Chrome extension popup (learner feedback, 25 Oct: "my extension doesn't have the language option like the website"). Built test-first and verified with the real extension, a live server, and the real model (Spanish: steps in Spanish marked `lang="es"`, 7 of 7 quotes found, seal confirmed, choice remembered); waiting for the learner to retry it.
+- [x] Checklist language in the Chrome extension popup (learner feedback, 25 Oct: "my extension doesn't have the language option like the website"). Built test-first and verified with the real extension, a live server, and the real model (Spanish: steps in Spanish marked `lang="es"`, 7 of 7 quotes found, seal confirmed, choice remembered); learner retried it in the reloaded extension on 26 Oct: "for extension is OK".
 - [ ] Final review complete — feedback resolved and learner confirms ready to ship
 
 ## Code Tour and App Map
