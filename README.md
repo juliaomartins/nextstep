@@ -2,7 +2,7 @@
 
 **From confusing documents to clear next steps.**
 
-**Try it live: [getnextstep.vercel.app](https://getnextstep.vercel.app)** · no account needed · the Chrome extension downloads from [getnextstep.vercel.app/extension](https://getnextstep.vercel.app/extension)
+**▶ [Watch the demo (2:52)](https://youtu.be/wZeXF9X5pY4)** · **Try it live: [getnextstep.vercel.app](https://getnextstep.vercel.app)** · no account needed · the Chrome extension downloads from [getnextstep.vercel.app/extension](https://getnextstep.vercel.app/extension)
 
 Paste a job posting, an application notice, course requirements, or a form's instructions. NextStep turns the document into a checklist in which **every item is backed by a quote from the document**, and anything unclear is flagged rather than guessed. No account needed.
 

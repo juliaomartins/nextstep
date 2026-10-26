@@ -96,6 +96,7 @@ Node 24.13 / npm 11.8 are installed locally, which is enough for Next 16.
 - **What to show in the demo video (about 1 minute):** Use the sample job posting → Make my checklist → Summary + "No deadline stated in this document" → open a *Required* item and its highlighted ✓ excerpt → point out an item in *Needs your check* → tick two items → reload, and the ticks are still there.
 - **Chrome extension:** `npm run build:extension` writes `extension/dist` for the live site, https://getnextstep.vercel.app (`npm run build:extension:local` for `http://localhost:3000`; `NEXTSTEP_URL=https://…` for another deployment). Load it via `chrome://extensions` → Developer mode → *Load unpacked*. Full steps are in `extension/README.md`.
 - **Submission:** demo video + public GitHub repository. *Deployed by the learner on 26 Oct:* **https://getnextstep.vercel.app** (Vercel). `scripts/prebuild.mjs` packs the extension for that address during each deploy, and the extension builds for it by default (`scripts/public-url.mjs`). Verified end to end against the live site: the real extension, one real model call, the seal confirmed on `/results`, and a tampered link refused.
+- **Sharing (recorded in 6-ship, 26 Oct):** demo video https://youtu.be/wZeXF9X5pY4 (public, 2:52, checked without login) · repository https://github.com/juliaomartins/nextstep (public, checked without login) · live app https://getnextstep.vercel.app (optional).
 
 ## Look and Feel
 Implements `prd.md > Look and Feel` ("stamp office" redesign, approved by the learner during the build).
