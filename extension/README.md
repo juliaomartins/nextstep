@@ -17,15 +17,16 @@ From the project root:
 
 ```bash
 npm install
-npm run build:extension                                   # for http://localhost:3000
-NEXTSTEP_URL=https://your-nextstep.example npm run build:extension   # for a deployed site (https only)
+npm run build:extension                                   # for the live site, https://getnextstep.vercel.app
+npm run build:extension:local                             # for http://localhost:3000 (development)
+NEXTSTEP_URL=https://another-site npm run build:extension # for another deployment (https only)
 ```
 
-The output is `extension/dist/`. `NEXTSTEP_URL` decides which server the extension talks to, and it is also the **only** host the extension is allowed to reach.
+The output is `extension/dist/`. The site it's built for (set in `scripts/public-url.mjs`, or by `NEXTSTEP_URL`) decides which server the extension talks to, and it is also the **only** host the extension is allowed to reach.
 
 ## Load it in Chrome
 
-1. Start NextStep: `npm run dev` (or `npm run build && npm start`) on http://localhost:3000.
+1. Use the live site (https://getnextstep.vercel.app), or for local development start NextStep with `npm run dev` on http://localhost:3000 and build with `npm run build:extension:local`.
 2. Open `chrome://extensions`, turn on **Developer mode**, click **Load unpacked**, and choose `extension/dist`.
 3. Pin **NextStep** from the puzzle-piece menu.
 
@@ -81,11 +82,11 @@ npm test                      # includes tests/extension-*.test.ts and tests/pag
 
 ## Download it from your deployed site
 
-Every deploy builds the extension for that site and publishes it at `/downloads/nextstep-extension.zip`, offered on the site's `/extension` page with install steps (unzip → `chrome://extensions` → Developer mode → *Load unpacked*). To build the same zip locally: `NEXTSTEP_URL=https://your-site npm run pack:extension -- --public`.
+Every deploy builds the extension for that site and publishes it at `/downloads/nextstep-extension.zip`, offered on the site's `/extension` page with install steps (unzip → `chrome://extensions` → Developer mode → *Load unpacked*). To build the same zip locally: `npm run pack:extension -- --public`.
 
 ## Publish to the Chrome Web Store
 
-`NEXTSTEP_URL=https://your-site npm run pack:extension` builds the upload zip for your public site. The listing text, permission justifications, data-usage answers, and step-by-step publishing guide are in [`STORE.md`](STORE.md). The website links "Add to Chrome" to the listing once `NEXT_PUBLIC_EXTENSION_URL` is set.
+`npm run pack:extension` builds the upload zip for the live site. The listing text, permission justifications, data-usage answers, and step-by-step publishing guide are in [`STORE.md`](STORE.md). The website links "Add to Chrome" to the listing once `NEXT_PUBLIC_EXTENSION_URL` is set.
 
 ## Limits
 

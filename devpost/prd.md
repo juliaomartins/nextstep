@@ -249,7 +249,7 @@ Source: `scope.md > Who It's For`, `scope.md > Added during the build (learner d
 ## Deferred From the POC
 - **Editing item titles:** in the learner's original idea notes (kept outside this repo); deferred in scope to keep the first loop small.
 - **Several saved checklists:** would need a list of saved results and switching between them. One at a time is enough to prove the idea.
-- **Public deployment:** optional for this hackathon. Do it if time remains after the core loop works.
+- **Public deployment:** optional for this hackathon. Do it if time remains after the core loop works. *Done at the end of the build: https://getnextstep.vercel.app.*
 
 ## Possible Later Enhancements
 - Export the checklist as Markdown or copy it to the clipboard.

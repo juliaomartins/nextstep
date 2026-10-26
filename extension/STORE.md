@@ -8,17 +8,17 @@ Everything Google asks for, ready to paste. A few steps need **you** (the accoun
 2. **Check the site works there**: the sample analysis, `/results`, `/privacy`, and `/extension`.
 3. **Protect your OpenAI budget**: set a monthly limit in your OpenAI account. A public extension means public traffic.
 
-> **Shortcut:** after any deploy, the exact same package is already on your site at `https://YOUR-SITE/downloads/nextstep-extension.zip`. You can upload that file directly.
+> **Shortcut:** after any deploy, the exact same package is already on your site at `https://getnextstep.vercel.app/downloads/nextstep-extension.zip`. You can upload that file directly.
 
 ## Build the upload package
 
 PowerShell:
 ```powershell
-$env:NEXTSTEP_URL="https://YOUR-SITE.vercel.app"; npm run pack:extension
+npm run pack:extension
 ```
 Git Bash:
 ```bash
-NEXTSTEP_URL=https://YOUR-SITE.vercel.app npm run pack:extension
+npm run pack:extension
 ```
 This creates `extension/nextstep-extension-0.2.0.zip`, with `manifest.json` at the zip's root, built for your site only. To publish an update later, raise `version` in `scripts/build-extension.mjs` and pack again.
 
@@ -80,6 +80,6 @@ Turn the web page the user is reading (a job posting or notice) into a checklist
 - Not collected: personally identifiable information, health, financial, authentication information, personal communications, location, web history, user activity.
 - Certify: not sold to third parties; not used or transferred for purposes unrelated to the single purpose; not used to determine creditworthiness or for lending.
 
-**Privacy policy URL:** `https://YOUR-SITE.vercel.app/privacy`
+**Privacy policy URL:** `https://getnextstep.vercel.app/privacy`
 
-**Website / homepage URL:** `https://YOUR-SITE.vercel.app/extension`
+**Website / homepage URL:** `https://getnextstep.vercel.app/extension`

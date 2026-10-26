@@ -1,9 +1,11 @@
 // Builds the NextStep Chrome extension (Manifest V3) into extension/dist.
-// Usage:  npm run build:extension                     (talks to http://localhost:3000)
-//         NEXTSTEP_URL=https://your-site npm run build:extension
+// Usage:  npm run build:extension                     (talks to the public site, https://getnextstep.vercel.app)
+//         npm run build:extension:local               (talks to http://localhost:3000, for development)
+//         NEXTSTEP_URL=https://another-site npm run build:extension
 import { copyFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { createCanvas, Image } from "@napi-rs/canvas";
 import { build } from "esbuild";
+import { LOCAL_URL, PUBLIC_URL } from "./public-url.mjs";
 
 const root = new URL("../", import.meta.url);
 const src = new URL("extension/src/", root);
@@ -12,7 +14,7 @@ const dist = new URL("extension/dist/", root);
 // The extension may only talk to this one NextStep server (its host permission is derived from it).
 let site;
 try {
-  site = new URL(process.env.NEXTSTEP_URL ?? "http://localhost:3000");
+  site = new URL(process.env.NEXTSTEP_URL ?? (process.argv.includes("--local") ? LOCAL_URL : PUBLIC_URL));
 } catch {
   console.error(`NEXTSTEP_URL is not a valid URL: ${process.env.NEXTSTEP_URL}`);
   process.exit(1);

@@ -10,6 +10,7 @@
     "test": "vitest run",
     "postinstall": "node scripts/copy-pdf-worker.mjs",
     "build:extension": "node scripts/build-extension.mjs",
+    "build:extension:local": "node scripts/build-extension.mjs --local",
     "typecheck:extension": "tsc -p extension/tsconfig.json",
     "pack:extension": "node scripts/pack-extension.mjs",
     "prebuild": "node scripts/prebuild.mjs"

@@ -2,6 +2,8 @@
 
 **From confusing documents to clear next steps.**
 
+**Try it live: [getnextstep.vercel.app](https://getnextstep.vercel.app)** · no account needed · the Chrome extension downloads from [getnextstep.vercel.app/extension](https://getnextstep.vercel.app/extension)
+
 Paste a job posting, an application notice, course requirements, or a form's instructions. NextStep turns the document into a checklist in which **every item is backed by a quote from the document**, and anything unclear is flagged rather than guessed. No account needed.
 
 Built for Devpost's *Build With AI: Basics* hackathon.
@@ -83,7 +85,7 @@ Reading a job posting in your browser? The NextStep extension turns the page you
 
 - **Private by design:** it reads only the tab you're on, only after your click (`activeTab`), and you review the text before anything is sent. The OpenAI key stays on the server.
 - **Can't be edited in transit:** the server seals each checklist it makes, and `/results` opens a link only after the server confirms the checklist is unchanged. (The seal proves NextStep made the checklist; the *Read from* line naming the page is shown as the extension reported it.)
-- **Install:** build it with `npm run build:extension` and load `extension/dist` in `chrome://extensions` (Developer mode, *Load unpacked*). Full steps, permissions, and the Chrome Web Store listing are in [`extension/README.md`](extension/README.md) and [`extension/STORE.md`](extension/STORE.md).
+- **Install:** download it from [the extension page](https://getnextstep.vercel.app/extension) (or build it with `npm run build:extension`, which targets the live site) and load the unzipped folder in `chrome://extensions` (Developer mode, *Load unpacked*). Full steps, permissions, and the Chrome Web Store listing are in [`extension/README.md`](extension/README.md) and [`extension/STORE.md`](extension/STORE.md).
 
 *Screenshots: real runs on a fictional posting, with a real model call.*
 
@@ -131,9 +133,10 @@ npm test         # Vitest: evidence check, input limits, text cleanup, storage, 
                  # (the first run downloads Tesseract's English model into node_modules/.cache)
 npm run lint
 npm run build && npm start   # production build on http://localhost:3000
-npm run build:extension      # Chrome extension → extension/dist (load it unpacked; see extension/README.md)
+npm run build:extension      # Chrome extension → extension/dist, for the live site (load it unpacked; see extension/README.md)
+npm run build:extension:local   # the same, talking to http://localhost:3000 for development
 npm run typecheck:extension
-NEXTSTEP_URL=https://your-site npm run pack:extension   # Chrome Web Store upload zip (see extension/STORE.md)
+npm run pack:extension       # Chrome Web Store upload zip for the live site (see extension/STORE.md)
 ```
 
 ## Token use
@@ -170,7 +173,7 @@ NextStep is a proof of concept. What it does not do yet, plainly:
 - **Photos are read with an English OCR model**, and the detector for hidden AI instructions looks for English phrasing.
 - **The "Be careful" check reads English phrasing** (fees, deposits, passwords, bank details), like the hidden-instruction detector.
 - **Grouping (Required, Recommended, Needs your check) is the AI's reading** of the document's wording, so a conditional requirement can occasionally land in Required.
-- **No public deployment** and no rate limiting on `/api/analyze` yet; it runs locally with your own OpenAI key.
+- **No rate limiting on `/api/analyze` yet.** The live site at https://getnextstep.vercel.app uses the project's OpenAI key, so a monthly spending limit on the OpenAI account is the safeguard to set.
 - **Not yet tried by people from the audience it's for.** That is the next step.
 
 ## Privacy

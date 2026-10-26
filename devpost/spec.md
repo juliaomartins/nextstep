@@ -94,8 +94,8 @@ Node 24.13 / npm 11.8 are installed locally, which is enough for Next 16.
 - **Start:** `npm install`, then `npm run dev`, then open **http://localhost:3000**.
 - **Check before recording:** `npm run test`, `npm run lint`, and `npm run build && npm run start`. Record against the production build.
 - **What to show in the demo video (about 1 minute):** Use the sample job posting → Make my checklist → Summary + "No deadline stated in this document" → open a *Required* item and its highlighted ✓ excerpt → point out an item in *Needs your check* → tick two items → reload, and the ticks are still there.
-- **Chrome extension:** `npm run build:extension` writes `extension/dist` for `http://localhost:3000` (or `NEXTSTEP_URL=https://… npm run build:extension`). Load it via `chrome://extensions` → Developer mode → *Load unpacked*. Full steps are in `extension/README.md`.
-- **Submission:** demo video + public GitHub repository. **Deployment is deferred** (`prd.md > Deferred From the POC`) and not done yet. The repo is Vercel-ready: `README.md > Deploy (Vercel)` lists the steps, and `scripts/prebuild.mjs` packs the extension for the deployed address during the build.
+- **Chrome extension:** `npm run build:extension` writes `extension/dist` for the live site, https://getnextstep.vercel.app (`npm run build:extension:local` for `http://localhost:3000`; `NEXTSTEP_URL=https://…` for another deployment). Load it via `chrome://extensions` → Developer mode → *Load unpacked*. Full steps are in `extension/README.md`.
+- **Submission:** demo video + public GitHub repository. *Deployed by the learner on 26 Oct:* **https://getnextstep.vercel.app** (Vercel). `scripts/prebuild.mjs` packs the extension for that address during each deploy, and the extension builds for it by default (`scripts/public-url.mjs`). Verified end to end against the live site: the real extension, one real model call, the seal confirmed on `/results`, and a tampered link refused.
 
 ## Look and Feel
 Implements `prd.md > Look and Feel` ("stamp office" redesign, approved by the learner during the build).
@@ -470,7 +470,7 @@ No other AI services. Hugging Face was considered as a second provider to save O
 - **One saved checklist** instead of a history. Agreed in the PRD. A history would need a list view and an id per document.
 - **One LangChain chain with one model call** instead of multi-step or agent pipelines. The learner's original idea notes (kept outside this repo) asked for a simple chain. A second "verifier" model pass is unnecessary because evidence is checked with deterministic code.
 - **Exact-match excerpt search (after normalization)** instead of fuzzy matching. A strict check fits the promise that a quote must really be in the text. It may occasionally flag a near-quote as *Not found*, which errs on the side of honesty. Fuzzy matching could come later if that's too strict in practice.
-- **Run locally and record** instead of deploying. Deployment is deferred in the PRD and optional for the hackathon; the repo is ready for Vercel (`README.md > Deploy (Vercel)`) if the learner chooses to deploy.
+- **Run locally and record** was the plan; the learner deployed to Vercel at the end of the build (https://getnextstep.vercel.app). Still simplified: no rate limiting on `/api/analyze`, so a spending limit on the OpenAI account is the safeguard to set.
 
 - **The extension hands results over in the URL fragment** instead of a server-side results store or extension messaging. There's nothing new to secure or host, and it works with any deployment. A very large checklist makes a long URL; a typical one is a few kilobytes.
 - **One server per extension build** (`NEXTSTEP_URL`) instead of a settings page. The host permission stays exactly that one origin.
@@ -492,7 +492,7 @@ Requested by the learner for `5-build`. Nothing is installed or run until the le
 **Learner decisions carried forward**
 - Stack: Next.js + TypeScript, LangChain JS + OpenAI, Zod, Tailwind + Lucide (shadcn/ui at first, later removed), and localStorage (from the learner's original idea notes (kept outside this repo)). The learner reports already having worked with these tools.
 - OpenAI key and model are already in `.env.local`.
-- Deployment deferred (PRD). The required deliverables are the demo video and the public repo.
+- Deployment: done at the end of the build (https://getnextstep.vercel.app); it was optional. The required deliverables are the demo video and the public repo.
 
 **Implementation details derived by the agent (change any of them at review)**
 - Input limits of 200–20,000 characters.

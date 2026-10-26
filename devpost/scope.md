@@ -62,7 +62,7 @@ The learner approved these after the core loop was working. They come **after** 
 ## Later
 - Editing task titles *(from the learner's original idea notes (kept outside this repo); deferred to keep the first loop small. Bring it back if you want it in now)*.
 - Export as Markdown and copy to clipboard.
-- Public deployment on Vercel (optional for this hackathon; worth doing if time remains).
+- Public deployment on Vercel (optional for this hackathon; worth doing if time remains). *Done: https://getnextstep.vercel.app.*
 - Example walkthroughs for academic, application, and administrative documents.
 
 ## Explicitly Cut
