@@ -112,8 +112,8 @@ Build mode: fast
 ## Hands-on Checkpoints
 
 - [x] Early usable behavior explored — after slice 2. The learner used the app and gave feedback that shaped everything after it: reported the grey *Make my checklist* button (fixed: `crypto.subtle` on a non-secure address), asked for a bolder look, then sent full-page screenshots of the result with a real document and judged it "AI slop" (→ the stamp-office redesign), spotted the header logo not matching the new icon (fixed), and asked for icons on every interaction (added).
-- [ ] Uploads explored — after slice 6 (real PDF, Word, and photo; OCR quality feedback before downloads are built). *Not yet done by the learner: they moved straight on to the redesign, downloads, and the extension. Uploads were verified mechanically (real PDF, Word, and OCR fixtures through the real API). Folded into the final kick-the-tires: the learner tries one real upload there.*
-- [ ] Final kick-the-tires exploration and feedback completed. *In progress: the learner has used the extension on real SEEK pages (feedback → link-heavy menus now skipped; "couldn't reach NextStep" → server not running, deploy guidance) and asked for misuse protection (→ prompt-injection hardening). Waiting for their final pass, including one real upload, and their confirmation.*
+- [x] Uploads explored — done at the final pass instead of after slice 6. Before that it was verified mechanically (real PDF, Word, and OCR fixtures through the real API). On 26 Oct the learner uploaded a real file on the live site (https://getnextstep.vercel.app), made the checklist, opened a source, and downloaded it: "all is OK". No changes requested.
+- [x] Final kick-the-tires exploration and feedback completed. Feedback during this review shaped the build: language choice in the extension (added, then confirmed "for extension is OK"), the hero example (changed to a job abroad), the README diagrams and screenshots, and the live address for the extension. Final pass on the live site and the reloaded extension, 26 Oct: "all is OK", with no further changes requested.
 
 ## Final Review
 
